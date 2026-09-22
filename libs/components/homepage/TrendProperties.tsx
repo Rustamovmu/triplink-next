@@ -97,7 +97,7 @@ const likePropertyHandler = async (user: T, id: string) => {
 								{trendProperties.map((property: Property) => {
 									return (
 										<SwiperSlide key={property._id} className={'trend-property-slide'}>
-											{/* <TrendPropertyCard property={property} likePropertyHandler={likePropertyHandler} /> */}
+											<TrendPropertyCard property={property} likePropertyHandler={likePropertyHandler} />
 										</SwiperSlide>
 									);
 								})}

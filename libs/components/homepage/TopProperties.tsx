@@ -88,7 +88,7 @@ const likePropertyHandler = async (user: T, id: string) => {
 							{topProperties.map((property: Property) => {
 								return (
 									<SwiperSlide className={'top-property-slide'} key={property?._id}>
-										{/* <TopPropertyCard property={property} /> */}
+										<TopPropertyCard property={property}  likePropertyHandler={likePropertyHandler} />
 									</SwiperSlide>
 								);
 							})}
