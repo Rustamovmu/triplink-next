@@ -128,20 +128,23 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 
 	/** LIFECYCLES **/
 	useEffect(() => {
-		if (router.query.id) {
-			setPropertyId(router.query.id as string);
-			setCommentInquiry({
-				...commentInquiry,
-				search: {
-					commentRefId: router.query.id as string,
-				},
-			});
-			setInsertCommentData({
-				...insertCommentData,
-				commentRefId: router.query.id as string,
-			});
-		}
-	}, [router]);
+		if (!router.isReady || !router.query.id) return;
+
+		const selectedPropertyId = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id;
+
+		setPropertyId(selectedPropertyId);
+		setCommentInquiry((currentInquiry) => ({
+			...currentInquiry,
+			search: {
+				...currentInquiry.search,
+				commentRefId: selectedPropertyId,
+			},
+		}));
+		setInsertCommentData((currentComment) => ({
+			...currentComment,
+			commentRefId: selectedPropertyId,
+		}));
+	}, [router.isReady, router.query.id]);
 
 	useEffect(() => {
 		if (commentInquiry.search.commentRefId) {
