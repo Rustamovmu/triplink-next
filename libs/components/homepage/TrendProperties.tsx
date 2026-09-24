@@ -27,12 +27,12 @@ const TrendProperties = (props: TrendPropertiesProps) => {
 	/** APOLLO REQUESTS **/
 const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
 
-	const {
+const {
 		loading: getPropertiesLoading, 
 		data: getPropertiesData,
 		error: getPropertiesError,
 	} = useQuery(GET_PROPERTIES, {
-		fetchPolicy: 'cache-and-network',
+		fetchPolicy: 'network-only',
 		variables: {
 			input: initialInput,
 		},
@@ -40,7 +40,6 @@ const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
 			setTrendProperties(data?.getProperties?.list);
 		}
 	});
-	/** HANDLERS **/
 	/** HANDLERS **/
 const likePropertyHandler = async (user: T, id: string) => {
 	try {
