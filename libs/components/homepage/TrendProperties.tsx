@@ -36,6 +36,7 @@ const {
 		variables: {
 			input: initialInput,
 		},
+		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
 			setTrendProperties(data?.getProperties?.list);
 		}
