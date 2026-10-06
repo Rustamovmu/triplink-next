@@ -63,7 +63,10 @@ const TuiEditor = () => {
 				},
 			});
 
-			const responseImage = response.data.data.imageUploader;
+			const responseImage = response.data?.data?.imageUploader;
+			if (!responseImage) {
+				throw new Error(response.data?.errors?.[0]?.message ?? 'Image upload failed');
+			}
 			console.log('=responseImage: ', responseImage);
 			memoizedValues.articleImage = responseImage;
 
