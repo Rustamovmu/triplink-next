@@ -12,30 +12,7 @@ import { socketVar, userVar } from '../../apollo/store';
 import { Member } from '../types/member/member';
 import { Messages, REACT_APP_API_URL } from '../config';
 import { sweetErrorAlert } from '../sweetAlert';
-
-const NewMessage = (type: any) => {
-	if (type === 'right') {
-		return (
-			<Box
-				component={'div'}
-				flexDirection={'row'}
-				style={{ display: 'flex' }}
-				alignItems={'flex-end'}
-				justifyContent={'flex-end'}
-				sx={{ m: '10px 0px' }}
-			>
-				<div className={'msg_right'}></div>
-			</Box>
-		);
-	} else {
-		return (
-			<Box flexDirection={'row'} style={{ display: 'flex' }} sx={{ m: '10px 0px' }} component={'div'}>
-				<Avatar alt={'jonik'} src={'/img/profile/defaultUser.svg'} />
-				<div className={'msg_left'}></div>
-			</Box>
-		);
-	}
-};
+import { getJwtToken } from '../auth';
 
 interface MessagePayload {
 	event: string;
@@ -53,39 +30,61 @@ interface InfoPayload {
 const Chat = () => {
 	const chatContentRef = useRef<HTMLDivElement>(null);
 	const [messagesList, setMessagesList] = useState<MessagePayload[]>([]);
-	const [onlineUsers, setOnlineUsers] = useState<number>(4);
+	const [onlineUsers, setOnlineUsers] = useState<number>(0);
 	const [messageInput, setMessageInput] = useState<string>('');
 	const [open, setOpen] = useState(false);
 	const [openButton, setOpenButton] = useState(false);
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
-	const socket = useReactiveVar(socketVar); // loyihani istalgan. joyida socketni ishlastsa buladi
-
+	const socket = useReactiveVar(socketVar);
+	const [connected, setConnected] = useState(false);
 
 	/** LIFECYCLES **/
 	useEffect(() => {
-		socket.onmessage = (msg) => {
-			const data = JSON.parse(msg.data);
-			console.log('WebSocket Message:', data);
+		// Live chat uses the Nest WsAdapter gateway at /, separately from GraphQL.
+		const url = new URL(REACT_APP_API_URL);
+		url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+		url.pathname = '/';
+		url.search = '';
+		url.searchParams.set('token', getJwtToken() || '');
+		const chatSocket = new WebSocket(url.toString());
+		socketVar(chatSocket);
+		setConnected(false);
 
-			switch (data.event) {
-				case 'info':
-					const newInfo: InfoPayload = data;
-					setOnlineUsers(newInfo.totalClients);
-					break;
-				case 'getMessages':
-					const list: MessagePayload[] = data.list;
-					setMessagesList(list);
-					break;
-				case 'message':
-					const newMessage: MessagePayload = data;
-					messagesList.push(newMessage);
-					setMessagesList([...messagesList]); // yangi xabarlarni olish
-					break;
+		chatSocket.onopen = () => setConnected(true);
+		chatSocket.onclose = () => {
+			setConnected(false);
+			setOnlineUsers(0);
+		};
+		chatSocket.onerror = () => setConnected(false);
+		chatSocket.onmessage = (msg) => {
+			try {
+				const data = JSON.parse(msg.data);
+				switch (data.event) {
+					case 'info':
+						setOnlineUsers((data as InfoPayload).totalClients);
+						break;
+					case 'getMessages':
+						setMessagesList(data.list);
+						break;
+					case 'message':
+						setMessagesList((messages) => [...messages, data as MessagePayload]);
+						break;
+				}
+			} catch (error) {
+				console.error('Invalid chat message:', error);
 			}
 		};
-	}, [socket, messagesList]);
 
+		return () => {
+			chatSocket.onopen = null;
+			chatSocket.onclose = null;
+			chatSocket.onerror = null;
+			chatSocket.onmessage = null;
+			chatSocket.close();
+			if (socketVar() === chatSocket) socketVar(undefined);
+		};
+	}, [user._id]);
 
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
@@ -103,13 +102,10 @@ const Chat = () => {
 		setOpen((prevState) => !prevState);
 	};
 
-	const getInputMessageHandler = useCallback(
-		(e: any) => {
-			const text = e.target.value;
-			setMessageInput(text);
-		},
-		[messageInput],
-	);
+	const getInputMessageHandler = useCallback((e: any) => {
+		const text = e.target.value;
+		setMessageInput(text);
+	}, []);
 
 	const getKeyHandler = (e: any) => {
 		try {
@@ -122,10 +118,20 @@ const Chat = () => {
 	};
 
 	const onClickHandler = () => {
-		if (!messageInput) sweetErrorAlert(Messages.error4);
-		else {
-			socket.send(JSON.stringify({ event: 'message', data: messageInput }));
+		const text = messageInput.trim();
+		if (!text) {
+			void sweetErrorAlert(Messages.error4);
+			return;
+		}
+		if (!socket || socket.readyState !== WebSocket.OPEN) {
+			void sweetErrorAlert('Chat is disconnected. Please refresh the page to reconnect.');
+			return;
+		}
+		try {
+			socket.send(JSON.stringify({ event: 'message', data: text }));
 			setMessageInput('');
+		} catch (error) {
+			void sweetErrorAlert('Message could not be sent. Please try again.');
 		}
 	};
 
@@ -147,7 +153,7 @@ const Chat = () => {
 							<Box flexDirection={'row'} style={{ display: 'flex' }} sx={{ m: '10px 0px' }} component={'div'}>
 								<div className={'welcome'}>Welcome to Live chat!</div>
 							</Box>
-							{messagesList.map((ele: MessagePayload) => {
+							{messagesList.map((ele: MessagePayload, index: number) => {
 								const { text, memberData } = ele;
 								const memberImage = memberData?.memberImage
 									? `${REACT_APP_API_URL}/${memberData.memberImage}`
@@ -155,6 +161,7 @@ const Chat = () => {
 
 								return memberData?._id === user?._id ? (
 									<Box
+										key={index}
 										component={'div'}
 										flexDirection={'row'}
 										style={{ display: 'flex' }}
@@ -165,7 +172,13 @@ const Chat = () => {
 										<div className={'msg-right'}>{text}</div>
 									</Box>
 								) : (
-									<Box flexDirection={'row'} style={{ display: 'flex' }} sx={{ m: '10px 0px' }} component={'div'}>
+									<Box
+										key={index}
+										flexDirection={'row'}
+										style={{ display: 'flex' }}
+										sx={{ m: '10px 0px' }}
+										component={'div'}
+									>
 										<Avatar alt={'jonik'} src={memberImage} />
 										<div className={'msg-left'}>{text}</div>
 									</Box>
@@ -184,7 +197,7 @@ const Chat = () => {
 						onChange={getInputMessageHandler}
 						onKeyDown={getKeyHandler}
 					/>
-					<button className={'send-msg-btn'} onClick={onClickHandler}>
+					<button className={'send-msg-btn'} onClick={onClickHandler} disabled={!connected} aria-label="Send message">
 						<SendIcon style={{ color: '#fff' }} />
 					</button>
 				</Box>
@@ -194,6 +207,3 @@ const Chat = () => {
 };
 
 export default Chat;
-function msg(this: WebSocket, ev: MessageEvent<any>) {
-	throw new Error('Function not implemented.');
-}
