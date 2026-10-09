@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslation } from 'next-i18next';
 import HomeSearchForm from './HomeSearchForm';
+import { tourSearchQuery } from '../../triplink/tourSearchUrl';
 import { motion } from 'framer-motion';
 import {
 	ArrowBackRounded,
@@ -124,7 +125,10 @@ export default function HeaderFilter() {
 								<div className="triplink-hero__actions">
 									<Link
 										passHref
-										href={{ pathname: '/tour', query: { text: slide.name } }}
+										href={{
+											pathname: '/tour',
+											query: tourSearchQuery({ page: 1, limit: 12, search: { text: slide.name } }),
+										}}
 										className="triplink-action triplink-action--coral"
 										tabIndex={active ? 0 : -1}
 									>

@@ -1,3 +1,5 @@
+import { parseTourSearchQuery, tourSearchQuery } from './tourSearchUrl';
+
 function calendarDate(value: string): Date {
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error('Choose valid departure dates.');
 	const [year, month, day] = value.split('-').map(Number);
@@ -28,15 +30,6 @@ export function buildHomeSearch(values: {
 		query.start = start.toISOString();
 		query.end = end.toISOString();
 	}
-	return query;
+	return tourSearchQuery(parseTourSearchQuery(query));
 }
-/** Preserve local meaning for both ISO instants and existing datetime-local URLs. */
-export function localDateTimeValue(value: string): string {
-	if (!value) return '';
-	const date = new Date(value);
-	if (!Number.isFinite(date.getTime())) return '';
-	const pad = (part: number, size = 2) => String(part).padStart(size, '0');
-	return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
-		date.getHours(),
-	)}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
-}
+export { localDateTimeValue } from './tourSearchUrl';

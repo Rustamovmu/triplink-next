@@ -1,76 +1,96 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { Box, Button, MenuItem, Stack, TextField } from '@mui/material';
+import { Alert, Box, Button, MenuItem, Stack, TextField } from '@mui/material';
 import { Frame } from './Common';
 import { TourList } from './Tours';
-import {
-	TourCategory,
-	TourDifficulty,
-	TourSearch,
-	tourCategories,
-	tourDifficulties,
-	tourSorts,
-} from '../../types/triplink';
+import { tourCategories, tourDifficulties, tourSorts } from '../../types/triplink';
 import { useTranslation } from 'next-i18next';
-import { localDateTimeValue } from '../../triplink/homeSearch';
+import {
+	applyTourSearchForm,
+	invalidTourSearch,
+	parseTourSearchQuery,
+	tourSearchFormValues,
+	tourSearchQuery,
+} from '../../triplink/tourSearchUrl';
 export default function TourSearchPage() {
 	const router = useRouter();
 	const { t } = useTranslation('common');
-	const one = (key: string) => (typeof router.query[key] === 'string' ? (router.query[key] as string) : '');
-	const page = Math.max(1, Math.floor(Number(one('page')) || 1));
-	const search: TourSearch = {};
-	if (one('text')) search.text = one('text');
-	if (one('destination')) search.destinations = [one('destination')];
-	if (tourCategories.includes(one('category') as TourCategory)) search.categories = [one('category') as TourCategory];
-	if (tourDifficulties.includes(one('difficulty') as TourDifficulty))
-		search.difficulties = [one('difficulty') as TourDifficulty];
-	if (
-		one('minPrice') &&
-		one('maxPrice') &&
-		Number(one('minPrice')) >= 0 &&
-		Number(one('maxPrice')) >= Number(one('minPrice'))
-	)
-		search.priceRange = { start: Number(one('minPrice')), end: Number(one('maxPrice')) };
-	if (
-		one('minDays') &&
-		one('maxDays') &&
-		Number(one('minDays')) >= 1 &&
-		Number(one('maxDays')) >= Number(one('minDays'))
-	)
-		search.durationRange = { start: Number(one('minDays')), end: Number(one('maxDays')) };
-	if (one('start') && one('end') && new Date(one('start')) < new Date(one('end')))
-		search.availableDateRange = {
-			start: new Date(one('start')).toISOString(),
-			end: new Date(one('end')).toISOString(),
-		};
-	if (Number(one('seats')) > 0) search.minimumAvailableSeats = Math.floor(Number(one('seats')));
-	if (Number(one('rating')) >= 1 && Number(one('rating')) <= 5) search.minimumRating = Number(one('rating'));
-	const updatePage = (value: number) =>
-		void router.push({ pathname: '/tour', query: { ...router.query, page: value } });
+	// Static HTML and the first browser render must share the loading state.
+	const [queryReady, setQueryReady] = React.useState(false);
+	React.useEffect(() => {
+		setQueryReady(router.isReady);
+	}, [router.isReady]);
+	const changed = React.useRef(new Set<string>());
+	const [formError, setFormError] = React.useState('');
+	React.useEffect(() => {
+		changed.current.clear();
+		setFormError('');
+	}, [router.asPath]);
+	let input: ReturnType<typeof parseTourSearchQuery> | undefined;
+	try {
+		if (queryReady) input = parseTourSearchQuery(router.query);
+	} catch {
+		/* Display invalid URLs without sending a query. */
+	}
+	const values = input ? tourSearchFormValues(input) : {};
+	const one = (key: string) => values[key] ?? '';
+	const updatePage = (page: number) => {
+		if (input) void router.push({ pathname: '/tour', query: tourSearchQuery({ ...input, page }) });
+	};
 	const submit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		const values = Object.fromEntries(new FormData(event.currentTarget).entries());
-		const query: Record<string, string> = {};
-		for (const [key, value] of Object.entries(values)) if (typeof value === 'string' && value) query[key] = value;
-		void router.push({ pathname: '/tour', query: { ...query, page: '1' } });
+		if (!input) return;
+		try {
+			const values = Object.fromEntries(new FormData(event.currentTarget).entries()) as Record<string, string>;
+			const next = applyTourSearchForm(input, values, changed.current);
+			setFormError('');
+			void router.push({ pathname: '/tour', query: tourSearchQuery(next) });
+		} catch {
+			setFormError(invalidTourSearch);
+		}
 	};
+	if (!queryReady)
+		return (
+			<Frame title={t('Tours')}>
+				<p role="status">{t('Loading…')}</p>
+			</Frame>
+		);
+	if (!input)
+		return (
+			<Frame title={t('Tours')}>
+				<Alert severity="error">{t(invalidTourSearch)}</Alert>
+				<Button onClick={() => void router.push('/tour')}>{t('Reset')}</Button>
+			</Frame>
+		);
 	return (
 		<Frame title={t('Tours')}>
+			{formError && <Alert severity="error">{t(formError)}</Alert>}
 			<Box
 				component="form"
 				key={router.asPath}
 				onSubmit={submit}
+				onChange={(event: React.FormEvent<HTMLFormElement>) => {
+					const target = event.target as HTMLInputElement;
+					if (target.name) changed.current.add(target.name);
+				}}
 				sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}
 			>
 				{['text', 'destination'].map((key) => (
 					<TextField
 						key={key}
 						name={key}
+						onChange={() => changed.current.add(key)}
 						label={t(key === 'text' ? 'Search' : 'Destination')}
 						defaultValue={one(key)}
 					/>
 				))}
-				<TextField select name="category" label={t('Category')} defaultValue={one('category')}>
+				<TextField
+					select
+					name="category"
+					onChange={() => changed.current.add('category')}
+					label={t('Category')}
+					defaultValue={one('category')}
+				>
 					<MenuItem value="">{t('All')}</MenuItem>
 					{tourCategories.map((value) => (
 						<MenuItem key={value} value={value}>
@@ -78,7 +98,13 @@ export default function TourSearchPage() {
 						</MenuItem>
 					))}
 				</TextField>
-				<TextField select name="difficulty" label={t('Difficulty')} defaultValue={one('difficulty')}>
+				<TextField
+					select
+					name="difficulty"
+					onChange={() => changed.current.add('difficulty')}
+					label={t('Difficulty')}
+					defaultValue={one('difficulty')}
+				>
 					<MenuItem value="">{t('All')}</MenuItem>
 					{tourDifficulties.map((value) => (
 						<MenuItem key={value} value={value}>
@@ -90,10 +116,11 @@ export default function TourSearchPage() {
 					<TextField
 						key={key}
 						name={key}
+						onChange={() => changed.current.add(key)}
 						label={t(key)}
 						type="number"
 						inputProps={{
-							min: key.includes('Price') ? 0 : 1,
+							min: key.includes('Price') || key === 'rating' ? 0 : 1,
 							step: key === 'rating' ? 0.1 : 1,
 							...(key === 'rating' ? { max: 5 } : {}),
 						}}
@@ -104,11 +131,12 @@ export default function TourSearchPage() {
 					<TextField
 						key={key}
 						name={key}
+						onChange={() => changed.current.add(key)}
 						label={t(key === 'start' ? 'From' : 'Until')}
 						type="datetime-local"
 						InputLabelProps={{ shrink: true }}
 						inputProps={{ step: 0.001 }}
-						defaultValue={localDateTimeValue(one(key))}
+						defaultValue={one(key)}
 					/>
 				))}
 				<TextField
@@ -139,16 +167,7 @@ export default function TourSearchPage() {
 					<Button onClick={() => void router.push('/tour')}>{t('Reset')}</Button>
 				</Stack>
 			</Box>
-			<TourList
-				input={{
-					page,
-					limit: 12,
-					search,
-					sort: tourSorts.includes(one('sort')) ? one('sort') : 'createdAt',
-					direction: one('direction') === 'ASC' ? 'ASC' : 'DESC',
-				}}
-				onPage={updatePage}
-			/>
+			<TourList input={input} onPage={updatePage} />
 		</Frame>
 	);
 }

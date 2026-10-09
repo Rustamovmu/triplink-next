@@ -11,7 +11,13 @@ require.extensions['.ts'] = (module, filename) =>
 const { buildHomeSearch, localDateTimeValue } = require('../libs/triplink/homeSearch.ts');
 const values = { text: ' Kyoto ', start: '', end: '', seats: '2' };
 test('search preserves supported URL keys and allows dates to be omitted', () => {
-	assert.deepEqual(buildHomeSearch(values), { text: 'Kyoto', seats: '2', page: '1' });
+	assert.deepEqual(JSON.parse(buildHomeSearch(values).input), {
+		page: 1,
+		limit: 12,
+		sort: 'createdAt',
+		direction: 'DESC',
+		search: { text: 'Kyoto', minimumAvailableSeats: 2 },
+	});
 });
 test('invalid dates and traveler counts do not produce search URLs', () => {
 	for (const change of [
@@ -33,7 +39,7 @@ test('whole-day ranges preserve local dates and DST boundaries', () => {
 		for (const timezone of ['Asia/Seoul', 'America/New_York', 'UTC']) {
 			process.env.TZ = timezone;
 			for (const day of ['2026-10-10', '2026-03-08', '2026-11-01']) {
-				const result = buildHomeSearch({ ...values, start: day, end: day });
+				const result = JSON.parse(buildHomeSearch({ ...values, start: day, end: day }).input).search.availableDateRange;
 				assert.equal(localDateTimeValue(result.start), `${day}T00:00:00.000`);
 				assert.equal(localDateTimeValue(result.end), `${day}T23:59:59.999`);
 				assert(new Date(result.start) < new Date(result.end));
