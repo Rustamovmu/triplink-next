@@ -1683,6 +1683,12 @@
  .triplink-top__menu-button:hover,
  .triplink-top__language select:hover { background: rgba(255, 255, 255, .12); }
 }
+// Extend inner-page banners behind the clear header while preserving title placement.
+#pc-wrap > #top + .header-basic {
+ margin-top: -89px;
+ min-height: 309px;
+ padding-top: 121px;
+}
 .triplink-home-top + .triplink-home-header {
  .triplink-hero { min-height: 768px; }
  .triplink-hero__content { padding-top: 176px; }

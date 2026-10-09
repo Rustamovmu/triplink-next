@@ -59,3 +59,37 @@ module.exports = [
 	['booking/booking.input', 'BookingRefundInput', { bookingId: id, refundReason: 'Synthetic refund' }],
 	['follow/follow.input', 'FollowInquiry', { page: 1, limit: 12, search: { memberId: id } }],
 ];
+
+module.exports.push(
+	[
+		'help-center/help-center.input',
+		'HelpEntryInput',
+		{
+			noticeCategory: 'FAQ',
+			faqTopic: 'BOOKINGS',
+			noticeTitle: 'Seats reserved',
+			noticeContent: 'Seats are reserved on confirmation.',
+		},
+	],
+	[
+		'help-center/help-center.input',
+		'HelpEntryInput',
+		{
+			noticeCategory: 'NOTICE',
+			noticeTitle: 'Service notice',
+			noticeContent: 'A synthetic plain text notice.',
+			noticeStatus: 'HOLD',
+		},
+	],
+	[
+		'help-center/help-center.input',
+		'HelpEntriesInquiry',
+		{ page: 1, limit: 12, search: { noticeCategory: 'FAQ', faqTopic: 'BOOKINGS', text: 'seats' } },
+	],
+	[
+		'help-center/help-center.input',
+		'AdminHelpEntriesInquiry',
+		{ page: 1, limit: 12, search: { noticeCategory: 'NOTICE', noticeStatus: 'HOLD' } },
+	],
+	['help-center/help-center.update', 'HelpEntryUpdate', { entryId: id, noticeStatus: 'ACTIVE' }],
+);

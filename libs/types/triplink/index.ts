@@ -267,3 +267,45 @@ export const tourSorts = [
 	'tourFavoriteCount',
 ];
 export const totalOf = (result?: { metaCounter: { total: number }[] }) => result?.metaCounter[0]?.total ?? 0;
+
+export type HelpKind = 'FAQ' | 'NOTICE';
+export type HelpStatus = 'HOLD' | 'ACTIVE';
+export type FaqTopic = 'TOURS' | 'BOOKINGS' | 'PAYMENTS' | 'ACCOUNTS' | 'AGENTS' | 'COMMUNITY' | 'OTHER';
+export interface HelpEntry {
+	_id: string;
+	noticeCategory: HelpKind;
+	noticeStatus: HelpStatus;
+	faqTopic?: FaqTopic | null;
+	noticeTitle: string;
+	noticeContent: string;
+	memberId: string;
+	createdAt: string;
+	updatedAt: string;
+}
+export interface HelpEntryInput {
+	noticeCategory: HelpKind;
+	faqTopic?: FaqTopic;
+	noticeTitle: string;
+	noticeContent: string;
+	noticeStatus?: HelpStatus;
+}
+export interface HelpEntryUpdate {
+	entryId: string;
+	faqTopic?: FaqTopic;
+	noticeTitle?: string;
+	noticeContent?: string;
+	noticeStatus?: HelpStatus;
+}
+export interface HelpSearch {
+	noticeCategory?: HelpKind;
+	faqTopic?: FaqTopic;
+	text?: string;
+}
+export interface AdminHelpSearch extends HelpSearch {
+	noticeStatus?: HelpStatus;
+}
+export interface HelpInquiry<S = HelpSearch> {
+	page: number;
+	limit: number;
+	search: S;
+}

@@ -161,7 +161,75 @@ async function fixtures() {
 	);
 	await call(user.CREATE_COMMENT, { input: { commentRefId: article._id, commentContent: 'Helpful travel notes' } }, u);
 	await call(user.ARTICLE_LIKE, { articleId: article._id }, u);
-	console.log('PASS: frontend operation lifecycle on a verified disposable database');
+	const help = await call(
+		admin.CREATE_HELP_ENTRY,
+		{
+			input: {
+				noticeCategory: 'FAQ',
+				faqTopic: 'BOOKINGS',
+				noticeTitle: 'Disposable seats question',
+				noticeContent: 'Seats are reserved after confirmation.',
+			},
+		},
+		d,
+	);
+	assert.equal(
+		(await call(user.HELP_ENTRIES, { input: { page: 1, limit: 12, search: { noticeCategory: 'FAQ' } } })).list.length,
+		0,
+	);
+	assert.equal(
+		(
+			await call(
+				admin.ADMIN_HELP_ENTRIES,
+				{
+					input: { page: 1, limit: 12, search: { noticeCategory: 'FAQ', noticeStatus: 'HOLD', faqTopic: 'BOOKINGS' } },
+				},
+				d,
+			)
+		).list[0]._id,
+		help._id,
+	);
+	await call(user.HELP_ENTRY, { entryId: help._id }, undefined, 'NOT_FOUND');
+	await call(admin.UPDATE_HELP_ENTRY, { input: { entryId: help._id, noticeStatus: 'ACTIVE' } }, d);
+	assert.equal((await call(user.HELP_ENTRY, { entryId: help._id })).noticeStatus, 'ACTIVE');
+	await call(
+		admin.UPDATE_HELP_ENTRY,
+		{ input: { entryId: help._id, noticeContent: 'Updated disposable plain text answer.' } },
+		d,
+	);
+	await call(admin.UPDATE_HELP_ENTRY, { input: { entryId: help._id, noticeStatus: 'HOLD' } }, d);
+	await call(user.HELP_ENTRY, { entryId: help._id }, undefined, 'NOT_FOUND');
+	await call(admin.REMOVE_HELP_ENTRY, { entryId: help._id }, u, 'FORBIDDEN');
+	assert.equal(await call(admin.REMOVE_HELP_ENTRY, { entryId: help._id }, d), true);
+	await call(user.HELP_ENTRY, { entryId: help._id }, undefined, 'NOT_FOUND');
+	if (process.env.TRIPLINK_BROWSER_FIXTURES === '1') {
+		await call(
+			admin.CREATE_HELP_ENTRY,
+			{
+				input: {
+					noticeCategory: 'FAQ',
+					faqTopic: 'TOURS',
+					noticeTitle: 'Disposable browser FAQ',
+					noticeContent: 'Browse tours in this disposable test environment.',
+					noticeStatus: 'ACTIVE',
+				},
+			},
+			d,
+		);
+		await call(
+			admin.CREATE_HELP_ENTRY,
+			{
+				input: {
+					noticeCategory: 'NOTICE',
+					noticeTitle: 'Disposable browser notice',
+					noticeContent: 'Plain text notice.\nSecond line.',
+					noticeStatus: 'ACTIVE',
+				},
+			},
+			d,
+		);
+	}
+	console.log('PASS: frontend operation lifecycle including Help Center on a verified disposable database');
 	if (process.env.TRIPLINK_BROWSER_FIXTURES === '1')
 		console.log(
 			'READY: port ' +

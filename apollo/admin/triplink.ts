@@ -1176,3 +1176,69 @@ export const ADMIN_COMMENT_REMOVE: TypedDocumentNode<Result<Comment>, { commentI
 		}
 	}
 `;
+
+import type {
+	HelpEntry,
+	HelpEntryInput,
+	HelpEntryUpdate,
+	HelpInquiry,
+	AdminHelpSearch,
+} from '../../libs/types/triplink';
+export const ADMIN_HELP_ENTRIES: TypedDocumentNode<
+	Result<PageResult<HelpEntry>>,
+	{ input: HelpInquiry<AdminHelpSearch> }
+> = gql`
+	query ADMIN_HELP_ENTRIES($input: AdminHelpEntriesInquiry!) {
+		result: getAllHelpEntriesByAdmin(input: $input) {
+			list {
+				_id
+				noticeCategory
+				noticeStatus
+				faqTopic
+				noticeTitle
+				noticeContent
+				memberId
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const CREATE_HELP_ENTRY: TypedDocumentNode<Result<HelpEntry>, { input: HelpEntryInput }> = gql`
+	mutation CREATE_HELP_ENTRY($input: HelpEntryInput!) {
+		result: createHelpEntry(input: $input) {
+			_id
+			noticeCategory
+			noticeStatus
+			faqTopic
+			noticeTitle
+			noticeContent
+			memberId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+export const UPDATE_HELP_ENTRY: TypedDocumentNode<Result<HelpEntry>, { input: HelpEntryUpdate }> = gql`
+	mutation UPDATE_HELP_ENTRY($input: HelpEntryUpdate!) {
+		result: updateHelpEntry(input: $input) {
+			_id
+			noticeCategory
+			noticeStatus
+			faqTopic
+			noticeTitle
+			noticeContent
+			memberId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+export const REMOVE_HELP_ENTRY: TypedDocumentNode<Result<boolean>, { entryId: string }> = gql`
+	mutation REMOVE_HELP_ENTRY($entryId: String!) {
+		result: removeHelpEntry(entryId: $entryId)
+	}
+`;

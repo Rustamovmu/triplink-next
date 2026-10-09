@@ -15,7 +15,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
 const withLayoutBasic = (Component: any) => {
-	return (props: any) => {
+	return function BasicLayout(props: any) {
 		const router = useRouter();
 		const { t } = useTranslation('common');
 		const device = useDeviceDetect();
@@ -56,9 +56,9 @@ const withLayoutBasic = (Component: any) => {
 					desc = 'Travel with TripLink';
 					bgImage = '/img/banner/header2.svg';
 					break;
-				case '/cs':
-					title = 'CS';
-					desc = 'We are glad to see you again!';
+				case '/help-center':
+					title = 'Help Center';
+					desc = 'Answers and updates for your TripLink journey';
 					bgImage = '/img/banner/header2.svg';
 					break;
 				case '/account/join':
@@ -83,7 +83,15 @@ const withLayoutBasic = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>TripLink</title>
+						<title>{router.pathname === '/help-center' ? `${t('Help Center')} | TripLink` : 'TripLink'}</title>
+						<meta
+							name="description"
+							content={
+								router.pathname === '/help-center'
+									? t('Answers and updates for your TripLink journey')
+									: t('Travel with TripLink')
+							}
+						/>
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="mobile-wrap">
@@ -106,7 +114,15 @@ const withLayoutBasic = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>TripLink</title>
+						<title>{router.pathname === '/help-center' ? `${t('Help Center')} | TripLink` : 'TripLink'}</title>
+						<meta
+							name="description"
+							content={
+								router.pathname === '/help-center'
+									? t('Answers and updates for your TripLink journey')
+									: t('Travel with TripLink')
+							}
+						/>
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="pc-wrap">

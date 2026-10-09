@@ -14,7 +14,7 @@ const { parse, validate, coerceInputValue } = require(root + '/node_modules/grap
 (async () => {
 	const app = await NestFactory.createApplicationContext(GraphQLSchemaBuilderModule, { logger: false });
 	try {
-		const names = ['member', 'tour', 'booking', 'review', 'follow', 'board-article', 'comment'];
+		const names = ['member', 'tour', 'booking', 'review', 'follow', 'board-article', 'comment', 'help-center'];
 		const resolvers = names.map(
 			(n) => Object.values(require(root + '/apps/trip-link/src/components/' + n + '/' + n + '.resolver.ts'))[0],
 		);

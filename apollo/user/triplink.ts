@@ -3369,3 +3369,40 @@ export const UPDATE_COMMENT: TypedDocumentNode<
 		}
 	}
 `;
+
+import type { HelpEntry, HelpInquiry } from '../../libs/types/triplink';
+export const HELP_ENTRIES: TypedDocumentNode<Result<PageResult<HelpEntry>>, { input: HelpInquiry }> = gql`
+	query HELP_ENTRIES($input: HelpEntriesInquiry!) {
+		result: getHelpEntries(input: $input) {
+			list {
+				_id
+				noticeCategory
+				noticeStatus
+				faqTopic
+				noticeTitle
+				noticeContent
+				memberId
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const HELP_ENTRY: TypedDocumentNode<Result<HelpEntry>, { entryId: string }> = gql`
+	query HELP_ENTRY($entryId: String!) {
+		result: getHelpEntry(entryId: $entryId) {
+			_id
+			noticeCategory
+			noticeStatus
+			faqTopic
+			noticeTitle
+			noticeContent
+			memberId
+			createdAt
+			updatedAt
+		}
+	}
+`;

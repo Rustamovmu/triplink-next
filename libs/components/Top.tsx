@@ -48,6 +48,7 @@ export default function Top() {
 		['/tour', 'Tours'],
 		['/agent', 'Agents'],
 		['/community', 'Community'],
+		['/help-center', 'Help Center'],
 		['/about', 'About'],
 	];
 	const shortcuts: [string, string][] = [
@@ -134,7 +135,7 @@ export default function Top() {
 			</Link>
 		);
 	return (
-		<header className={`triplink-top${router.pathname === '/' && !scrolled ? ' triplink-top--clear' : ''}`}>
+		<header className={`triplink-top${!scrolled ? ' triplink-top--clear' : ''}`}>
 			<a
 				className="triplink-top__skip"
 				href="#main"

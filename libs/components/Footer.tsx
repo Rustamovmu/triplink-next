@@ -62,6 +62,7 @@ export default function Footer() {
 								['/tour', 'Tours'],
 								['/agent', 'Agents'],
 								['/community', 'Community'],
+								['/help-center', 'Help Center'],
 							].map(([url, title]) => (
 								<li key={url}>
 									<Link href={url}>{t(title)}</Link>

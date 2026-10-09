@@ -14,8 +14,10 @@ export default function AdminMenuList() {
 				['bookings', 'Bookings'],
 				['reviews', 'Reviews'],
 				['community', 'Community'],
+				['cs/faq', 'Help Center: FAQs'],
+				['cs/notice', 'Help Center: Notices'],
 			].map(([path, title]) => (
-				<Link href={`/_admin/${path}`} key={path}>
+				<Link href={`/_admin/${path}`} key={path} passHref>
 					<ListItemButton component="div" selected={router.pathname === `/_admin/${path}`}>
 						<ListItemText primary={t(title)} />
 					</ListItemButton>
