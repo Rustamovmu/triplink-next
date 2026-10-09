@@ -8,6 +8,7 @@ import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
 import nextI18nextConfig from '../next-i18next.config';
 import { SessionBootstrap } from '../libs/components/triplink/Session';
+import { TourFavoritesProvider } from '../libs/components/triplink/TourFavorites';
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';
@@ -23,7 +24,9 @@ const App = ({ Component, pageProps }: AppProps) => {
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
 				<SessionBootstrap />
-				<Component {...pageProps} />
+				<TourFavoritesProvider>
+					<Component {...pageProps} />
+				</TourFavoritesProvider>
 			</ThemeProvider>
 		</ApolloProvider>
 	);

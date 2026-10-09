@@ -14,7 +14,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
 const withLayoutMain = (Component: any) => {
-	return (props: any) => {
+	return function LayoutMain(props: any) {
 		const device = useDeviceDetect();
 
 		if (device == 'mobile') {
@@ -25,7 +25,7 @@ const withLayoutMain = (Component: any) => {
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="mobile-wrap">
-						<Stack id={'top'}>
+						<Stack id={'top'} className="triplink-home-top">
 							<Top />
 						</Stack>
 
@@ -51,7 +51,7 @@ const withLayoutMain = (Component: any) => {
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="pc-wrap">
-						<Stack id={'top'}>
+						<Stack id={'top'} className="triplink-home-top">
 							<Top />
 						</Stack>
 

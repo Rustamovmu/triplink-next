@@ -19,6 +19,13 @@ export default function Top() {
 		drawerId = `triplink-navigation-${id}`;
 	const [open, setOpen] = useState(false);
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+	const [scrolled, setScrolled] = useState(false);
+	useEffect(() => {
+		const update = () => setScrolled(window.scrollY > 24);
+		update();
+		window.addEventListener('scroll', update, { passive: true });
+		return () => window.removeEventListener('scroll', update);
+	}, []);
 	const close = () => {
 		setOpen(false);
 		setAnchor(null);
@@ -127,7 +134,7 @@ export default function Top() {
 			</Link>
 		);
 	return (
-		<header className="triplink-top">
+		<header className={`triplink-top${router.pathname === '/' && !scrolled ? ' triplink-top--clear' : ''}`}>
 			<a
 				className="triplink-top__skip"
 				href="#main"

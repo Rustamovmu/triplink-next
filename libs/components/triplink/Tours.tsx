@@ -1,59 +1,212 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Alert, Box, Button, Card, CardContent, CardMedia, Chip, Stack, Typography } from '@mui/material';
+import { Card, CardContent, Rating, Stack, Typography } from '@mui/material';
 import { useQuery } from '@apollo/client';
 import { TOURS, TOUR_REVIEWS, PUBLIC_AGENT_REVIEWS } from '../../../apollo/user/triplink';
 import { Inquiry, TourSearch, Tour, totalOf } from '../../types/triplink';
 import { imageUrl, Pager, QueryState, usePublicReady } from './Common';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
+import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import { useTourFavorites } from './TourFavorites';
+const tourPlaceholder = '/img/tour-placeholder.svg';
+
+function TourPhotos({ images, href, title }: { images: string[]; href: string; title: string }) {
+	const { t } = useTranslation('common');
+	const [index, setIndex] = useState(0);
+	const [failed, setFailed] = useState<string[]>([]);
+	const path = images[index];
+	const src = path && !failed.includes(path) ? imageUrl(path) : tourPlaceholder;
+	return (
+		<div className="triplink-tour-card__media">
+			<Link
+				href={href}
+				passHref
+				className="triplink-tour-card__photo-link"
+				aria-label={t('View tour: {{title}}', { title })}
+			>
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
+					key={src}
+					src={src}
+					alt={title}
+					width={600}
+					height={400}
+					loading="lazy"
+					decoding="async"
+					onError={() => {
+						if (path && src !== tourPlaceholder) setFailed((previous) => [...previous, path]);
+					}}
+				/>
+			</Link>
+			{images.length > 1 && (
+				<div className="triplink-tour-card__gallery">
+					<button
+						type="button"
+						aria-label={t('Previous photo of {{title}}', { title })}
+						onClick={() => setIndex((previous) => (previous - 1 + images.length) % images.length)}
+					>
+						<ChevronLeftRoundedIcon aria-hidden="true" />
+					</button>
+					<span role="status" aria-live="polite" aria-atomic="true">
+						<span aria-hidden="true">
+							{index + 1}/{images.length}
+						</span>
+						<span className="triplink-visually-hidden">
+							{t('Photo {{current}} of {{total}}', { current: index + 1, total: images.length })}
+						</span>
+					</span>
+					<button
+						type="button"
+						aria-label={t('Next photo of {{title}}', { title })}
+						onClick={() => setIndex((previous) => (previous + 1) % images.length)}
+					>
+						<ChevronRightRoundedIcon aria-hidden="true" />
+					</button>
+				</div>
+			)}
+		</div>
+	);
+}
+
 export function TourCard({ tour }: { tour: Tour }) {
 	const { t } = useTranslation('common');
+	const favorites = useTourFavorites();
+	const saved = favorites.saved.has(tour._id);
+	const favoriteCount = favorites.counts[tour._id] ?? tour.tourFavoriteCount;
+	const { locale = 'en' } = useRouter();
+	const displayLocale = locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US';
+	const price = new Intl.NumberFormat(displayLocale, {
+		style: 'currency',
+		currency: 'USD',
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 2,
+	});
+	const number = new Intl.NumberFormat(displayLocale, { maximumFractionDigits: 1 });
+	const href = `/tour/detail?id=${tour._id}`;
+	const discounted = tour.tourDiscountPrice !== null && tour.tourDiscountPrice < tour.tourPrice;
 	return (
-		<Card variant="outlined" sx={{ height: '100%' }}>
-			<CardMedia
-				component="img"
-				onError={(event: React.SyntheticEvent<HTMLImageElement>) => {
-					const target = event.currentTarget;
-					target.onerror = null;
-					if (!target.src.endsWith('/img/tour-placeholder.svg')) target.src = '/img/tour-placeholder.svg';
-				}}
-				height="190"
-				image={tour.tourImages[0] ? imageUrl(tour.tourImages[0]) : '/img/tour-placeholder.svg'}
-				alt={tour.tourTitle}
-			/>
-			<CardContent>
-				<Stack spacing={1}>
-					<Link href={`/tour/detail?id=${tour._id}`} passHref>
-						<Typography variant="h6" component="h2">
-							{tour.tourTitle}
-						</Typography>
+		<Card component="article" className="triplink-tour-card" elevation={0}>
+			<div className="triplink-tour-card__visual">
+				<TourPhotos
+					key={JSON.stringify([tour._id, tour.tourImages])}
+					images={tour.tourImages}
+					href={href}
+					title={tour.tourTitle}
+				/>
+				{(tour.tourFeatured || tour.tourStatus === 'SOLD_OUT') && (
+					<div className="triplink-tour-card__badges">
+						{tour.tourFeatured && <span>{t('Featured')}</span>}
+						{tour.tourStatus === 'SOLD_OUT' && <span className="triplink-tour-card__sold-out">{t('Sold out')}</span>}
+					</div>
+				)}
+				{favorites.anonymous ? (
+					<Link
+						href="/account/join"
+						passHref
+						className="triplink-tour-card__favorite"
+						aria-label={t('Login to save {{title}}', { title: tour.tourTitle })}
+					>
+						<FavoriteBorderRoundedIcon aria-hidden="true" />
 					</Link>
-					<Typography>
-						{tour.tourDestination} · {tour.tourDurationDays} {t('Days')}
-					</Typography>
-					<Typography>
-						{tour.tourDiscountPrice ?? tour.tourPrice} · ★ {tour.tourAverageRating.toFixed(1)} ({tour.tourReviewCount})
-					</Typography>
-					<Stack direction="row" spacing={1}>
-						<Chip label={t(tour.tourCategory)} size="small" />
-						<Chip label={t(tour.tourStatus)} size="small" />
-					</Stack>
-				</Stack>
-			</CardContent>
+				) : (
+					favorites.eligible && (
+						<button
+							type="button"
+							className="triplink-tour-card__favorite"
+							aria-label={
+								favorites.error
+									? t('Retry saved tours')
+									: t(saved ? 'Unsave {{title}}' : 'Save {{title}}', { title: tour.tourTitle })
+							}
+							aria-pressed={favorites.ready ? saved : undefined}
+							aria-busy={(!favorites.ready && !favorites.error) || favorites.pending.has(tour._id)}
+							disabled={(!favorites.ready && !favorites.error) || favorites.pending.has(tour._id)}
+							onClick={() => (favorites.error ? favorites.retry() : void favorites.toggle(tour._id))}
+						>
+							{saved ? <FavoriteRoundedIcon aria-hidden="true" /> : <FavoriteBorderRoundedIcon aria-hidden="true" />}
+						</button>
+					)
+				)}
+			</div>
+			<div className="triplink-tour-card__content">
+				<span className="triplink-tour-card__category">{t(tour.tourCategory)}</span>
+				<h2 className="triplink-tour-card__title">
+					<Link href={href}>{tour.tourTitle}</Link>
+				</h2>
+				<p className="triplink-tour-card__details">
+					<PlaceOutlinedIcon aria-hidden="true" />
+					<span>{tour.tourDestination}</span>
+					<span aria-hidden="true">·</span>
+					<span>{t('{{count}} days', { count: tour.tourDurationDays })}</span>
+				</p>
+				<div className="triplink-tour-card__rating">
+					{tour.tourReviewCount > 0 ? (
+						<>
+							<Rating value={tour.tourAverageRating} precision={0.1} readOnly size="small" aria-hidden="true" />
+							<span>{t('{{rating}} out of 5', { rating: number.format(tour.tourAverageRating) })}</span>
+							<span className="triplink-tour-card__review-count">
+								({t('{{count}} reviews', { count: tour.tourReviewCount })})
+							</span>
+						</>
+					) : (
+						<span className="triplink-tour-card__review-count">{t('No reviews yet')}</span>
+					)}
+				</div>
+				<div className="triplink-tour-card__stats">
+					<span>
+						<VisibilityOutlinedIcon aria-hidden="true" />
+						{t('{{count}} views', { count: tour.tourViewCount, displayCount: number.format(tour.tourViewCount) })}
+					</span>
+					<span>
+						<FavoriteBorderRoundedIcon aria-hidden="true" />
+						{t('{{count}} saves', { count: favoriteCount, displayCount: number.format(favoriteCount) })}
+					</span>
+				</div>
+				{(favorites.error || favorites.errors[tour._id]) && (
+					<p role="alert" className="triplink-tour-card__error">
+						{t(favorites.error || favorites.errors[tour._id])}
+					</p>
+				)}
+				<div className="triplink-tour-card__bottom">
+					<div className="triplink-tour-card__pricing">
+						<span className="triplink-tour-card__price-caption">{t('Per person')}</span>
+						{discounted && <s className="triplink-tour-card__original-price">{price.format(tour.tourPrice)}</s>}
+						<strong
+							className={
+								discounted
+									? 'triplink-tour-card__price triplink-tour-card__price--discount'
+									: 'triplink-tour-card__price'
+							}
+						>
+							{price.format(discounted ? tour.tourDiscountPrice! : tour.tourPrice)}
+						</strong>
+					</div>
+					<Link
+						href={href}
+						className="triplink-tour-card__view"
+						aria-label={t('View tour: {{title}}', { title: tour.tourTitle })}
+					>
+						{t('View tour')}
+					</Link>
+				</div>
+			</div>
 		</Card>
 	);
 }
+
 export function TourGrid({ tours }: { tours: Tour[] }) {
-	const { t } = useTranslation('common');
 	return (
-		<Box
-			component="div"
-			sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}
-		>
+		<div className="triplink-tour-grid">
 			{tours.map((tour) => (
 				<TourCard key={tour._id} tour={tour} />
 			))}
-		</Box>
+		</div>
 	);
 }
 export function TourList({ input, onPage }: { input: Inquiry<TourSearch>; onPage?: (page: number) => void }) {
