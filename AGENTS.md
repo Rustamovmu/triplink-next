@@ -27,3 +27,13 @@ Before making any changes, read!
 4. Run typecheck after each phase.
 5. Do not remove working logic unless replaced safely.
 6. Update petoria/docs/ai/COMPLETED_TASKS.md after major changes.
+
+## Package Manager
+
+- Use Yarn for all frontend commands.
+- Do not use npm or pnpm.
+- Install dependencies with:
+
+```bash
+yarn install
+```
