@@ -1,10 +1,11 @@
 import React, { useEffect, useId, useState } from 'react';
 import Link from 'next/link';
 import BrandLogo from './BrandLogo';
-import { Divider, Drawer, Menu, MenuItem } from '@mui/material';
+import { Avatar, Divider, Drawer, Menu, MenuItem } from '@mui/material';
 import { useReactiveVar } from '@apollo/client';
 import { memberVar, sessionVar } from '../../apollo/store';
 import { logOut } from '../auth';
+import { imageUrl } from './triplink/Common';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 
@@ -104,6 +105,17 @@ export default function Top() {
 		.slice(0, 2)
 		.join('')
 		.toLocaleUpperCase(router.locale === 'kr' ? 'ko' : router.locale ?? 'en');
+	const avatar = () => (
+		<Avatar
+			className="triplink-top__avatar"
+			src={member?.memberImage ? imageUrl(member.memberImage) : undefined}
+			alt=""
+			aria-hidden="true"
+			imgProps={{ width: 30, height: 30 }}
+		>
+			{initials}
+		</Avatar>
+	);
 	const login = () =>
 		session === 'loading' ? (
 			<span className="triplink-top__account-placeholder" role="status">
@@ -130,7 +142,7 @@ export default function Top() {
 				{t('Skip to content')}
 			</a>
 			<div className="triplink-top__inner">
-				<Link href="/" className="triplink-brand-link" translate="no">
+				<Link href="/" passHref className="triplink-brand-link" translate="no">
 					<BrandLogo inverse />
 				</Link>
 				<nav className="triplink-top__desktop-nav" aria-label={t('Main navigation')}>
@@ -155,9 +167,7 @@ export default function Top() {
 								}
 							}}
 						>
-							<span className="triplink-top__initials" aria-hidden="true">
-								{initials}
-							</span>
+							{avatar()}
 							<span className="triplink-top__nickname" translate="no">
 								{nickname}
 							</span>
@@ -230,9 +240,12 @@ export default function Top() {
 						<h2 id={`${drawerId}-account`}>{t('Account')}</h2>
 						{member ? (
 							<>
-								<p className="triplink-nav-drawer__nickname" translate="no">
-									{nickname}
-								</p>
+								<div className="triplink-nav-drawer__identity">
+									{avatar()}
+									<p className="triplink-nav-drawer__nickname" translate="no">
+										{nickname}
+									</p>
+								</div>
 								<nav aria-label={t('Account navigation')}>
 									{shortcuts.map(([url, label]) => (
 										<Link key={url} href={url} onClick={close} aria-current={current(url) ? 'page' : undefined}>
