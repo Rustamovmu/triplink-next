@@ -26,7 +26,7 @@ Before making any changes, read!
 3. Make small incremental changes.
 4. Run typecheck after each phase.
 5. Do not remove working logic unless replaced safely.
-6. Update petoria/docs/ai/COMPLETED_TASKS.md after major changes.
+6. Update tripLink/docs/COMPLETED_TASKS.md after major changes.
 
 ## Package Manager
 

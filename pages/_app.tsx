@@ -6,9 +6,12 @@ import { light } from '../scss/MaterialTheme';
 import { ApolloProvider } from '@apollo/client';
 import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
+import nextI18nextConfig from '../next-i18next.config';
+import { SessionBootstrap } from '../libs/components/triplink/Session';
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';
+import '../scss/triplink.scss';
 
 const App = ({ Component, pageProps }: AppProps) => {
 	// @ts-ignore
@@ -19,10 +22,11 @@ const App = ({ Component, pageProps }: AppProps) => {
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
+				<SessionBootstrap />
 				<Component {...pageProps} />
 			</ThemeProvider>
 		</ApolloProvider>
 	);
 };
 
-export default appWithTranslation(App);
+export default appWithTranslation(App, nextI18nextConfig);

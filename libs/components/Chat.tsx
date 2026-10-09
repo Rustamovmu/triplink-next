@@ -1,209 +1,171 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Avatar, Box, Stack } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import Badge from '@mui/material/Badge';
-import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
-import MarkChatUnreadIcon from '@mui/icons-material/MarkChatUnread';
-import { useRouter } from 'next/router';
-import ScrollableFeed from 'react-scrollable-feed';
-import { RippleBadge } from '../../scss/MaterialTheme/styled';
+import { useTranslation } from 'next-i18next';
+import React, { useEffect, useRef, useState } from 'react';
 import { useReactiveVar } from '@apollo/client';
-import { socketVar, userVar } from '../../apollo/store';
-import { Member } from '../types/member/member';
-import { Messages, REACT_APP_API_URL } from '../config';
-import { sweetErrorAlert } from '../sweetAlert';
-import { getJwtToken } from '../auth';
+import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
+import { memberVar, socketVar } from '../../apollo/store';
+import { getJwtToken } from '../auth/token';
+import { ChatMessage } from '../types/triplink';
+import { isChatMessage as isMessage, mergeMessages } from '../triplink/chat';
+export default function Chat() {
+	const { t } = useTranslation('common');
 
-interface MessagePayload {
-	event: string;
-	text: string;
-	memberData: Member | null;
-}
-
-interface InfoPayload {
-	event: string;
-	totalClients: number;
-	memberData: Member | null;
-	action: string;
-}
-
-const Chat = () => {
-	const chatContentRef = useRef<HTMLDivElement>(null);
-	const [messagesList, setMessagesList] = useState<MessagePayload[]>([]);
-	const [onlineUsers, setOnlineUsers] = useState<number>(0);
-	const [messageInput, setMessageInput] = useState<string>('');
+	const member = useReactiveVar(memberVar);
+	const token = getJwtToken();
 	const [open, setOpen] = useState(false);
-	const [openButton, setOpenButton] = useState(false);
-	const router = useRouter();
-	const user = useReactiveVar(userVar);
-	const socket = useReactiveVar(socketVar);
-	const [connected, setConnected] = useState(false);
-
-	/** LIFECYCLES **/
+	const [attempt, setAttempt] = useState(0);
+	const [status, setStatus] = useState<'connecting' | 'authenticated' | 'closed'>('closed');
+	const [messages, setMessages] = useState<ChatMessage[]>([]);
+	const [clients, setClients] = useState(0);
+	const [text, setText] = useState('');
+	const [error, setError] = useState('');
+	const [denied, setDenied] = useState(false);
+	const connection = useRef<WebSocket | null>(null);
 	useEffect(() => {
-		// Live chat uses the Nest WsAdapter gateway at /, separately from GraphQL.
-		const url = new URL(REACT_APP_API_URL);
-		url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-		url.pathname = '/';
-		url.search = '';
-		url.searchParams.set('token', getJwtToken() || '');
-		const chatSocket = new WebSocket(url.toString());
-		socketVar(chatSocket);
-		setConnected(false);
-
-		chatSocket.onopen = () => setConnected(true);
-		chatSocket.onclose = () => {
-			setConnected(false);
-			setOnlineUsers(0);
-		};
-		chatSocket.onerror = () => setConnected(false);
-		chatSocket.onmessage = (msg) => {
+		setMessages([]);
+		setClients(0);
+		setText('');
+		setError('');
+		setDenied(false);
+		if (!member?._id || !token) {
+			setStatus('closed');
+			return;
+		}
+		let active = true;
+		let socket: WebSocket;
+		try {
+			socket = new WebSocket(process.env.REACT_APP_API_WS || 'ws://localhost:3007/chat');
+		} catch {
+			setError('Unable to connect to chat');
+			return;
+		}
+		connection.current = socket;
+		socketVar(socket);
+		setStatus('connecting');
+		const timeout = setTimeout(() => {
+			if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+				setError('Chat authentication timed out');
+				socket.close();
+			}
+		}, 12000);
+		socket.onopen = () => socket.send(JSON.stringify({ event: 'authenticate', data: { token } }));
+		socket.onmessage = (event) => {
+			if (!active) return;
 			try {
-				const data = JSON.parse(msg.data);
-				switch (data.event) {
-					case 'info':
-						setOnlineUsers((data as InfoPayload).totalClients);
+				const message = JSON.parse(event.data);
+				switch (message.event) {
+					case 'authenticated':
+						clearTimeout(timeout);
+						setStatus('authenticated');
+						setClients(message.data.totalClients);
 						break;
 					case 'getMessages':
-						setMessagesList(data.list);
+						if (Array.isArray(message.data?.list))
+							setMessages((previous) => mergeMessages(previous, message.data.list.filter(isMessage)));
 						break;
 					case 'message':
-						setMessagesList((messages) => [...messages, data as MessagePayload]);
+						if (isMessage(message.data)) setMessages((previous) => mergeMessages(previous, [message.data]));
+						break;
+					case 'info':
+						if (typeof message.data?.totalClients === 'number') setClients(message.data.totalClients);
+						break;
+					case 'error':
+						setError(message.data?.message ?? 'Chat error');
+						if (['UNAUTHENTICATED', 'FORBIDDEN'].includes(message.data?.code)) {
+							setDenied(true);
+							socket.close();
+						}
 						break;
 				}
-			} catch (error) {
-				console.error('Invalid chat message:', error);
+			} catch {
+				setError('Invalid chat response');
 			}
 		};
-
+		socket.onclose = () => {
+			clearTimeout(timeout);
+			if (active) {
+				setStatus('closed');
+				setClients(0);
+			}
+		};
+		socket.onerror = () => {
+			if (active) setError('Chat connection failed');
+		};
 		return () => {
-			chatSocket.onopen = null;
-			chatSocket.onclose = null;
-			chatSocket.onerror = null;
-			chatSocket.onmessage = null;
-			chatSocket.close();
-			if (socketVar() === chatSocket) socketVar(undefined);
+			active = false;
+			clearTimeout(timeout);
+			socket.onopen = null;
+			socket.onmessage = null;
+			socket.onclose = null;
+			socket.onerror = null;
+			socket.close();
+			connection.current = null;
+			if (socketVar() === socket) socketVar(undefined);
 		};
-	}, [user._id]);
-
-	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			setOpenButton(true);
-		}, 100);
-		return () => clearTimeout(timeoutId);
-	}, []);
-
-	useEffect(() => {
-		setOpenButton(false);
-	}, [router.pathname]);
-
-	/** HANDLERS **/
-	const handleOpenChat = () => {
-		setOpen((prevState) => !prevState);
-	};
-
-	const getInputMessageHandler = useCallback((e: any) => {
-		const text = e.target.value;
-		setMessageInput(text);
-	}, []);
-
-	const getKeyHandler = (e: any) => {
-		try {
-			if (e.key == 'Enter') {
-				onClickHandler();
-			}
-		} catch (err: any) {
-			console.log(err);
-		}
-	};
-
-	const onClickHandler = () => {
-		const text = messageInput.trim();
-		if (!text) {
-			void sweetErrorAlert(Messages.error4);
-			return;
-		}
-		if (!socket || socket.readyState !== WebSocket.OPEN) {
-			void sweetErrorAlert('Chat is disconnected. Please refresh the page to reconnect.');
-			return;
-		}
-		try {
-			socket.send(JSON.stringify({ event: 'message', data: text }));
-			setMessageInput('');
-		} catch (error) {
-			void sweetErrorAlert('Message could not be sent. Please try again.');
-		}
-	};
-
+	}, [member?._id, token, attempt]);
+	if (!member) return null;
 	return (
-		<Stack className="chatting">
-			{openButton ? (
-				<button className="chat-button" onClick={handleOpenChat}>
-					{open ? <CloseFullscreenIcon /> : <MarkChatUnreadIcon />}
-				</button>
-			) : null}
-			<Stack className={`chat-frame ${open ? 'open' : ''}`}>
-				<Box className={'chat-top'} component={'div'}>
-					<div style={{ fontFamily: 'Nunito' }}>Online Chat</div>
-					<RippleBadge style={{ margin: '-18px 0 0 21px' }} badgeContent={onlineUsers} />
-				</Box>
-				<Box className={'chat-content'} id="chat-content" ref={chatContentRef} component={'div'}>
-					<ScrollableFeed>
-						<Stack className={'chat-main'}>
-							<Box flexDirection={'row'} style={{ display: 'flex' }} sx={{ m: '10px 0px' }} component={'div'}>
-								<div className={'welcome'}>Welcome to Live chat!</div>
-							</Box>
-							{messagesList.map((ele: MessagePayload, index: number) => {
-								const { text, memberData } = ele;
-								const memberImage = memberData?.memberImage
-									? `${REACT_APP_API_URL}/${memberData.memberImage}`
-									: '/img/profile/defaultUser.svg';
-
-								return memberData?._id === user?._id ? (
-									<Box
-										key={index}
-										component={'div'}
-										flexDirection={'row'}
-										style={{ display: 'flex' }}
-										alignItems={'flex-end'}
-										justifyContent={'flex-end'}
-										sx={{ m: '10px 0px' }}
-									>
-										<div className={'msg-right'}>{text}</div>
-									</Box>
-								) : (
-									<Box
-										key={index}
-										flexDirection={'row'}
-										style={{ display: 'flex' }}
-										sx={{ m: '10px 0px' }}
-										component={'div'}
-									>
-										<Avatar alt={'jonik'} src={memberImage} />
-										<div className={'msg-left'}>{text}</div>
-									</Box>
-								);
-							})}
+		<Box
+			component="div"
+			sx={{
+				position: 'fixed',
+				right: { xs: 8, md: 24 },
+				bottom: 16,
+				zIndex: 1300,
+				width: open ? { xs: 'calc(100vw - 16px)', sm: 360 } : 'auto',
+			}}
+		>
+			<Button variant="contained" aria-expanded={open} onClick={() => setOpen(!open)}>
+				{t(open ? 'Close chat' : 'Shared chat')}
+			</Button>
+			{open && (
+				<Paper elevation={6} sx={{ p: 2, mt: 1 }}>
+					<Stack spacing={2}>
+						<Typography variant="h6">
+							{t('Shared chat ·')} {clients} {t('connections')}
+						</Typography>
+						<Typography variant="caption">{t('Latest five messages. History resets on server restart.')}</Typography>
+						{error && <Alert severity="error">{t(error)}</Alert>}
+						<Box component="div" sx={{ maxHeight: 300, overflowY: 'auto' }}>
+							{messages.map((message) => (
+								<Box component="div" key={message._id} sx={{ py: 1 }}>
+									<Typography variant="caption">{message.memberData.memberNick}</Typography>
+									<Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{message.text}</Typography>
+								</Box>
+							))}
+						</Box>
+						{status === 'closed' && !denied && (
+							<Button onClick={() => setAttempt(attempt + 1)}>{t('Reconnect')}</Button>
+						)}
+						{denied && <Alert severity="warning">{t('Login again to reconnect.')}</Alert>}
+						<Stack
+							component="form"
+							spacing={1}
+							onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+								event.preventDefault();
+								const socket = connection.current;
+								if (status !== 'authenticated' || socket?.readyState !== WebSocket.OPEN || !text.trim()) return;
+								try {
+									socket.send(JSON.stringify({ event: 'message', data: text.trim() }));
+									setText('');
+								} catch {
+									setError('Message could not be sent');
+								}
+							}}
+						>
+							<TextField
+								label={t('Message')}
+								value={text}
+								onChange={(e) => setText(e.target.value)}
+								inputProps={{ maxLength: 1000 }}
+								disabled={status !== 'authenticated'}
+							/>
+							<Button type="submit" disabled={status !== 'authenticated' || !text.trim()}>
+								{t('Send')}
+							</Button>
 						</Stack>
-					</ScrollableFeed>
-				</Box>
-				<Box className={'chat-bott'} component={'div'}>
-					<input
-						type={'text'}
-						name={'message'}
-						className={'msg-input'}
-						placeholder={'Type message'}
-						value={messageInput}
-						onChange={getInputMessageHandler}
-						onKeyDown={getKeyHandler}
-					/>
-					<button className={'send-msg-btn'} onClick={onClickHandler} disabled={!connected} aria-label="Send message">
-						<SendIcon style={{ color: '#fff' }} />
-					</button>
-				</Box>
-			</Stack>
-		</Stack>
+					</Stack>
+				</Paper>
+			)}
+		</Box>
 	);
-};
-
-export default Chat;
+}

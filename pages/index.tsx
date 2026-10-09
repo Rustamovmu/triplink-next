@@ -1,48 +1,24 @@
-import { NextPage } from 'next';
-import useDeviceDetect from '../libs/hooks/useDeviceDetect';
-import withLayoutMain from '../libs/components/layout/LayoutHome';
-import CommunityBoards from '../libs/components/homepage/CommunityBoards';
-import PopularProperties from '../libs/components/homepage/PopularProperties';
-import TopAgents from '../libs/components/homepage/TopAgents';
-import Events from '../libs/components/homepage/Events';
-import TrendProperties from '../libs/components/homepage/TrendProperties';
-import TopProperties from '../libs/components/homepage/TopProperties';
-import { Stack } from '@mui/material';
-import Advertisement from '../libs/components/homepage/Advertisement';
+import React from 'react';
+import { Typography } from '@mui/material';
+import withLayoutHome from '../libs/components/layout/LayoutHome';
+import { Frame } from '../libs/components/triplink/Common';
+import { TourList } from '../libs/components/triplink/Tours';
+import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-
-export const getStaticProps = async ({ locale }: any) => ({
-	props: {
-		...(await serverSideTranslations(locale, ['common'])),
-	},
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+	props: { ...(await serverSideTranslations(locale, ['common'])) },
 });
-
-const Home: NextPage = () => {
-	const device = useDeviceDetect();
-
-	if (device === 'mobile') {
-		return (
-			<Stack className={'home-page'}>
-				<TrendProperties />
-				<PopularProperties />
-				<Advertisement />
-				<TopProperties />
-				<TopAgents />
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className={'home-page'}>
-				<TrendProperties />
-				<PopularProperties />
-				<Advertisement />
-				<TopProperties />
-				<TopAgents />
-				<Events />
-				<CommunityBoards />
-			</Stack>
-		);
-	}
-};
-
-export default withLayoutMain(Home);
+function Home() {
+	const { t } = useTranslation('common');
+	return (
+		<Frame title={t('Explore with TripLink')}>
+			<Typography variant="h5">{t('Featured tours')}</Typography>
+			<TourList input={{ page: 1, limit: 6, search: { featured: true } }} />
+			<Typography variant="h5">{t('Best rated')}</Typography>
+			<TourList input={{ page: 1, limit: 6, search: {}, sort: 'tourAverageRating', direction: 'DESC' }} />
+			<Typography variant="h5">{t('Popular tours')}</Typography>
+			<TourList input={{ page: 1, limit: 6, search: {}, sort: 'tourBookingCount', direction: 'DESC' }} />
+		</Frame>
+	);
+}
+export default withLayoutHome(Home);

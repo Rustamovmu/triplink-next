@@ -1,188 +1,99 @@
-import decodeJWT from 'jwt-decode';
 import { initializeApollo } from '../../apollo/client';
-import { userVar } from '../../apollo/store';
-import { CustomJwtPayload } from '../types/customJwtPayload';
-import { sweetMixinErrorAlert } from '../sweetAlert';
-import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
-
-export function getJwtToken(): any {
-	if (typeof window !== 'undefined') {
-		return localStorage.getItem('accessToken') ?? '';
-	}
+import { memberVar, sessionVar, sessionErrorVar, socketVar } from '../../apollo/store';
+import { CURRENT_MEMBER, LOGIN, SIGNUP } from '../../apollo/user/triplink';
+import { AuthPayload, Member } from '../types/triplink';
+import { getJwtToken, setJwtToken } from './token';
+export { getJwtToken, setJwtToken } from './token';
+let generation = 0;
+export function hydrateMember(member: Member) {
+	memberVar(member);
+	sessionVar('authenticated');
+	sessionErrorVar('');
 }
-
-export function setJwtToken(token: string) {
-	localStorage.setItem('accessToken', token);
-}
-
-export const logIn = async (nick: string, password: string): Promise<void> => {
-	try {
-		const { jwtToken } = await requestJwtToken({ nick, password });
-
-		if (jwtToken) {
-			updateStorage({ jwtToken });
-			updateUserInfo(jwtToken);
-		}
-	} catch (err) {
-		console.warn('login err', err);
-		logOut();
-		// throw new Error('Login Err');
-	}
-};
-
-const requestJwtToken = async ({
-	nick,
-	password,
-}: {
-	nick: string;
-	password: string;
-}): Promise<{ jwtToken: string }> => {
-	const apolloClient = await initializeApollo();
-
-	try {
-		const result = await apolloClient.mutate({
-			mutation: LOGIN,
-			variables: { input: { memberNick: nick, memberPassword: password } },
-			fetchPolicy: 'network-only',
-		});
-
-		console.log('---------- login ----------');
-		const { accessToken } = result?.data?.login;
-
-		return { jwtToken: accessToken };
-	} catch (err: any) {
-		console.log('request token err', err.graphQLErrors);
-		switch (err.graphQLErrors[0].message) {
-			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
-				break;
-			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
-				break;
-		}
-		throw new Error('token error');
-	}
-};
-
-export const signUp = async (nick: string, password: string, phone: string, type: string): Promise<void> => {
-	try {
-		const { jwtToken } = await requestSignUpJwtToken({ nick, password, phone, type });
-
-		if (jwtToken) {
-			updateStorage({ jwtToken });
-			updateUserInfo(jwtToken);
-		}
-	} catch (err) {
-		console.warn('login err', err);
-		logOut();
-		// throw new Error('Login Err');
-	}
-};
-
-const requestSignUpJwtToken = async ({
-	nick,
-	password,
-	phone,
-	type,
-}: {
-	nick: string;
-	password: string;
-	phone: string;
-	type: string;
-}): Promise<{ jwtToken: string }> => {
-	const apolloClient = await initializeApollo();
-
-	try {
-		const result = await apolloClient.mutate({
-			mutation: SIGN_UP,
-			variables: {
-				input: { memberNick: nick, memberPassword: password, memberPhone: phone, memberType: type },
-			},
-			fetchPolicy: 'network-only',
-		});
-
-		console.log('---------- login ----------');
-		const { accessToken } = result?.data?.signup;
-
-		return { jwtToken: accessToken };
-	} catch (err: any) {
-		console.log('request token err', err.graphQLErrors);
-		switch (err.graphQLErrors[0].message) {
-			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
-				break;
-			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
-				break;
-		}
-		throw new Error('token error');
-	}
-};
-
-export const updateStorage = ({ jwtToken }: { jwtToken: any }) => {
+export const updateStorage = ({ jwtToken }: { jwtToken: string }) => {
 	setJwtToken(jwtToken);
-	window.localStorage.setItem('login', Date.now().toString());
+	localStorage.setItem('login', Date.now().toString());
 };
-
-export const updateUserInfo = (jwtToken: any) => {
-	if (!jwtToken) return false;
-
-	const claims = decodeJWT<CustomJwtPayload>(jwtToken);
-	userVar({
-		_id: claims._id ?? '',
-		memberType: claims.memberType ?? '',
-		memberStatus: claims.memberStatus ?? '',
-		memberAuthType: claims.memberAuthType,
-		memberPhone: claims.memberPhone ?? '',
-		memberNick: claims.memberNick ?? '',
-		memberFullName: claims.memberFullName ?? '',
-		memberImage:
-			claims.memberImage === null || claims.memberImage === undefined
-				? '/img/profile/defaultUser.svg'
-				: `${claims.memberImage}`,
-		memberAddress: claims.memberAddress ?? '',
-		memberDesc: claims.memberDesc ?? '',
-		memberProperties: claims.memberProperties,
-		memberRank: claims.memberRank,
-		memberArticles: claims.memberArticles,
-		memberPoints: claims.memberPoints,
-		memberLikes: claims.memberLikes,
-		memberViews: claims.memberViews,
-		memberWarnings: claims.memberWarnings,
-		memberBlocks: claims.memberBlocks,
+export async function acceptAuth(payload: AuthPayload) {
+	const current = ++generation;
+	await initializeApollo().clearStore();
+	if (current !== generation) return;
+	updateStorage({ jwtToken: payload.accessToken });
+	hydrateMember(payload.member);
+	socketVar()?.close();
+	socketVar(undefined);
+}
+export const logIn = async (nick: string, password: string) => {
+	const response = await initializeApollo().mutate({
+		mutation: LOGIN,
+		variables: { input: { memberNick: nick.trim(), memberPassword: password } },
 	});
+	if (!response.data?.result) throw new Error('Login failed');
+	await acceptAuth(response.data.result);
 };
-
-export const logOut = () => {
-	deleteStorage();
-	deleteUserInfo();
-	window.location.reload();
+export const signUp = async (nick: string, password: string, phone: string, type: string) => {
+	if (type !== 'USER' && type !== 'AGENT') throw new Error('Choose USER or AGENT');
+	const response = await initializeApollo().mutate({
+		mutation: SIGNUP,
+		variables: {
+			input: {
+				memberNick: nick.trim(),
+				memberPassword: password,
+				memberPhone: phone.trim(),
+				memberType: type,
+				memberAuthType: 'PHONE',
+			},
+		},
+	});
+	if (!response.data?.result) throw new Error('Signup failed');
+	await acceptAuth(response.data.result);
 };
-
-const deleteStorage = () => {
+export function logOut() {
+	generation++;
 	localStorage.removeItem('accessToken');
-	window.localStorage.setItem('logout', Date.now().toString());
-};
-
-const deleteUserInfo = () => {
-	userVar({
-		_id: '',
-		memberType: '',
-		memberStatus: '',
-		memberAuthType: '',
-		memberPhone: '',
-		memberNick: '',
-		memberFullName: '',
-		memberImage: '',
-		memberAddress: '',
-		memberDesc: '',
-		memberProperties: 0,
-		memberRank: 0,
-		memberArticles: 0,
-		memberPoints: 0,
-		memberLikes: 0,
-		memberViews: 0,
-		memberWarnings: 0,
-		memberBlocks: 0,
-	});
-};
+	localStorage.setItem('logout', Date.now().toString());
+	memberVar(null);
+	sessionVar('anonymous');
+	sessionErrorVar('');
+	socketVar()?.close();
+	socketVar(undefined);
+	void initializeApollo().clearStore();
+}
+export async function restoreSession() {
+	const token = getJwtToken();
+	const current = ++generation;
+	sessionVar('loading');
+	memberVar(null);
+	socketVar()?.close();
+	socketVar(undefined);
+	await initializeApollo().clearStore();
+	if (current !== generation || token !== getJwtToken()) return;
+	if (!token) {
+		memberVar(null);
+		sessionVar('anonymous');
+		return;
+	}
+	try {
+		const { data } = await initializeApollo().query({ query: CURRENT_MEMBER, fetchPolicy: 'network-only' });
+		if (current === generation && token === getJwtToken()) hydrateMember(data.result);
+	} catch (error: unknown) {
+		if (current !== generation) return;
+		const codes = (error as { graphQLErrors?: { extensions?: { code?: string } }[] }).graphQLErrors?.map(
+			(item) => item.extensions?.code,
+		);
+		if (codes?.some((code) => code === 'UNAUTHENTICATED' || code === 'FORBIDDEN')) logOut();
+		else {
+			memberVar(null);
+			sessionVar('error');
+			sessionErrorVar('Unable to restore your session. Please retry.');
+		}
+	}
+}
+export async function refreshCurrentMember() {
+	const token = getJwtToken();
+	const current = generation;
+	const { data } = await initializeApollo().query({ query: CURRENT_MEMBER, fetchPolicy: 'network-only' });
+	if (current === generation && token === getJwtToken()) hydrateMember(data.result);
+}
+export const updateUserInfo = (_token: string) => restoreSession();
+export { safeReturnUrl } from './returnUrl';

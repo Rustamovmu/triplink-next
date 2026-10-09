@@ -2,9 +2,9 @@
 const nextConfig = {
 	reactStrictMode: true,
 	env: {
-		REACT_APP_API_URL: process.env.REACT_APP_API_URL,
-		REACT_APP_API_GRAPHQL_URL: process.env.REACT_APP_API_GRAPHQL_URL,
-		REACT_APP_API_WS: process.env.REACT_APP_API_WS,
+		REACT_APP_API_URL: process.env.REACT_APP_API_URL || 'http://localhost:3007',
+		REACT_APP_API_GRAPHQL_URL: process.env.REACT_APP_API_GRAPHQL_URL || 'http://localhost:3007/graphql',
+		REACT_APP_API_WS: process.env.REACT_APP_API_WS || 'ws://localhost:3007/chat',
 	},
 };
 

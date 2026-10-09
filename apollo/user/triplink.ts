@@ -1,0 +1,3371 @@
+import { gql, TypedDocumentNode } from '@apollo/client';
+import {
+	Member,
+	PublicMember,
+	AuthPayload,
+	MemberInput,
+	MemberUpdate,
+	Tour,
+	TourInput,
+	TourUpdate,
+	TourSearch,
+	TourStatus,
+	Booking,
+	BookingInput,
+	BookingStatus,
+	PaymentStatus,
+	Review,
+	ReviewInput,
+	Article,
+	ArticleInput,
+	Comment,
+	FollowMember,
+	Inquiry,
+	PageResult,
+	Role,
+	MemberStatus,
+} from '../../libs/types/triplink';
+export type Result<T> = { result: T };
+export const CURRENT_MEMBER: TypedDocumentNode<Result<Member>, Record<string, never>> = gql`
+	query CURRENT_MEMBER {
+		result: getCurrentMember {
+			_id
+			memberType
+			memberStatus
+			memberNick
+			memberFullname
+			memberImage
+			memberCountry
+			memberDesc
+			memberFavoriteDestinations
+			memberTours
+			memberReviews
+			memberFollowers
+			memberFollowings
+			memberLikes
+			memberViews
+			memberComments
+			createdAt
+			updatedAt
+			isFollowing
+		}
+	}
+`;
+export const TOURS: TypedDocumentNode<Result<PageResult<Tour>>, { input: Inquiry<TourSearch> }> = gql`
+	query TOURS($input: ToursInquiry!) {
+		result: getTours(input: $input) {
+			list {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const AGENT_TOURS: TypedDocumentNode<
+	Result<PageResult<Tour>>,
+	{ input: Inquiry<{ tourStatus?: TourStatus; text?: string }> }
+> = gql`
+	query AGENT_TOURS($input: AgentToursInquiry!) {
+		result: getAgentTours(input: $input) {
+			list {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const AGENTS: TypedDocumentNode<Result<PageResult<Member>>, { input: Inquiry<{ text?: string }> }> = gql`
+	query AGENTS($input: AgentsInquiry!) {
+		result: getAgents(input: $input) {
+			list {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const MY_BOOKINGS: TypedDocumentNode<
+	Result<PageResult<Booking>>,
+	{ input: Inquiry<{ bookingStatus?: BookingStatus; paymentStatus?: PaymentStatus; tourId?: string }> }
+> = gql`
+	query MY_BOOKINGS($input: MyBookingsInquiry!) {
+		result: getMyBookings(input: $input) {
+			list {
+				_id
+				bookingCode
+				userId
+				tourId
+				agentId
+				tourDateId
+				selectedDate
+				selectedEndDate
+				numberOfPeople
+				unitPrice
+				totalPrice
+				bookingStatus
+				paymentStatus
+				paymentReference
+				paidAt
+				refundReference
+				refundReason
+				refundedAt
+				cancellationReason
+				cancelledAt
+				rejectionReason
+				rejectedAt
+				completedAt
+				createdAt
+				updatedAt
+				tourData {
+					_id
+					tourTitle
+					tourSlug
+					tourDescription
+					tourDestination
+					tourCountry
+					tourCity
+					tourImages
+					tourPrice
+					tourDiscountPrice
+					tourDurationDays
+					tourAvailableDates {
+						_id
+						startDate
+						endDate
+						availableSeats
+					}
+					tourAvailableSeats
+					tourMaxGroupSize
+					tourCategory
+					tourDifficulty
+					tourLanguages
+					tourTransportation
+					tourAccommodation
+					tourMeals
+					tourItinerary {
+						day
+						title
+						description
+					}
+					tourIncludedServices
+					tourExcludedServices
+					tourAverageRating
+					tourReviewCount
+					tourBookingCount
+					tourViewCount
+					tourFavoriteCount
+					tourStatus
+					tourFeatured
+					agentId
+					deletedAt
+					createdAt
+					updatedAt
+					agentData {
+						_id
+						memberType
+						memberStatus
+						memberNick
+						memberFullname
+						memberImage
+						memberCountry
+						memberDesc
+						memberFavoriteDestinations
+						memberTours
+						memberReviews
+						memberFollowers
+						memberFollowings
+						memberLikes
+						memberViews
+						memberComments
+						createdAt
+						updatedAt
+						isFollowing
+					}
+				}
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				userData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const AGENT_BOOKINGS: TypedDocumentNode<
+	Result<PageResult<Booking>>,
+	{ input: Inquiry<{ bookingStatus?: BookingStatus; paymentStatus?: PaymentStatus; tourId?: string }> }
+> = gql`
+	query AGENT_BOOKINGS($input: AgentBookingsInquiry!) {
+		result: getAgentBookings(input: $input) {
+			list {
+				_id
+				bookingCode
+				userId
+				tourId
+				agentId
+				tourDateId
+				selectedDate
+				selectedEndDate
+				numberOfPeople
+				unitPrice
+				totalPrice
+				bookingStatus
+				paymentStatus
+				paymentReference
+				paidAt
+				refundReference
+				refundReason
+				refundedAt
+				cancellationReason
+				cancelledAt
+				rejectionReason
+				rejectedAt
+				completedAt
+				createdAt
+				updatedAt
+				tourData {
+					_id
+					tourTitle
+					tourSlug
+					tourDescription
+					tourDestination
+					tourCountry
+					tourCity
+					tourImages
+					tourPrice
+					tourDiscountPrice
+					tourDurationDays
+					tourAvailableDates {
+						_id
+						startDate
+						endDate
+						availableSeats
+					}
+					tourAvailableSeats
+					tourMaxGroupSize
+					tourCategory
+					tourDifficulty
+					tourLanguages
+					tourTransportation
+					tourAccommodation
+					tourMeals
+					tourItinerary {
+						day
+						title
+						description
+					}
+					tourIncludedServices
+					tourExcludedServices
+					tourAverageRating
+					tourReviewCount
+					tourBookingCount
+					tourViewCount
+					tourFavoriteCount
+					tourStatus
+					tourFeatured
+					agentId
+					deletedAt
+					createdAt
+					updatedAt
+					agentData {
+						_id
+						memberType
+						memberStatus
+						memberNick
+						memberFullname
+						memberImage
+						memberCountry
+						memberDesc
+						memberFavoriteDestinations
+						memberTours
+						memberReviews
+						memberFollowers
+						memberFollowings
+						memberLikes
+						memberViews
+						memberComments
+						createdAt
+						updatedAt
+						isFollowing
+					}
+				}
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				userData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const MY_REVIEWS: TypedDocumentNode<
+	Result<PageResult<Review>>,
+	{ input: Inquiry<{ reviewStatus?: Review['reviewStatus']; tourId?: string }> }
+> = gql`
+	query MY_REVIEWS($input: MyReviewsInquiry!) {
+		result: getMyReviews(input: $input) {
+			list {
+				_id
+				bookingId
+				userId
+				tourId
+				agentId
+				reviewRating
+				reviewComment
+				reviewStatus
+				moderationReason
+				moderatedAt
+				deletedAt
+				createdAt
+				updatedAt
+				userData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				tourData {
+					_id
+					tourTitle
+					tourSlug
+					tourDescription
+					tourDestination
+					tourCountry
+					tourCity
+					tourImages
+					tourPrice
+					tourDiscountPrice
+					tourDurationDays
+					tourAvailableDates {
+						_id
+						startDate
+						endDate
+						availableSeats
+					}
+					tourAvailableSeats
+					tourMaxGroupSize
+					tourCategory
+					tourDifficulty
+					tourLanguages
+					tourTransportation
+					tourAccommodation
+					tourMeals
+					tourItinerary {
+						day
+						title
+						description
+					}
+					tourIncludedServices
+					tourExcludedServices
+					tourAverageRating
+					tourReviewCount
+					tourBookingCount
+					tourViewCount
+					tourFavoriteCount
+					tourStatus
+					tourFeatured
+					agentId
+					deletedAt
+					createdAt
+					updatedAt
+					agentData {
+						_id
+						memberType
+						memberStatus
+						memberNick
+						memberFullname
+						memberImage
+						memberCountry
+						memberDesc
+						memberFavoriteDestinations
+						memberTours
+						memberReviews
+						memberFollowers
+						memberFollowings
+						memberLikes
+						memberViews
+						memberComments
+						createdAt
+						updatedAt
+						isFollowing
+					}
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const AGENT_REVIEWS: TypedDocumentNode<
+	Result<PageResult<Review>>,
+	{ input: Inquiry<{ tourId?: string }> }
+> = gql`
+	query AGENT_REVIEWS($input: AgentReviewsInquiry!) {
+		result: getAgentReviews(input: $input) {
+			list {
+				_id
+				bookingId
+				userId
+				tourId
+				agentId
+				reviewRating
+				reviewComment
+				reviewStatus
+				moderationReason
+				moderatedAt
+				deletedAt
+				createdAt
+				updatedAt
+				userData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				tourData {
+					_id
+					tourTitle
+					tourSlug
+					tourDescription
+					tourDestination
+					tourCountry
+					tourCity
+					tourImages
+					tourPrice
+					tourDiscountPrice
+					tourDurationDays
+					tourAvailableDates {
+						_id
+						startDate
+						endDate
+						availableSeats
+					}
+					tourAvailableSeats
+					tourMaxGroupSize
+					tourCategory
+					tourDifficulty
+					tourLanguages
+					tourTransportation
+					tourAccommodation
+					tourMeals
+					tourItinerary {
+						day
+						title
+						description
+					}
+					tourIncludedServices
+					tourExcludedServices
+					tourAverageRating
+					tourReviewCount
+					tourBookingCount
+					tourViewCount
+					tourFavoriteCount
+					tourStatus
+					tourFeatured
+					agentId
+					deletedAt
+					createdAt
+					updatedAt
+					agentData {
+						_id
+						memberType
+						memberStatus
+						memberNick
+						memberFullname
+						memberImage
+						memberCountry
+						memberDesc
+						memberFavoriteDestinations
+						memberTours
+						memberReviews
+						memberFollowers
+						memberFollowings
+						memberLikes
+						memberViews
+						memberComments
+						createdAt
+						updatedAt
+						isFollowing
+					}
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const TOUR_REVIEWS: TypedDocumentNode<Result<PageResult<Review>>, { input: Inquiry<{ tourId: string }> }> = gql`
+	query TOUR_REVIEWS($input: TourReviewsInquiry!) {
+		result: getTourReviews(input: $input) {
+			list {
+				_id
+				bookingId
+				userId
+				tourId
+				agentId
+				reviewRating
+				reviewComment
+				reviewStatus
+				moderationReason
+				moderatedAt
+				deletedAt
+				createdAt
+				updatedAt
+				userData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				tourData {
+					_id
+					tourTitle
+					tourSlug
+					tourDescription
+					tourDestination
+					tourCountry
+					tourCity
+					tourImages
+					tourPrice
+					tourDiscountPrice
+					tourDurationDays
+					tourAvailableDates {
+						_id
+						startDate
+						endDate
+						availableSeats
+					}
+					tourAvailableSeats
+					tourMaxGroupSize
+					tourCategory
+					tourDifficulty
+					tourLanguages
+					tourTransportation
+					tourAccommodation
+					tourMeals
+					tourItinerary {
+						day
+						title
+						description
+					}
+					tourIncludedServices
+					tourExcludedServices
+					tourAverageRating
+					tourReviewCount
+					tourBookingCount
+					tourViewCount
+					tourFavoriteCount
+					tourStatus
+					tourFeatured
+					agentId
+					deletedAt
+					createdAt
+					updatedAt
+					agentData {
+						_id
+						memberType
+						memberStatus
+						memberNick
+						memberFullname
+						memberImage
+						memberCountry
+						memberDesc
+						memberFavoriteDestinations
+						memberTours
+						memberReviews
+						memberFollowers
+						memberFollowings
+						memberLikes
+						memberViews
+						memberComments
+						createdAt
+						updatedAt
+						isFollowing
+					}
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const ARTICLES: TypedDocumentNode<
+	Result<PageResult<Article>>,
+	{ input: Inquiry<{ articleCategory?: Article['articleCategory']; text?: string; memberId?: string }> }
+> = gql`
+	query ARTICLES($input: BoardArticlesInquiry!) {
+		result: getBoardArticles(input: $input) {
+			list {
+				_id
+				articleCategory
+				articleStatus
+				articleTitle
+				articleContent
+				articleImage
+				articleLikes
+				articleViews
+				articleComments
+				memberId
+				createdAt
+				updatedAt
+				meLiked
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const COMMENTS: TypedDocumentNode<
+	Result<PageResult<Comment>>,
+	{ input: Inquiry<{ commentRefId: string }> }
+> = gql`
+	query COMMENTS($input: CommentsInquiry!) {
+		result: getComments(input: $input) {
+			list {
+				_id
+				commentStatus
+				commentGroup
+				commentContent
+				commentRefId
+				memberId
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const FOLLOWERS: TypedDocumentNode<
+	Result<PageResult<FollowMember>>,
+	{ input: Inquiry<{ memberId: string }> }
+> = gql`
+	query FOLLOWERS($input: FollowInquiry!) {
+		result: getMemberFollowers(input: $input) {
+			list {
+				_id
+				followingId
+				followerId
+				followedAt
+				isFollowing
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const FOLLOWINGS: TypedDocumentNode<
+	Result<PageResult<FollowMember>>,
+	{ input: Inquiry<{ memberId: string }> }
+> = gql`
+	query FOLLOWINGS($input: FollowInquiry!) {
+		result: getMemberFollowings(input: $input) {
+			list {
+				_id
+				followingId
+				followerId
+				followedAt
+				isFollowing
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const FAVORITES: TypedDocumentNode<Result<PageResult<Tour>>, { input: { page: number; limit: number } }> = gql`
+	query FAVORITES($input: FavoriteToursInquiry!) {
+		result: getFavoriteTours(input: $input) {
+			list {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const VISITED: TypedDocumentNode<Result<PageResult<Tour>>, { input: { page: number; limit: number } }> = gql`
+	query VISITED($input: VisitedToursInquiry!) {
+		result: getVisitedTours(input: $input) {
+			list {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const TOUR: TypedDocumentNode<Result<Tour>, { tourId: string }> = gql`
+	query TOUR($tourId: String!) {
+		result: getTour(tourId: $tourId) {
+			_id
+			tourTitle
+			tourSlug
+			tourDescription
+			tourDestination
+			tourCountry
+			tourCity
+			tourImages
+			tourPrice
+			tourDiscountPrice
+			tourDurationDays
+			tourAvailableDates {
+				_id
+				startDate
+				endDate
+				availableSeats
+			}
+			tourAvailableSeats
+			tourMaxGroupSize
+			tourCategory
+			tourDifficulty
+			tourLanguages
+			tourTransportation
+			tourAccommodation
+			tourMeals
+			tourItinerary {
+				day
+				title
+				description
+			}
+			tourIncludedServices
+			tourExcludedServices
+			tourAverageRating
+			tourReviewCount
+			tourBookingCount
+			tourViewCount
+			tourFavoriteCount
+			tourStatus
+			tourFeatured
+			agentId
+			deletedAt
+			createdAt
+			updatedAt
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const MEMBER: TypedDocumentNode<Result<PublicMember>, { memberId: string }> = gql`
+	query MEMBER($memberId: String!) {
+		result: getMember(memberId: $memberId) {
+			_id
+			memberType
+			memberStatus
+			memberNick
+			memberFullname
+			memberImage
+			memberCountry
+			memberDesc
+			memberFavoriteDestinations
+			memberTours
+			memberReviews
+			memberFollowers
+			memberFollowings
+			memberLikes
+			memberViews
+			memberComments
+			createdAt
+			updatedAt
+			isFollowing
+			agentAverageRating
+			agentReviewCount
+			agentTourCount
+			recentTours {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+		}
+	}
+`;
+export const ARTICLE: TypedDocumentNode<Result<Article>, { articleId: string }> = gql`
+	query ARTICLE($articleId: String!) {
+		result: getBoardArticle(articleId: $articleId) {
+			_id
+			articleCategory
+			articleStatus
+			articleTitle
+			articleContent
+			articleImage
+			articleLikes
+			articleViews
+			articleComments
+			memberId
+			createdAt
+			updatedAt
+			meLiked
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const PUBLIC_AGENT_REVIEWS: TypedDocumentNode<
+	Result<PageResult<Review>>,
+	{ agentId: string; input: Inquiry<{ tourId?: string }> }
+> = gql`
+	query PUBLIC_AGENT_REVIEWS($agentId: String!, $input: PublicAgentReviewsInquiry!) {
+		result: getPublicAgentReviews(agentId: $agentId, input: $input) {
+			list {
+				_id
+				bookingId
+				userId
+				tourId
+				agentId
+				reviewRating
+				reviewComment
+				reviewStatus
+				moderationReason
+				moderatedAt
+				deletedAt
+				createdAt
+				updatedAt
+				userData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+				tourData {
+					_id
+					tourTitle
+					tourSlug
+					tourDescription
+					tourDestination
+					tourCountry
+					tourCity
+					tourImages
+					tourPrice
+					tourDiscountPrice
+					tourDurationDays
+					tourAvailableDates {
+						_id
+						startDate
+						endDate
+						availableSeats
+					}
+					tourAvailableSeats
+					tourMaxGroupSize
+					tourCategory
+					tourDifficulty
+					tourLanguages
+					tourTransportation
+					tourAccommodation
+					tourMeals
+					tourItinerary {
+						day
+						title
+						description
+					}
+					tourIncludedServices
+					tourExcludedServices
+					tourAverageRating
+					tourReviewCount
+					tourBookingCount
+					tourViewCount
+					tourFavoriteCount
+					tourStatus
+					tourFeatured
+					agentId
+					deletedAt
+					createdAt
+					updatedAt
+					agentData {
+						_id
+						memberType
+						memberStatus
+						memberNick
+						memberFullname
+						memberImage
+						memberCountry
+						memberDesc
+						memberFavoriteDestinations
+						memberTours
+						memberReviews
+						memberFollowers
+						memberFollowings
+						memberLikes
+						memberViews
+						memberComments
+						createdAt
+						updatedAt
+						isFollowing
+					}
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const SIGNUP: TypedDocumentNode<Result<AuthPayload>, { input: MemberInput }> = gql`
+	mutation SIGNUP($input: MemberInput!) {
+		result: signup(input: $input) {
+			accessToken
+			member {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const LOGIN: TypedDocumentNode<
+	Result<AuthPayload>,
+	{ input: { memberNick: string; memberPassword: string } }
+> = gql`
+	mutation LOGIN($input: LoginInput!) {
+		result: login(input: $input) {
+			accessToken
+			member {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const PROFILE_UPDATE: TypedDocumentNode<Result<AuthPayload>, { input: MemberUpdate }> = gql`
+	mutation PROFILE_UPDATE($input: MemberUpdate!) {
+		result: updateMember(input: $input) {
+			accessToken
+			member {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const FAVORITE_TOGGLE: TypedDocumentNode<Result<{ tour: Tour; favorited: boolean }>, { tourId: string }> = gql`
+	mutation FAVORITE_TOGGLE($tourId: String!) {
+		result: toggleFavoriteTour(tourId: $tourId) {
+			tour {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			favorited
+		}
+	}
+`;
+export const FOLLOW_TOGGLE: TypedDocumentNode<
+	Result<{ member: Member; followed: boolean }>,
+	{ memberId: string }
+> = gql`
+	mutation FOLLOW_TOGGLE($memberId: String!) {
+		result: toggleFollowMember(memberId: $memberId) {
+			member {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			followed
+		}
+	}
+`;
+export const MEMBER_LIKE: TypedDocumentNode<Result<Member>, { memberId: string }> = gql`
+	mutation MEMBER_LIKE($memberId: String!) {
+		result: likeTargetMember(memberId: $memberId) {
+			_id
+			memberType
+			memberStatus
+			memberNick
+			memberFullname
+			memberImage
+			memberCountry
+			memberDesc
+			memberFavoriteDestinations
+			memberTours
+			memberReviews
+			memberFollowers
+			memberFollowings
+			memberLikes
+			memberViews
+			memberComments
+			createdAt
+			updatedAt
+			isFollowing
+		}
+	}
+`;
+export const ARTICLE_LIKE: TypedDocumentNode<Result<Article>, { articleId: string }> = gql`
+	mutation ARTICLE_LIKE($articleId: String!) {
+		result: likeTargetBoardArticle(articleId: $articleId) {
+			_id
+			articleCategory
+			articleStatus
+			articleTitle
+			articleContent
+			articleImage
+			articleLikes
+			articleViews
+			articleComments
+			memberId
+			createdAt
+			updatedAt
+			meLiked
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const PAY_BOOKING: TypedDocumentNode<Result<Booking>, { bookingId: string }> = gql`
+	mutation PAY_BOOKING($bookingId: String!) {
+		result: payBooking(bookingId: $bookingId) {
+			_id
+			bookingCode
+			userId
+			tourId
+			agentId
+			tourDateId
+			selectedDate
+			selectedEndDate
+			numberOfPeople
+			unitPrice
+			totalPrice
+			bookingStatus
+			paymentStatus
+			paymentReference
+			paidAt
+			refundReference
+			refundReason
+			refundedAt
+			cancellationReason
+			cancelledAt
+			rejectionReason
+			rejectedAt
+			completedAt
+			createdAt
+			updatedAt
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const CONFIRM_BOOKING: TypedDocumentNode<Result<Booking>, { bookingId: string }> = gql`
+	mutation CONFIRM_BOOKING($bookingId: String!) {
+		result: confirmBooking(bookingId: $bookingId) {
+			_id
+			bookingCode
+			userId
+			tourId
+			agentId
+			tourDateId
+			selectedDate
+			selectedEndDate
+			numberOfPeople
+			unitPrice
+			totalPrice
+			bookingStatus
+			paymentStatus
+			paymentReference
+			paidAt
+			refundReference
+			refundReason
+			refundedAt
+			cancellationReason
+			cancelledAt
+			rejectionReason
+			rejectedAt
+			completedAt
+			createdAt
+			updatedAt
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const COMPLETE_BOOKING: TypedDocumentNode<Result<Booking>, { bookingId: string }> = gql`
+	mutation COMPLETE_BOOKING($bookingId: String!) {
+		result: completeBooking(bookingId: $bookingId) {
+			_id
+			bookingCode
+			userId
+			tourId
+			agentId
+			tourDateId
+			selectedDate
+			selectedEndDate
+			numberOfPeople
+			unitPrice
+			totalPrice
+			bookingStatus
+			paymentStatus
+			paymentReference
+			paidAt
+			refundReference
+			refundReason
+			refundedAt
+			cancellationReason
+			cancelledAt
+			rejectionReason
+			rejectedAt
+			completedAt
+			createdAt
+			updatedAt
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const REMOVE_REVIEW: TypedDocumentNode<Result<Review>, { reviewId: string }> = gql`
+	mutation REMOVE_REVIEW($reviewId: String!) {
+		result: removeReview(reviewId: $reviewId) {
+			_id
+			bookingId
+			userId
+			tourId
+			agentId
+			reviewRating
+			reviewComment
+			reviewStatus
+			moderationReason
+			moderatedAt
+			deletedAt
+			createdAt
+			updatedAt
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+		}
+	}
+`;
+export const CREATE_TOUR: TypedDocumentNode<Result<Tour>, { input: TourInput }> = gql`
+	mutation CREATE_TOUR($input: TourInput!) {
+		result: createTour(input: $input) {
+			_id
+			tourTitle
+			tourSlug
+			tourDescription
+			tourDestination
+			tourCountry
+			tourCity
+			tourImages
+			tourPrice
+			tourDiscountPrice
+			tourDurationDays
+			tourAvailableDates {
+				_id
+				startDate
+				endDate
+				availableSeats
+			}
+			tourAvailableSeats
+			tourMaxGroupSize
+			tourCategory
+			tourDifficulty
+			tourLanguages
+			tourTransportation
+			tourAccommodation
+			tourMeals
+			tourItinerary {
+				day
+				title
+				description
+			}
+			tourIncludedServices
+			tourExcludedServices
+			tourAverageRating
+			tourReviewCount
+			tourBookingCount
+			tourViewCount
+			tourFavoriteCount
+			tourStatus
+			tourFeatured
+			agentId
+			deletedAt
+			createdAt
+			updatedAt
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const UPDATE_TOUR: TypedDocumentNode<Result<Tour>, { input: TourUpdate }> = gql`
+	mutation UPDATE_TOUR($input: TourUpdate!) {
+		result: updateTour(input: $input) {
+			_id
+			tourTitle
+			tourSlug
+			tourDescription
+			tourDestination
+			tourCountry
+			tourCity
+			tourImages
+			tourPrice
+			tourDiscountPrice
+			tourDurationDays
+			tourAvailableDates {
+				_id
+				startDate
+				endDate
+				availableSeats
+			}
+			tourAvailableSeats
+			tourMaxGroupSize
+			tourCategory
+			tourDifficulty
+			tourLanguages
+			tourTransportation
+			tourAccommodation
+			tourMeals
+			tourItinerary {
+				day
+				title
+				description
+			}
+			tourIncludedServices
+			tourExcludedServices
+			tourAverageRating
+			tourReviewCount
+			tourBookingCount
+			tourViewCount
+			tourFavoriteCount
+			tourStatus
+			tourFeatured
+			agentId
+			deletedAt
+			createdAt
+			updatedAt
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const CREATE_BOOKING: TypedDocumentNode<Result<Booking>, { input: BookingInput }> = gql`
+	mutation CREATE_BOOKING($input: BookingInput!) {
+		result: createBooking(input: $input) {
+			_id
+			bookingCode
+			userId
+			tourId
+			agentId
+			tourDateId
+			selectedDate
+			selectedEndDate
+			numberOfPeople
+			unitPrice
+			totalPrice
+			bookingStatus
+			paymentStatus
+			paymentReference
+			paidAt
+			refundReference
+			refundReason
+			refundedAt
+			cancellationReason
+			cancelledAt
+			rejectionReason
+			rejectedAt
+			completedAt
+			createdAt
+			updatedAt
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const CANCEL_BOOKING: TypedDocumentNode<
+	Result<Booking>,
+	{ input: { bookingId: string; cancellationReason: string } }
+> = gql`
+	mutation CANCEL_BOOKING($input: BookingCancellationInput!) {
+		result: cancelBooking(input: $input) {
+			_id
+			bookingCode
+			userId
+			tourId
+			agentId
+			tourDateId
+			selectedDate
+			selectedEndDate
+			numberOfPeople
+			unitPrice
+			totalPrice
+			bookingStatus
+			paymentStatus
+			paymentReference
+			paidAt
+			refundReference
+			refundReason
+			refundedAt
+			cancellationReason
+			cancelledAt
+			rejectionReason
+			rejectedAt
+			completedAt
+			createdAt
+			updatedAt
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const REJECT_BOOKING: TypedDocumentNode<
+	Result<Booking>,
+	{ input: { bookingId: string; rejectionReason: string } }
+> = gql`
+	mutation REJECT_BOOKING($input: BookingRejectionInput!) {
+		result: rejectBooking(input: $input) {
+			_id
+			bookingCode
+			userId
+			tourId
+			agentId
+			tourDateId
+			selectedDate
+			selectedEndDate
+			numberOfPeople
+			unitPrice
+			totalPrice
+			bookingStatus
+			paymentStatus
+			paymentReference
+			paidAt
+			refundReference
+			refundReason
+			refundedAt
+			cancellationReason
+			cancelledAt
+			rejectionReason
+			rejectedAt
+			completedAt
+			createdAt
+			updatedAt
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const CREATE_REVIEW: TypedDocumentNode<Result<Review>, { input: ReviewInput }> = gql`
+	mutation CREATE_REVIEW($input: ReviewInput!) {
+		result: createReview(input: $input) {
+			_id
+			bookingId
+			userId
+			tourId
+			agentId
+			reviewRating
+			reviewComment
+			reviewStatus
+			moderationReason
+			moderatedAt
+			deletedAt
+			createdAt
+			updatedAt
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+		}
+	}
+`;
+export const UPDATE_REVIEW: TypedDocumentNode<
+	Result<Review>,
+	{ input: { reviewId: string; reviewRating?: number; reviewComment?: string } }
+> = gql`
+	mutation UPDATE_REVIEW($input: ReviewUpdate!) {
+		result: updateReview(input: $input) {
+			_id
+			bookingId
+			userId
+			tourId
+			agentId
+			reviewRating
+			reviewComment
+			reviewStatus
+			moderationReason
+			moderatedAt
+			deletedAt
+			createdAt
+			updatedAt
+			userData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			agentData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+			tourData {
+				_id
+				tourTitle
+				tourSlug
+				tourDescription
+				tourDestination
+				tourCountry
+				tourCity
+				tourImages
+				tourPrice
+				tourDiscountPrice
+				tourDurationDays
+				tourAvailableDates {
+					_id
+					startDate
+					endDate
+					availableSeats
+				}
+				tourAvailableSeats
+				tourMaxGroupSize
+				tourCategory
+				tourDifficulty
+				tourLanguages
+				tourTransportation
+				tourAccommodation
+				tourMeals
+				tourItinerary {
+					day
+					title
+					description
+				}
+				tourIncludedServices
+				tourExcludedServices
+				tourAverageRating
+				tourReviewCount
+				tourBookingCount
+				tourViewCount
+				tourFavoriteCount
+				tourStatus
+				tourFeatured
+				agentId
+				deletedAt
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberType
+					memberStatus
+					memberNick
+					memberFullname
+					memberImage
+					memberCountry
+					memberDesc
+					memberFavoriteDestinations
+					memberTours
+					memberReviews
+					memberFollowers
+					memberFollowings
+					memberLikes
+					memberViews
+					memberComments
+					createdAt
+					updatedAt
+					isFollowing
+				}
+			}
+		}
+	}
+`;
+export const CREATE_ARTICLE: TypedDocumentNode<Result<Article>, { input: ArticleInput }> = gql`
+	mutation CREATE_ARTICLE($input: BoardArticleInput!) {
+		result: createBoardArticle(input: $input) {
+			_id
+			articleCategory
+			articleStatus
+			articleTitle
+			articleContent
+			articleImage
+			articleLikes
+			articleViews
+			articleComments
+			memberId
+			createdAt
+			updatedAt
+			meLiked
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const UPDATE_ARTICLE: TypedDocumentNode<
+	Result<Article>,
+	{ input: Partial<ArticleInput> & { _id: string; articleStatus?: 'DELETE' } }
+> = gql`
+	mutation UPDATE_ARTICLE($input: BoardArticleUpdate!) {
+		result: updateBoardArticle(input: $input) {
+			_id
+			articleCategory
+			articleStatus
+			articleTitle
+			articleContent
+			articleImage
+			articleLikes
+			articleViews
+			articleComments
+			memberId
+			createdAt
+			updatedAt
+			meLiked
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const CREATE_COMMENT: TypedDocumentNode<
+	Result<Comment>,
+	{ input: { commentRefId: string; commentContent: string } }
+> = gql`
+	mutation CREATE_COMMENT($input: CommentInput!) {
+		result: createComment(input: $input) {
+			_id
+			commentStatus
+			commentGroup
+			commentContent
+			commentRefId
+			memberId
+			createdAt
+			updatedAt
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;
+export const UPDATE_COMMENT: TypedDocumentNode<
+	Result<Comment>,
+	{ input: { _id: string; commentContent?: string; commentStatus?: 'DELETE' } }
+> = gql`
+	mutation UPDATE_COMMENT($input: CommentUpdate!) {
+		result: updateComment(input: $input) {
+			_id
+			commentStatus
+			commentGroup
+			commentContent
+			commentRefId
+			memberId
+			createdAt
+			updatedAt
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberNick
+				memberFullname
+				memberImage
+				memberCountry
+				memberDesc
+				memberFavoriteDestinations
+				memberTours
+				memberReviews
+				memberFollowers
+				memberFollowings
+				memberLikes
+				memberViews
+				memberComments
+				createdAt
+				updatedAt
+				isFollowing
+			}
+		}
+	}
+`;

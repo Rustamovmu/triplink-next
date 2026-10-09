@@ -5,10 +5,8 @@ import Head from 'next/head';
 import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
-import { getJwtToken, updateUserInfo } from '../../auth';
 import Chat from '../Chat';
 import { useReactiveVar } from '@apollo/client';
-import { userVar } from '../../../apollo/store';
 // @ts-ignore
 import 'swiper/css';
 // @ts-ignore
@@ -20,12 +18,10 @@ const withLayoutFull = (Component: any) => {
 	return (props: any) => {
 		const router = useRouter();
 		const device = useDeviceDetect();
-		const user = useReactiveVar(userVar);
 
 		/** LIFECYCLES **/
 		useEffect(() => {
-			const jwt = getJwtToken();
-			if (jwt) updateUserInfo(jwt);
+			// Session restoration is owned by SessionBootstrap.
 		}, []);
 
 		/** HANDLERS **/
@@ -34,8 +30,8 @@ const withLayoutFull = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>Nestar</title>
-						<meta name={'title'} content={`Nestar`} />
+						<title>TripLink</title>
+						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="mobile-wrap">
 						<Stack id={'top'}>
@@ -46,6 +42,7 @@ const withLayoutFull = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
+						<Chat />
 						<Stack id={'footer'}>
 							<Footer />
 						</Stack>
@@ -56,8 +53,8 @@ const withLayoutFull = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>Nestar</title>
-						<meta name={'title'} content={`Nestar`} />
+						<title>TripLink</title>
+						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="pc-wrap">
 						<Stack id={'top'}>
