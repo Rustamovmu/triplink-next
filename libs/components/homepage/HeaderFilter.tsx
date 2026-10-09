@@ -1,21 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { Alert } from '@mui/material';
+import Image from 'next/image';
 import { useTranslation } from 'next-i18next';
-import { buildHomeSearch } from '../../triplink/homeSearch';
+import HomeSearchForm from './HomeSearchForm';
+import { motion } from 'framer-motion';
+import {
+	ArrowBackRounded,
+	ArrowForwardRounded,
+	NorthEastRounded,
+	PauseRounded,
+	PlayArrowRounded,
+} from '@mui/icons-material';
 import { homeDestinations } from './homeContent';
 
 export default function HeaderFilter() {
-	const router = useRouter();
 	const { t } = useTranslation('common');
 	const [index, setIndex] = useState(0),
 		[playing, setPlaying] = useState(true);
 	const [reduced, setReduced] = useState(true),
 		[hovered, setHovered] = useState(false);
 	const [focused, setFocused] = useState(false),
-		[hidden, setHidden] = useState(false),
-		[error, setError] = useState('');
+		[hidden, setHidden] = useState(false);
+	const [loadedSlides, setLoadedSlides] = useState(() => new Set([0, 1]));
+	useEffect(() => {
+		setLoadedSlides((current) => {
+			const next = (index + 1) % homeDestinations.length;
+			if (current.has(index) && current.has(next)) return current;
+			return new Set([...Array.from(current), index, next]);
+		});
+	}, [index]);
 	const touch = useRef<{ x: number; y: number } | null>(null);
 	const change = (offset: number) =>
 		setIndex((current) => (current + offset + homeDestinations.length) % homeDestinations.length);
@@ -37,26 +50,10 @@ export default function HeaderFilter() {
 		const timer = window.setInterval(() => change(1), 6000);
 		return () => window.clearInterval(timer);
 	}, [playing, reduced, hovered, focused, hidden, index]);
-	const submit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		const data = new FormData(event.currentTarget);
-		try {
-			const query = buildHomeSearch({
-				text: String(data.get('text') ?? ''),
-				start: String(data.get('start') ?? ''),
-				end: String(data.get('end') ?? ''),
-				seats: String(data.get('seats') ?? '1'),
-			});
-			setError('');
-			void router.push({ pathname: '/tour', query });
-		} catch (cause) {
-			setError(cause instanceof Error ? cause.message : 'Choose valid departure dates.');
-		}
-	};
 	return (
 		<div className="triplink-home-intro">
 			<section
-				className="triplink-hero"
+				className={`triplink-hero${!playing || reduced || hovered || focused || hidden ? ' is-paused' : ''}`}
 				aria-label={t('Destination inspiration')}
 				aria-roledescription={t('Carousel')}
 				onPointerEnter={(event) => {
@@ -93,15 +90,32 @@ export default function HeaderFilter() {
 							className={`triplink-hero__slide${active ? ' is-active' : ''}`}
 							aria-hidden={!active}
 						>
-							<img
-								className="triplink-hero__image"
-								src={`/img/homepage/${slide.image}.jpg`}
-								alt=""
-								onError={(event) => {
-									event.currentTarget.style.visibility = 'hidden';
-								}}
-							/>
-							<div className="triplink-hero__content">
+							{(active || loadedSlides.has(slideIndex)) && (
+								<Image
+									className="triplink-hero__image"
+									style={
+										{
+											'--triplink-image-position': slide.imagePosition ?? '50% 50%',
+											'--triplink-mobile-image-position': slide.mobileImagePosition ?? '50% 50%',
+										} as React.CSSProperties
+									}
+									src={`/img/homepage/${slide.image}.jpg`}
+									alt=""
+									fill
+									sizes="(max-width: 767px) calc(100vw - 24px), calc(100vw - 48px)"
+									quality={90}
+									priority={slideIndex === 0}
+									onError={(event) => {
+										event.currentTarget.style.visibility = 'hidden';
+									}}
+								/>
+							)}
+							<motion.div
+								className="triplink-hero__content"
+								initial={false}
+								animate={{ opacity: active ? 1 : 0, y: reduced ? 0 : active ? 0 : 14 }}
+								transition={{ duration: reduced ? 0 : 0.7, ease: 'easeOut', delay: active && !reduced ? 0.1 : 0 }}
+							>
 								<span className="triplink-hero__eyebrow">
 									{t('Destination spotlight')} · {t(slide.name)}
 								</span>
@@ -109,18 +123,24 @@ export default function HeaderFilter() {
 								<p>{t(slide.description)}</p>
 								<div className="triplink-hero__actions">
 									<Link
+										passHref
 										href={{ pathname: '/tour', query: { text: slide.name } }}
 										className="triplink-action triplink-action--coral"
 										tabIndex={active ? 0 : -1}
 									>
 										{t('Explore {{destination}} tours', { destination: t(slide.name) })}{' '}
-										<span aria-hidden="true">↗</span>
+										<NorthEastRounded aria-hidden="true" />
 									</Link>
-									<Link href="/tour" className="triplink-action triplink-action--glass" tabIndex={active ? 0 : -1}>
-										{t('Browse all tours')} <span aria-hidden="true">→</span>
+									<Link
+										passHref
+										href="/tour"
+										className="triplink-action triplink-action--glass"
+										tabIndex={active ? 0 : -1}
+									>
+										{t('Browse all tours')} <ArrowForwardRounded aria-hidden="true" />
 									</Link>
 								</div>
-							</div>
+							</motion.div>
 						</div>
 					);
 				})}
@@ -137,7 +157,9 @@ export default function HeaderFilter() {
 						))}
 					</div>
 					<div className="triplink-hero__navigation">
-						<span className="triplink-hero__counter">{String(index + 1).padStart(2, '0')} / 05</span>
+						<span className="triplink-hero__counter">
+							{String(index + 1).padStart(2, '0')} <span>/</span> {String(homeDestinations.length).padStart(2, '0')}
+						</span>
 						<button
 							type="button"
 							disabled={reduced}
@@ -145,46 +167,18 @@ export default function HeaderFilter() {
 							aria-pressed={!playing || reduced}
 							onClick={() => setPlaying((value) => !value)}
 						>
-							{playing && !reduced ? 'Ⅱ' : '▷'}
+							{playing && !reduced ? <PauseRounded aria-hidden="true" /> : <PlayArrowRounded aria-hidden="true" />}
 						</button>
 						<button type="button" aria-label={t('Previous slide')} onClick={() => change(-1)}>
-							←
+							<ArrowBackRounded aria-hidden="true" />
 						</button>
 						<button type="button" aria-label={t('Next slide')} onClick={() => change(1)}>
-							→
+							<ArrowForwardRounded aria-hidden="true" />
 						</button>
 					</div>
 				</div>
 			</section>
-			<div className="triplink-search-wrap">
-				<form className="triplink-search" onSubmit={submit} aria-label={t('Search tours')}>
-					<label className="triplink-search__destination">
-						<span>{t('Destination or tour')}</span>
-						<input name="text" type="text" maxLength={150} placeholder={t('Where would you like to go?')} />
-					</label>
-					<label>
-						<span>{t('Departure from')}</span>
-						<input name="start" type="date" />
-					</label>
-					<label>
-						<span>{t('Departure until')}</span>
-						<input name="end" type="date" />
-					</label>
-					<label>
-						<span>{t('Travelers')}</span>
-						<input name="seats" type="number" min={1} max={100} step={1} defaultValue={1} required />
-						<small>{t('Minimum available seats')}</small>
-					</label>
-					<button className="triplink-action triplink-action--primary" type="submit">
-						{t('Search tours')} <span aria-hidden="true">→</span>
-					</button>
-					{error && (
-						<Alert severity="error" className="triplink-search__error">
-							{t(error)}
-						</Alert>
-					)}
-				</form>
-			</div>
+			<HomeSearchForm />
 		</div>
 	);
 }

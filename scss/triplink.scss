@@ -41,39 +41,77 @@
 }
 
 .triplink-brand {
-	display: block;
+	display: flex;
+	align-items: center;
+	gap: 14px;
 	width: 236px;
 	max-width: 100%;
-	padding: 8px;
+	padding: 0;
 	box-sizing: border-box;
-	background: white;
-	border-radius: 8px;
+	color: #00343b;
 	align-self: flex-start;
-
 	&__artwork {
 		display: block;
-		position: relative;
-
-		img {
-			display: block;
-			width: 100%;
-			height: auto;
-			// Split at the transparent gap between the badge and the supplied lettering.
-			clip-path: inset(0 0 0 27.826087%);
-		}
-
-		svg {
-			position: absolute;
-			inset: 0;
-			width: 100%;
-			height: 100%;
-			pointer-events: none;
-		}
+		flex: 0 0 56px;
+		width: 56px;
+		height: 56px;
 	}
-
+	&__artwork svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+		pointer-events: none;
+	}
+	&__wordmark {
+		display: inline-flex;
+		align-items: baseline;
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: 36px;
+		line-height: 1;
+		font-weight: 600;
+		letter-spacing: -1.5px;
+		white-space: nowrap;
+	}
+	&__wordmark > span {
+		font: inherit;
+		color: #0f766e;
+	}
+	&__wordmark i {
+		display: inline-block;
+		flex-shrink: 0;
+		width: 5px;
+		height: 5px;
+		margin-left: 7px;
+		align-self: center;
+		background: #dc5e3e;
+		border-radius: 50%;
+	}
+	&--inverse {
+		color: #fff;
+	}
+	&--inverse &__wordmark > span {
+		color: #c6e6e0;
+	}
+	&--inverse &__wordmark i {
+		background: #f2a289;
+	}
 	&__compass {
 		transform-box: fill-box;
 		transform-origin: center;
+	}
+}
+@media (max-width: 599px) {
+	.triplink-brand {
+		gap: 10px;
+	}
+	.triplink-brand__artwork {
+		flex-basis: 48px;
+		width: 48px;
+		height: 48px;
+	}
+	.triplink-brand__wordmark {
+		font-size: 32px;
 	}
 }
 
@@ -129,6 +167,7 @@
 	font-display: swap;
 }
 .triplink-home-intro {
+	padding-top: 0;
 	color: #131d20;
 	font-family: 'TripLink Jakarta', Arial, sans-serif;
 	*,
@@ -153,7 +192,9 @@
 	position: relative;
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
-	min-height: 620px;
+	min-height: 680px;
+	margin: 0;
+	border-radius: 0;
 	background: #00343b;
 	color: white;
 	overflow: hidden;
@@ -163,7 +204,7 @@
 		position: relative;
 		opacity: 0;
 		pointer-events: none;
-		transition: opacity 700ms ease-in-out;
+		transition: opacity 900ms ease-in-out;
 	}
 	&__slide.is-active {
 		opacity: 1;
@@ -175,12 +216,13 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		object-position: var(--triplink-image-position, 50% 50%);
 	}
 	&__slide::after {
 		content: '';
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(90deg, rgba(0, 31, 36, 0.84), rgba(0, 52, 59, 0.15)),
+		background: linear-gradient(90deg, rgba(0, 30, 35, 0.8) 0%, rgba(0, 30, 35, 0.4) 48%, rgba(0, 30, 35, 0.08) 100%),
 			linear-gradient(0deg, rgba(0, 31, 36, 0.75), transparent 65%);
 	}
 	&__content {
@@ -190,7 +232,8 @@
 		z-index: 1;
 		max-width: 1280px;
 		margin: auto;
-		padding: 90px 32px 150px;
+		padding: 88px 48px 176px;
+		width: 100%;
 	}
 	&__eyebrow {
 		display: inline-block;
@@ -205,7 +248,8 @@
 	h1,
 	h2 {
 		font-family: 'TripLink Outfit', Arial, sans-serif;
-		font-size: clamp(36px, 4.5vw, 60px);
+		font-size: clamp(48px, 4.8vw, 68px);
+		text-wrap: balance;
 		font-weight: 600;
 		line-height: 1.08;
 		letter-spacing: -0.035em;
@@ -232,7 +276,7 @@
 		left: 50%;
 		transform: translateX(-50%);
 		width: min(100%, 1280px);
-		padding: 0 32px;
+		padding: 0 48px;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
@@ -242,14 +286,14 @@
 	&__dots {
 		display: flex;
 		align-items: center;
-		gap: 9px;
+		gap: 4px;
 		padding: 10px;
 		border-radius: 30px;
 		background: rgba(0, 31, 36, 0.35);
 	}
 	&__dots button {
-		width: 24px;
-		height: 24px;
+		width: 32px;
+		height: 44px;
 		position: relative;
 		border: 0;
 		background: transparent;
@@ -258,15 +302,19 @@
 	&__dots button::after {
 		content: '';
 		position: absolute;
-		inset: 8px 7px;
+		width: 8px;
+		height: 8px;
+		top: 18px;
+		left: calc(50% - 4px);
+		transition: transform 200ms ease, opacity 200ms ease;
 		background: rgba(255, 255, 255, 0.5);
 		border-radius: 12px;
 	}
 	&__dots button[aria-pressed='true'] {
-		width: 40px;
+		width: 32px;
 	}
 	&__dots button[aria-pressed='true']::after {
-		inset: 8px 0;
+		transform: scaleX(4);
 		background: white;
 	}
 	&__navigation {
@@ -275,8 +323,13 @@
 		gap: 10px;
 	}
 	&__navigation button {
-		width: 44px;
-		height: 44px;
+		width: 48px;
+		height: 48px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		backdrop-filter: blur(12px);
+		transition: background-color 180ms ease, transform 180ms ease;
 		border-radius: 50%;
 		border: 1px solid rgba(255, 255, 255, 0.35);
 		background: rgba(0, 31, 36, 0.4);
@@ -286,13 +339,19 @@
 	}
 	&__navigation button:hover {
 		background: #0d4c55;
+		transform: translateY(-2px);
 	}
 	&__navigation button:disabled {
 		opacity: 0.5;
 		cursor: default;
 	}
 	&__counter {
-		font-size: 13px;
+		font-size: 14px;
+		letter-spacing: 0.06em;
+		span {
+			opacity: 0.55;
+			margin-inline: 3px;
+		}
 		font-variant-numeric: tabular-nums;
 		margin-right: 8px;
 	}
@@ -302,24 +361,39 @@
 	align-items: center;
 	justify-content: center;
 	gap: 12px;
-	padding: 16px 22px;
+	padding: 16px 24px;
+	min-height: 56px;
+	transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+	svg {
+		width: 20px;
+		height: 20px;
+		transition: transform 180ms ease;
+	}
+	&:hover svg {
+		transform: translateX(3px);
+	}
+	&:hover {
+		transform: translateY(-2px);
+	}
 	border: 0;
 	border-radius: 12px;
 	font-weight: 700;
-	font-size: 14px;
+	font-size: 15px;
 	line-height: 1.5;
 	white-space: normal;
 	cursor: pointer;
 	text-decoration: none;
 	&--coral {
 		background: #ab3425;
+		box-shadow: 0 6px 18px rgba(80, 20, 12, 0.16);
 		color: white;
 		&:hover {
 			background: #8a291e;
 		}
 	}
 	&--glass {
-		background: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, 0.12);
+		backdrop-filter: blur(12px);
 		color: white;
 		border: 1px solid rgba(255, 255, 255, 0.3);
 		&:hover {
@@ -331,42 +405,68 @@
 		color: white;
 		&:hover {
 			background: #0d4c55;
+			transform: translateY(-2px);
 		}
 	}
 }
 .triplink-search-wrap {
 	position: relative;
 	z-index: 3;
-	max-width: 1280px;
-	padding: 0 32px;
-	margin: -40px auto 0;
+	max-width: 1328px;
+	padding: 0 48px;
+	margin: -48px auto 0;
 }
 .triplink-search {
 	display: grid;
-	grid-template-columns: minmax(200px, 1.5fr) repeat(2, minmax(160px, 1fr)) minmax(140px, 0.8fr) auto;
+	grid-template-columns: minmax(220px, 1.4fr) repeat(2, minmax(180px, 1fr)) minmax(150px, 0.8fr) minmax(150px, auto);
 	align-items: stretch;
-	gap: 12px;
-	background: white;
+	gap: 8px;
+	background: rgba(255, 255, 255, 0.98);
+	border: 1px solid #e5eded;
 	padding: 16px;
-	border-radius: 18px;
-	box-shadow: 0 14px 45px rgba(0, 52, 59, 0.12);
-	label {
+	border-radius: 28px;
+	box-shadow: 0 20px 60px rgba(0, 25, 35, 0.1), 0 4px 16px rgba(0, 25, 35, 0.04);
+	&__field {
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		gap: 7px;
-		background: #eaf6f9;
-		padding: 14px;
-		border-radius: 10px;
+		gap: 8px;
+		background: #f5f8f8;
+		padding: 18px 16px;
+		border: 1px solid transparent;
+		border-radius: 14px;
+		transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 	}
-	label > span {
-		font-size: 11px;
+	&__field:hover {
+		background: #edf4f4;
+	}
+	&__field:focus-within {
+		background: #fff;
+		border-color: #0f766e;
+		box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+	}
+	&__label {
+		font-family: 'TripLink Jakarta', Arial, sans-serif;
+		font-size: 10px;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: #40484a;
-		line-height: 1.4;
+		letter-spacing: 0.07em;
+		color: #496469;
+		line-height: 1.5;
+	}
+	&__value {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+	}
+	&__value svg,
+	&__traveler-button svg {
+		width: 20px;
+		height: 20px;
+		color: #608486;
+		flex-shrink: 0;
 	}
 	input {
 		border: 0;
@@ -374,68 +474,303 @@
 		background: transparent;
 		width: 100%;
 		min-width: 0;
-		font-size: 14px;
+		font-size: 15px;
 		line-height: 1.5;
 		padding: 2px 0;
+	}
+	input::placeholder {
+		color: #667e81;
+		opacity: 1;
 	}
 	small {
 		color: #52666a;
 		font-size: 10px;
 		line-height: 1.4;
 	}
+	&__date .MuiInputLabel-root {
+		font-family: 'TripLink Jakarta', Arial, sans-serif;
+		color: #496469;
+		font-size: 13px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+	&__date .MuiInput-root {
+		margin-top: 22px;
+	}
+	&__date .MuiIconButton-root {
+		color: #608486;
+		width: 40px;
+		height: 40px;
+		margin-right: -8px;
+	}
+	&__date .MuiInputBase-input {
+		font-family: 'TripLink Jakarta', Arial, sans-serif;
+		font-size: 15px;
+		min-width: 0;
+	}
+	&__traveler-button {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		border: 0;
+		padding: 0;
+		background: transparent;
+		color: #00343b;
+		font-size: 15px;
+		text-align: left;
+		cursor: pointer;
+		min-height: 28px;
+	}
+	&__traveler-button span {
+		font-family: 'TripLink Jakarta', Arial, sans-serif;
+		line-height: 1.5;
+	}
+	&__submit {
+		border-radius: 16px;
+		font-size: 15px;
+	}
+	&__submit:disabled {
+		opacity: 0.7;
+		cursor: wait;
+		transform: none;
+	}
 	&__error {
 		grid-column: 1 / -1;
 	}
 }
-@media (max-width: 1100px) {
-	.triplink-search {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		&__destination {
-			grid-column: 1 / -1;
-		}
+.triplink-traveler-popover,
+.triplink-calendar {
+	font-family: 'TripLink Jakarta', Arial, sans-serif !important;
+	color: #00343b;
+	border: 1px solid #e3ebed;
+	border-radius: 18px !important;
+	box-shadow: 0 16px 48px rgba(0, 31, 36, 0.14) !important;
+	overscroll-behavior: contain;
+	button,
+	input {
+		font-family: inherit;
+	}
+	button:focus-visible,
+	input:focus-visible {
+		outline: 2px solid #0f766e;
+		outline-offset: 2px;
 	}
 }
-@media (max-width: 599px) {
+.triplink-traveler-popover {
+	padding: 24px;
+	width: min(288px, calc(100vw - 32px));
+	h2 {
+		font-family: 'TripLink Outfit', Arial, sans-serif;
+		font-size: 22px;
+		font-weight: 600;
+		margin: 0 0 8px;
+	}
+	p {
+		font-size: 12px;
+		color: #52666a;
+		margin-bottom: 24px;
+	}
+	&__stepper {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+	&__stepper button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		flex-shrink: 0;
+		background: #f1f7f6;
+		border: 1px solid #d9e7e5;
+		border-radius: 50%;
+		color: #00343b;
+		cursor: pointer;
+	}
+	&__stepper button:disabled {
+		opacity: 0.4;
+		cursor: default;
+	}
+	&__stepper input {
+		min-width: 0;
+		width: 72px;
+		text-align: center;
+		border: 0;
+		padding: 8px 0;
+		color: #00343b;
+		font-size: 22px;
+		font-variant-numeric: tabular-nums;
+	}
+	&__done {
+		width: 100%;
+		min-height: 44px;
+		margin-top: 24px;
+		border: 0;
+		border-radius: 12px;
+		background: #003b42;
+		color: #fff;
+		cursor: pointer;
+		font-size: 14px;
+	}
+	&__done:hover {
+		background: #00515b;
+	}
+}
+.triplink-calendar {
+	.MuiCalendarPicker-root {
+		width: min(320px, calc(100vw - 32px));
+	}
+	.MuiPickersDay-root {
+		width: 32px;
+		height: 32px;
+		margin-inline: 2px;
+	}
+	.MuiPickersDay-root.Mui-selected {
+		background: #0f766e;
+		color: #fff;
+	}
+	.MuiPickersDay-root.Mui-selected:hover {
+		background: #044e46;
+	}
+	.MuiButton-root {
+		color: #0f766e;
+	}
+}
+@keyframes triplink-hero-zoom {
+	from {
+		transform: scale(1);
+	}
+	to {
+		transform: scale(1.035);
+	}
+}
+@media (prefers-reduced-motion: no-preference) {
+	.triplink-hero__slide.is-active .triplink-hero__image {
+		animation: triplink-hero-zoom 6s linear forwards;
+	}
+	.triplink-hero.is-paused .triplink-hero__image {
+		animation-play-state: paused;
+	}
+}
+@media (max-width: 1279px) {
+	.triplink-search {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.triplink-search__destination {
+		grid-column: 1 / -1;
+	}
+	.triplink-search__submit {
+		min-height: 64px;
+	}
+	.triplink-hero h1,
+	.triplink-hero h2 {
+		font-size: 52px;
+	}
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+	.triplink-hero__content {
+		padding-bottom: 248px;
+	}
+	.triplink-hero__controls {
+		flex-direction: column;
+		align-items: flex-end;
+	}
+	.triplink-hero__dots {
+		align-self: stretch;
+		justify-content: space-between;
+	}
+}
+@media (max-width: 767px) {
 	.triplink-hero {
 		min-height: 580px;
-		&__content {
-			padding: 48px 20px 180px;
-		}
-		h1,
-		h2 {
-			font-size: 40px;
-		}
-		p {
-			font-size: 16px;
-		}
-		&__controls {
-			padding: 0 20px;
-			bottom: 70px;
-		}
-		&__navigation {
-			gap: 6px;
-		}
-		&__dots {
-			gap: 2px;
-			padding: 5px;
-		}
-		&__counter {
-			margin-right: 2px;
-		}
+	}
+	.triplink-hero__content {
+		padding: 48px 24px 284px;
+	}
+	.triplink-hero h1,
+	.triplink-hero h2 {
+		font-size: clamp(32px, 6vw, 40px);
+		margin: 20px 0;
+	}
+	.triplink-hero p {
+		font-size: 16px;
+		line-height: 1.6;
+	}
+	.triplink-hero__actions {
+		gap: 12px;
+	}
+	.triplink-hero__actions a {
+		width: 100%;
+		min-height: 52px;
+	}
+	.triplink-hero__image {
+		object-position: var(--triplink-mobile-image-position, 50% 50%);
+	}
+	.triplink-hero__controls {
+		padding: 0 24px;
+		bottom: 82px;
+		gap: 16px;
+	}
+	.triplink-hero__navigation {
+		gap: 8px;
+		margin-left: auto;
+	}
+	.triplink-hero__dots {
+		display: grid;
+		grid-template-columns: repeat(7, minmax(0, 1fr));
+		width: 100%;
+		gap: 4px;
+		padding: 5px;
+	}
+	.triplink-hero__dots button,
+	.triplink-hero__dots button[aria-pressed='true'] {
+		width: 100%;
+		height: 44px;
+	}
+	.triplink-hero__dots button::after {
+		top: 18px;
 	}
 	.triplink-search-wrap {
-		padding: 0 16px;
+		padding: 0 24px;
+		margin-top: -48px;
 	}
 	.triplink-search {
 		grid-template-columns: minmax(0, 1fr);
-		&__destination {
-			grid-column: auto;
-		}
+		padding: 12px;
+		border-radius: 24px;
+		gap: 8px;
+	}
+	.triplink-search__destination {
+		grid-column: auto;
+	}
+	.triplink-search__field {
+		padding: 16px;
+	}
+	.triplink-calendar .MuiDialogContent-root {
+		padding: 0;
 	}
 }
 @media (prefers-reduced-motion: reduce) {
-	.triplink-hero__slide {
-		transition: none;
+	.triplink-hero__slide,
+	.triplink-hero__image,
+	.triplink-hero__dots button::after,
+	.triplink-hero__navigation button,
+	.triplink-action,
+	.triplink-action svg,
+	.triplink-search__field,
+	.triplink-traveler-popover,
+	.triplink-calendar {
+		transition: none !important;
+		animation: none !important;
+	}
+	.triplink-action:hover,
+	.triplink-action:hover svg,
+	.triplink-hero__navigation button:hover {
+		transform: none;
 	}
 }
 
@@ -444,6 +779,10 @@
 	position: sticky;
 	top: 0;
 	z-index: 40;
+}
+#pc-wrap > #main,
+#mobile-wrap > #main {
+	scroll-margin-top: 112px;
 }
 .triplink-visually-hidden {
 	position: absolute;
@@ -485,16 +824,33 @@
 		}
 	}
 }
+// Public navigation. Portal surfaces carry their own scoped typography and focus styles.
 .triplink-top {
-	background: rgba(240, 251, 255, 0.97);
-	box-shadow: 0 1px 12px rgba(0, 52, 59, 0.07);
-	backdrop-filter: blur(16px);
+	background: #073f4c;
+	border-bottom: 1px solid #1c5360;
+	box-shadow: 0 3px 16px rgba(0, 31, 36, 0.16);
+	color: #fff;
+	a {
+		font-family: inherit;
+		color: #fff !important;
+	}
+	a:hover {
+		color: #c6e6e0 !important;
+	}
+	a:focus-visible,
+	button:focus-visible,
+	select:focus-visible {
+		outline-color: #f2a289;
+	}
+	.triplink-brand {
+		width: 236px;
+	}
 	&__inner {
-		max-width: 1280px;
+		max-width: 1440px;
 		margin: auto;
-		padding: 12px 16px;
+		padding: 16px 16px;
 		display: flex;
-		gap: 12px;
+		gap: 8px;
 		align-items: center;
 		justify-content: space-between;
 	}
@@ -507,45 +863,118 @@
 	}
 	&__menu-button {
 		flex-shrink: 0;
-		width: 40px;
+		width: 44px;
 		height: 44px;
-		background: transparent;
-		color: #00343b;
-		border: 1px solid #bfc8ca;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: #073f4c;
+		color: #fff;
+		border: 1px solid rgba(255, 255, 255, 0.3);
 		border-radius: 10px;
-		font-size: 22px;
 		cursor: pointer;
 	}
 	&__account-button {
 		display: inline-flex;
+		min-height: 44px;
 		align-items: center;
-		padding: 10px 12px;
-		border: 1px solid #bfc8ca;
-		border-radius: 9px;
-		background: white;
-		color: #00343b;
-		font-size: 13px;
+		justify-content: center;
+		gap: 8px;
+		padding: 5px 9px;
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		border-radius: 24px;
+		background: #073f4c;
+		color: #fff;
+		font-size: 14px;
 		font-weight: 600;
 		cursor: pointer;
 		line-height: 1.5;
+		white-space: nowrap;
+	}
+	&__initials {
+		display: inline-flex;
+		width: 30px;
+		height: 30px;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background: #eaf6f4;
+		color: #0f766e;
+		font-size: 11px;
+	}
+	&__nickname {
+		max-width: 88px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		min-width: 0;
+	}
+	&__chevron {
+		font-size: 17px;
+		line-height: 1;
+	}
+	&__account-placeholder {
+		display: inline-block;
+		width: 160px;
+		height: 44px;
+		border-radius: 24px;
+		background: #185562;
 	}
 	&__language select {
+		color-scheme: dark;
 		max-width: 100%;
-		padding: 10px 8px;
-		border: 1px solid #bfc8ca;
-		border-radius: 9px;
-		background: white;
-		color: #00343b;
-		font-size: 13px;
+		min-height: 44px;
+		padding: 8px 4px;
+		border: 0;
+		border-radius: 6px;
+		background: #073f4c;
+		color: #fff;
+		font-size: 14px;
+		cursor: pointer;
+	}
+	&__skip {
+		color: #00343b !important;
+		position: absolute;
+		top: 8px;
+		left: 16px;
+		z-index: 50;
+		padding: 12px 16px;
+		background: #fff;
+		border: 1px solid #00343b;
+		transform: translateY(-200%);
+	}
+	&__skip:hover {
+		color: #00343b !important;
+	}
+	&__skip:focus {
+		transform: translateY(0);
+	}
+	&__menu-button:hover,
+	&__account-button:hover,
+	&__language select:hover {
+		background: #185562;
+		border-color: #9bc8cc;
+	}
+	a,
+	button,
+	select {
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: rgba(15, 118, 110, 0.15);
 	}
 }
+.triplink-nav-drawer-paper {
+	width: min(360px, 100vw);
+	background: #fff !important;
+	overscroll-behavior: contain;
+}
 .triplink-nav-drawer {
-	padding: 24px;
+	padding: 24px max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) 20px;
 	&__heading {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 24px;
+		margin-bottom: 20px;
 		font-family: 'TripLink Outfit', Arial, sans-serif;
 		font-size: 24px;
 	}
@@ -553,134 +982,362 @@
 		border: 0;
 		width: 44px;
 		height: 44px;
-		background: transparent;
+		background: #fff;
 		color: #00343b;
+		border-radius: 8px;
 		font-size: 32px;
 		cursor: pointer;
 	}
 	nav {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 4px;
 	}
 	nav a {
-		padding: 14px;
-		border-radius: 10px;
+		min-height: 44px;
+		padding: 12px;
+		border-radius: 8px;
+		font-size: 17px;
 		font-weight: 600;
+		overflow-wrap: anywhere;
 	}
 	nav a[aria-current='page'] {
-		background: #dfeaee;
+		background: #eaf6f4;
+		box-shadow: inset 3px 0 #ab3425;
+	}
+	nav a:hover,
+	button:hover {
+		background: #f1f8f7;
 	}
 	&__account {
-		border-top: 1px solid #bfc8ca;
+		border-top: 1px solid #e3ebed;
 		margin-top: 24px;
-		padding-top: 24px;
-		display: flex;
-		gap: 12px;
-		flex-wrap: wrap;
+		padding-top: 20px;
+	}
+	&__account h2 {
+		margin: 0 0 12px;
+		font-size: 16px;
+		font-weight: 600;
+	}
+	&__nickname {
+		margin: 0 12px 12px;
+		color: #496469;
+		font-size: 13px;
+		overflow-wrap: anywhere;
+	}
+	&__logout {
+		width: 100%;
+		text-align: left;
+		min-height: 44px;
+		margin-top: 12px;
+		padding: 12px;
+		border: 0;
+		border-top: 1px solid #e3ebed;
+		background: #fff;
+		color: #ab3425;
+		cursor: pointer;
+	}
+	&__language {
+		border-top: 1px solid #e3ebed;
+		margin-top: 20px;
+		padding-top: 16px;
+	}
+	button,
+	a,
+	select {
+		touch-action: manipulation;
 	}
 }
+.triplink-account-menu {
+	font-family: 'TripLink Jakarta', Arial, sans-serif !important;
+	min-width: 220px;
+	max-width: calc(100vw - 32px);
+	max-height: calc(100dvh - 130px) !important;
+	margin-top: 8px;
+	padding: 4px;
+	border: 1px solid #e3ebed;
+	border-radius: 12px !important;
+	box-shadow: 0 12px 32px rgba(0, 52, 59, 0.12) !important;
+	overscroll-behavior: contain;
+	.MuiMenuItem-root {
+		min-height: 44px;
+		padding: 10px 12px;
+		border-radius: 6px;
+		font: inherit;
+		font-size: 13px;
+		color: #00343b;
+		white-space: normal;
+		overflow-wrap: anywhere;
+		touch-action: manipulation;
+	}
+	.MuiMenuItem-root:hover,
+	.MuiMenuItem-root.Mui-focusVisible {
+		background: #eaf6f4;
+	}
+	.MuiMenuItem-root.Mui-focusVisible,
+	.MuiMenuItem-root:focus-visible {
+		outline: 2px solid #ab3425;
+		outline-offset: -2px;
+	}
+	.MuiMenuItem-root[aria-current='page'] {
+		background: #eaf6f4;
+		box-shadow: inset 3px 0 #ab3425;
+	}
+	.triplink-account-menu__logout {
+		color: #ab3425;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.triplink-account-menu,
+	.triplink-nav-drawer-paper {
+		transition: none !important;
+	}
+}
+// Override the legacy public footer wrapper without touching portal layouts.
+#pc-wrap > #footer,
+#mobile-wrap > #footer {
+	padding: 0;
+	background: #363636;
+	display: block;
+	width: 100%;
+}
 .triplink-footer {
-	background: #eaf6f9;
-	border-top: 1px solid #d9e4e8;
+	width: 100%;
+	background: #363636;
+	border-top: 1px solid #525252;
+	color: #fff;
+	a {
+		color: #c8c8c8 !important;
+		text-decoration: none;
+		touch-action: manipulation;
+	}
+	a:hover {
+		color: #fff !important;
+		text-decoration: underline;
+		text-underline-offset: 5px;
+	}
+	a:focus-visible {
+		outline-color: #ef6b73;
+	}
 	&__inner {
 		max-width: 1280px;
-		padding: 56px 32px 24px;
+		padding: 48px max(32px, env(safe-area-inset-left)) max(76px, env(safe-area-inset-bottom)) max(32px, env(safe-area-inset-right));
 		margin: auto;
 	}
 	&__grid {
 		display: grid;
-		grid-template-columns: 2fr repeat(3, 1fr);
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 36px;
+	}
+	&__grid > div {
+		min-width: 0;
 	}
 	h2 {
 		font-family: 'TripLink Outfit', Arial, sans-serif;
 		font-size: 18px;
 		line-height: 1.5;
 		font-weight: 600;
-		margin: 12px 0 20px;
+		margin: 0 0 22px;
+		padding-bottom: 12px;
+		position: relative;
+		text-wrap: balance;
+		color: #fff;
+	}
+	&__grid > div > h2::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 32px;
+		height: 2px;
+		background: #ef6b73;
+	}
+	.triplink-brand {
+		width: auto;
+		gap: 10px;
+	}
+	.triplink-brand__artwork {
+		width: 40px;
+		height: 40px;
+		flex-basis: 40px;
+	}
+	.triplink-brand__wordmark {
+		font-size: 28px;
+	}
+	.triplink-brand__wordmark > span {
+		color: #fff;
+	}
+	.triplink-brand__wordmark i {
+		background: #ef6b73;
 	}
 	ul {
 		list-style: none;
 		padding: 0;
 		margin: 0;
 		display: grid;
-		gap: 14px;
+		gap: 2px;
 	}
 	li {
-		font-size: 13px;
+		font-size: 14px;
 		line-height: 1.6;
+	}
+	li a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		overflow-wrap: anywhere;
+	}
+	&__logo {
+		display: inline-flex;
+		max-width: 100%;
 	}
 	&__brand p {
 		font-size: 14px;
 		line-height: 1.8;
-		max-width: 380px;
-		margin: 20px 0 12px;
-		color: #40484a;
+		max-width: 340px;
+		margin: 14px 0 10px;
+		color: #c8c8c8;
 	}
-	&__brand > span {
-		font-size: 12px;
+	&__promise {
+		font-size: 14px;
 		font-weight: 600;
-		letter-spacing: 0.04em;
+		color: #fff;
+	}
+	&__connect {
+		margin-top: 20px;
+	}
+	&__brand .triplink-footer__social-caption {
+		font-size: 12px;
+		font-weight: 400;
+		line-height: 1.7;
+		color: #c8c8c8;
+		margin: 0 0 10px;
+	}
+	&__socials {
+		display: flex !important;
+		flex-wrap: wrap;
+		gap: 8px !important;
+	}
+	&__socials a {
+		width: 44px;
+		height: 44px;
+		padding: 0;
+		justify-content: center;
+		background: #fff;
+		color: #363636 !important;
+		border: 1px solid #fff;
+		border-radius: 50%;
+		transition: background-color 160ms ease, border-color 160ms ease;
+	}
+	&__socials a:hover {
+		background: #ef6b73;
+		border-color: #ef6b73;
+		color: #363636 !important;
+		text-decoration: none;
+	}
+	&__socials svg {
+		width: 18px;
+		height: 18px;
+	}
+	&__destinations {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: 16px;
+	}
+	&__browse {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		margin-top: 8px;
+		font-size: 14px;
+		font-weight: 600;
+		text-decoration: underline !important;
+		text-underline-offset: 5px;
 	}
 	&__bottom {
-		border-top: 1px solid #bfc8ca;
+		border-top: 1px solid #525252;
 		margin-top: 40px;
-		padding-top: 24px;
+		padding-top: 22px;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
 		gap: 12px;
 		font-size: 12px;
-		color: #40484a;
+		line-height: 1.7;
+		color: #c8c8c8;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.triplink-footer__socials a {
+		transition: none;
 	}
 }
 @media (min-width: 1200px) {
 	.triplink-top {
 		&__inner {
 			padding-inline: 32px;
-			gap: 20px;
+			gap: 16px;
 		}
 		&__desktop-nav {
 			display: flex;
 			flex: 1;
 			min-width: 0;
-			flex-wrap: wrap;
 			justify-content: center;
 			align-items: center;
 			gap: 4px;
 		}
 		&__desktop-nav a {
-			padding: 9px;
-			font-size: 13px;
+			position: relative;
+			padding: 13px 12px;
+			font-size: 17px;
 			font-weight: 600;
-			border-radius: 8px;
+			border-radius: 7px;
 			line-height: 1.5;
+			white-space: nowrap;
 		}
+		&__desktop-nav a:hover,
 		&__desktop-nav a[aria-current='page'] {
-			background: #dfeaee;
+			background: #185562;
+		}
+		&__desktop-nav a::after {
+			content: '';
+			position: absolute;
+			height: 2px;
+			bottom: 7px;
+			left: 8px;
+			right: 8px;
+			background: #f2a289;
+			transform: scaleX(0);
+		}
+		&__desktop-nav a[aria-current='page']::after {
+			transform: scaleX(1);
 		}
 		&__desktop-account {
 			display: flex;
-			gap: 8px;
+			flex-shrink: 0;
+			gap: 12px;
 			align-items: center;
+		}
+		&__desktop-account > .triplink-top__account-button,
+		&__account-placeholder {
+			width: 184px;
+		}
+		&__desktop-account .triplink-top__language select {
+			width: 90px;
 		}
 		&__menu-button {
 			display: none;
 		}
 	}
 }
-@media (max-width: 899px) {
+@media (max-width: 1024px) {
 	.triplink-footer__grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-	.triplink-footer__brand {
-		grid-column: 1 / -1;
+		gap: 28px;
 	}
 }
 @media (max-width: 599px) {
 	.triplink-footer__inner {
-		padding: 36px 20px 24px;
+		padding: 36px max(20px, env(safe-area-inset-left)) max(76px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-right));
 	}
 	.triplink-footer__grid {
 		grid-template-columns: minmax(0, 1fr);
