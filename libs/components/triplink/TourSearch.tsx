@@ -12,6 +12,7 @@ import {
 	tourSorts,
 } from '../../types/triplink';
 import { useTranslation } from 'next-i18next';
+import { localDateTimeValue } from '../../triplink/homeSearch';
 export default function TourSearchPage() {
 	const router = useRouter();
 	const { t } = useTranslation('common');
@@ -106,7 +107,8 @@ export default function TourSearchPage() {
 						label={t(key === 'start' ? 'From' : 'Until')}
 						type="datetime-local"
 						InputLabelProps={{ shrink: true }}
-						defaultValue={one(key)}
+						inputProps={{ step: 0.001 }}
+						defaultValue={localDateTimeValue(one(key))}
 					/>
 				))}
 				<TextField

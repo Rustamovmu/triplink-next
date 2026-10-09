@@ -1,1 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>TripLink</title><rect width="64" height="64" rx="16" fill="#246f7a"/><path d="M14 16h36v9H37v25H27V25H14Z" fill="white"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 104"><title>TripLink</title><defs>
+    <linearGradient id="deepTealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F766E" />
+      <stop offset="100%" stop-color="#044E46" />
+    </linearGradient>
+    <linearGradient id="warmCoralGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F28B70" />
+      <stop offset="100%" stop-color="#DC5E3E" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#A88219" />
+    </linearGradient>
+    <filter id="elevatedDrop" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#044E46" flood-opacity="0.08" />
+    </filter>
+  </defs>
+
+
+  <g transform="translate(8, 8)" filter="url(#elevatedDrop)">
+
+    <rect width="88" height="88" rx="28" fill="#FFFFFF" stroke="#E6ECE9" stroke-width="1.2" />
+    <circle cx="44" cy="44" r="34" stroke="#0F766E" stroke-width="0.8" stroke-opacity="0.2" stroke-dasharray="2 3" />
+
+
+    <line x1="44" y1="14" x2="44" y2="18" stroke="#0F766E" stroke-width="1.5" stroke-linecap="round" />
+    <line x1="44" y1="70" x2="44" y2="74" stroke="#0F766E" stroke-width="1.5" stroke-linecap="round" />
+    <line x1="14" y1="44" x2="18" y2="44" stroke="#0F766E" stroke-width="1.5" stroke-linecap="round" />
+    <line x1="70" y1="44" x2="74" y2="44" stroke="#0F766E" stroke-width="1.5" stroke-linecap="round" />
+
+
+    <ellipse cx="44" cy="44" rx="27" ry="14" stroke="#F28B70" stroke-width="1.2" stroke-opacity="0.45" transform="rotate(-30 44 44)" />
+    <ellipse cx="44" cy="44" rx="27" ry="14" stroke="#0F766E" stroke-width="1.2" stroke-opacity="0.35" transform="rotate(45 44 44)" />
+
+
+
+    <path d="M44 20 L51 44 L44 41 Z" fill="url(#warmCoralGrad)" />
+    <path d="M44 20 L37 44 L44 41 Z" fill="#F8A791" />
+
+
+    <path d="M44 68 L37 44 L44 47 Z" fill="url(#deepTealGrad)" />
+    <path d="M44 68 L51 44 L44 47 Z" fill="#149A90" />
+
+
+    <path d="M64 44 L44 48 L46 44 Z" fill="#0F766E" fill-opacity="0.6" />
+    <path d="M24 44 L44 40 L42 44 Z" fill="#0F766E" fill-opacity="0.6" />
+
+
+    <circle cx="44" cy="44" r="5" fill="#FFFFFF" stroke="#0F766E" stroke-width="2" />
+    <circle cx="44" cy="44" r="2" fill="#DC5E3E" />
+  </g>
+
+
+  </svg>

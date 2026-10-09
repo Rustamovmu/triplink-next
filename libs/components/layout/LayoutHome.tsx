@@ -29,7 +29,7 @@ const withLayoutMain = (Component: any) => {
 							<Top />
 						</Stack>
 
-						<Stack className={'header-main'}>
+						<Stack className={'triplink-home-header'}>
 							<HeaderFilter />
 						</Stack>
 						<Stack id={'main'}>
@@ -55,10 +55,8 @@ const withLayoutMain = (Component: any) => {
 							<Top />
 						</Stack>
 
-						<Stack className={'header-main'}>
-							<Stack className={'container'}>
-								<HeaderFilter />
-							</Stack>
+						<Stack className={'triplink-home-header'}>
+							<HeaderFilter />
 						</Stack>
 
 						<Stack id={'main'}>
