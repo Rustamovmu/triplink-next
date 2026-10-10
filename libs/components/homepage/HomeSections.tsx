@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Avatar } from '@mui/material';
+import { IntroSlider, IntroVideo, introductionPhotos } from './IntroMedia';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
@@ -26,6 +27,18 @@ const headings = {
 	top: ['Top tours', 'Most viewed tours'],
 };
 
+const introductions: Record<string, { text: string; detail?: string; photo?: string }> = {
+	featured: {
+		text: 'Make room for a memorable journey.',
+		detail: 'Explore featured tours and find a destination that stays with you.',
+		photo: '/img/homepage/swiss-alps.jpg',
+	},
+	rated: { text: 'Let traveler reviews guide your next trip.', photo: '/img/events/hirosaki-blossoms.jpg' },
+	agents: { text: 'Meet the people behind your next adventure.' },
+	top: { text: 'See what other travelers are exploring.', photo: '/img/homepage/istanbul.jpg' },
+	events: { text: 'Plan your travels around moments worth experiencing.' },
+};
+
 function Section({
 	id,
 	title,
@@ -42,20 +55,39 @@ function Section({
 	children: React.ReactNode;
 }) {
 	const { t } = useTranslation('common');
+	const introduction = introductions[id];
 	return (
 		<section className={`triplink-home-section triplink-home-section--${id}`} aria-labelledby={`home-${id}`}>
-			<div className="triplink-home-section__heading">
-				<div>
-					<h2 id={`home-${id}`}>{t(title)}</h2>
-					<p>{t(description)}</p>
+			<div className="triplink-home-section__inner">
+				<div
+					className={`triplink-home-section__intro${introduction?.photo ? ' triplink-home-section__intro--photo' : ''}`}
+				>
+					<div className="triplink-home-section__copy">
+						<h2 id={`home-${id}`}>{t(title)}</h2>
+						{introduction && <p className="triplink-home-section__statement">{t(introduction.text)}</p>}
+						<p className="triplink-home-section__description">{t(introduction?.detail || description)}</p>
+						{introduction?.detail && <p className="triplink-home-section__description">{t(description)}</p>}
+						{href && linkText && (
+							<Link className="triplink-home-section__link" href={href}>
+								{t(linkText)}
+							</Link>
+						)}
+					</div>
+					{id === 'featured' || id === 'rated' ? (
+						<IntroSlider photos={introductionPhotos[id]} title={title} />
+					) : id === 'top' ? (
+						<IntroVideo />
+					) : (
+						introduction?.photo && (
+							<div className="triplink-home-section__image" aria-hidden="true">
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img src={introduction.photo} alt="" width={800} height={500} loading="lazy" decoding="async" />
+							</div>
+						)
+					)}
 				</div>
-				{href && linkText && (
-					<Link className="triplink-home-section__link" href={href}>
-						{t(linkText)}
-					</Link>
-				)}
+				{children}
 			</div>
-			{children}
 		</section>
 	);
 }

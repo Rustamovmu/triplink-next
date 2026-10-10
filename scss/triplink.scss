@@ -1711,7 +1711,7 @@
 	color: #00343b;
 	font-family: 'TripLink Jakarta', Arial, sans-serif;
 	display: grid;
-	gap: 64px;
+	gap: 0;
 	min-width: 0;
 	* {
 		box-sizing: border-box;
@@ -1980,11 +1980,6 @@
 		font-size: 12px;
 		color: #0f766e;
 	}
-	.triplink-home-section--agents {
-		padding: 32px;
-		border-radius: 16px;
-		background: #f1f7f6;
-	}
 	.triplink-home-agent {
 		min-width: 0;
 		display: flex;
@@ -2109,7 +2104,6 @@
 		}
 	}
 	@media (max-width: 599px) {
-		gap: 40px;
 		.triplink-home-section__heading {
 			align-items: flex-start;
 			flex-direction: column;
@@ -2129,9 +2123,6 @@
 				font-size: 18px;
 			}
 		}
-		.triplink-home-section--agents {
-			padding: 24px 20px;
-		}
 		.triplink-home-agent {
 			flex-direction: row;
 			gap: 16px;
@@ -2144,5 +2135,78 @@
 		.triplink-home-agent__body {
 			min-width: 0;
 		}
+	}
+}
+
+// Full-width editorial bands, aligned to the existing 1200px content width.
+.triplink-home-sections {
+	.triplink-home-section { padding: 72px 0; }
+	.triplink-home-section__inner { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+	.triplink-home-section__intro { margin-bottom: 36px; }
+	.triplink-home-section__intro--photo { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+	.triplink-home-section__copy { min-width: 0; max-width: 760px; }
+	.triplink-home-section__copy h2 { font-size: 22px; line-height: 1.3; color: #0f766e; margin-bottom: 16px; }
+	.triplink-home-section__statement { font-family: 'TripLink Outfit', Arial, sans-serif; font-size: clamp(30px, 3.5vw, 44px); line-height: 1.15; font-weight: 600; text-wrap: balance; }
+	.triplink-home-section__description { margin-top: 16px; font-size: 15px; line-height: 1.75; color: #52676b; max-width: 60ch; }
+	.triplink-home-section__link { display: inline-block; margin-top: 18px; padding: 12px 18px; border: 1px solid currentColor; border-radius: 6px; font-size: 14px; }
+	.triplink-home-section__image { min-width: 0; overflow: hidden; border-radius: 16px; aspect-ratio: 1.55; background: #d9eae7; }
+	.triplink-home-section__image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+	.triplink-home-section--featured { background: #edf6f3; }
+	.triplink-home-section--featured .triplink-home-tour { background: white; }
+	.triplink-home-section--rated { background: #f5f8fa; }
+	.triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: minmax(0, 1fr) 280px; }
+	.triplink-home-section--rated .triplink-home-section__image { aspect-ratio: 1.25; border-radius: 50% 50% 12px 12px; }
+	.triplink-home-section--rated .triplink-home-tour { background: white; border: 1px solid #dce8e7; }
+	.triplink-home-section--agents {
+		background: #00343b;
+		color: white;
+		.MuiCircularProgress-root { color: #bde4d9; }
+		.triplink-home-section__copy h2 { color: #bde4d9; }
+		.triplink-home-section__description { color: #d7e8e6; }
+		.triplink-home-section__link { color: white; }
+		.triplink-home-agent { padding: 16px; border-radius: 12px; background: white; color: #00343b; }
+		.triplink-home-agent a:focus-visible { outline-color: #0f766e; }
+		.triplink-home-section__copy a:focus-visible { outline-color: #f2a289; }
+	}
+	.triplink-home-section--top {
+		background: white;
+		.triplink-home-section__intro { gap: 0; align-items: stretch; border-radius: 16px; overflow: hidden; }
+		.triplink-home-section__copy { padding: 40px; background: #00343b; color: white; }
+		.triplink-home-section__copy h2 { color: #bde4d9; }
+		.triplink-home-section__description { color: #d7e8e6; }
+		.triplink-home-section__link { color: white; }
+		.triplink-home-section__copy a:focus-visible { outline-color: #f2a289; }
+		.triplink-home-section__image { border-radius: 0; aspect-ratio: auto; min-height: 300px; }
+		.triplink-home-section__image img { object-position: 65% 50%; }
+	}
+	.triplink-home-section--events { background: #eaf0f7; .triplink-home-event { background: white; } }
+	@media (max-width: 1023px) {
+		.triplink-home-section__intro--photo { gap: 28px; }
+		.triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: minmax(0, 1fr) 220px; }
+		.triplink-home-section--top .triplink-home-section__copy { padding: 28px; }
+	}
+	@media (max-width: 599px) {
+		.triplink-home-section { padding: 40px 0; }
+		.triplink-home-section__inner { padding: 0 20px; }
+		.triplink-home-section__intro { margin-bottom: 28px; }
+		.triplink-home-section__intro--photo, .triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: minmax(0, 1fr); }
+		.triplink-home-section--rated .triplink-home-section__image { width: 100%; aspect-ratio: 2; border-radius: 12px; }
+		.triplink-home-section--top .triplink-home-section__image { min-height: 0; aspect-ratio: 1.6; }
+	}
+}
+
+.triplink-home-sections {
+	.triplink-intro-slider { position: relative; }
+	.triplink-intro-slider .swiper, .triplink-intro-slider .swiper-wrapper, .triplink-intro-slider .swiper-slide { height: 100%; }
+	.triplink-intro-video { position: relative; }
+	.triplink-intro-video video { display: block; width: 100%; height: 100%; object-fit: cover; }
+	.triplink-intro-media__controls {
+		position: absolute; bottom: 14px; right: 14px; z-index: 2;
+		display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 28px;
+		background: #00343b; color: white;
+		span { padding: 0 8px; font-size: 12px; }
+		button { display: grid; place-items: center; border: 1px solid #6b9295; background: transparent; color: white; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; }
+		button:hover { background: #0f766e; }
+		button:focus-visible { outline-color: #f2a289; outline-offset: 2px; }
 	}
 }

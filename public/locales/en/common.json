@@ -490,5 +490,17 @@
 	"Agent follower count_one": "{{count}} follower",
 	"Agent follower count_other": "{{count}} followers",
 	"Agent tour count": "{{count}} tours",
-	"Agent follower count": "{{count}} followers"
+	"Agent follower count": "{{count}} followers",
+	"Make room for a memorable journey.": "Make room for a memorable journey.",
+	"Explore featured tours and find a destination that stays with you.": "Explore featured tours and find a destination that stays with you.",
+	"Let traveler reviews guide your next trip.": "Let traveler reviews guide your next trip.",
+	"Meet the people behind your next adventure.": "Meet the people behind your next adventure.",
+	"See what other travelers are exploring.": "See what other travelers are exploring.",
+	"Plan your travels around moments worth experiencing.": "Plan your travels around moments worth experiencing.",
+	"Photo inspiration for {{section}}": "Photo inspiration for {{section}}",
+	"Previous photo in {{section}}": "Previous photo in {{section}}",
+	"Next photo in {{section}}": "Next photo in {{section}}",
+	"Aerial travel video of Istanbul": "Aerial travel video of Istanbul",
+	"Pause travel video": "Pause travel video",
+	"Play travel video": "Play travel video"
 }

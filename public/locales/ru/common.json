@@ -498,5 +498,17 @@
 	"Agent follower count_many": "{{count}} подписчиков",
 	"Agent follower count_other": "{{count}} подписчика",
 	"Agent tour count": "{{count}} туров",
-	"Agent follower count": "{{count}} подписчиков"
+	"Agent follower count": "{{count}} подписчиков",
+	"Make room for a memorable journey.": "Подарите себе незабываемое путешествие.",
+	"Explore featured tours and find a destination that stays with you.": "Откройте для себя избранные туры и места, которые останутся в памяти.",
+	"Let traveler reviews guide your next trip.": "Выберите следующую поездку с помощью отзывов путешественников.",
+	"Meet the people behind your next adventure.": "Познакомьтесь с людьми, которые организуют ваше следующее приключение.",
+	"See what other travelers are exploring.": "Посмотрите, какие туры интересуют других путешественников.",
+	"Plan your travels around moments worth experiencing.": "Планируйте поездки ради событий, которые стоит пережить.",
+	"Photo inspiration for {{section}}": "Фотографии для вдохновения: {{section}}",
+	"Previous photo in {{section}}": "Предыдущее фото: {{section}}",
+	"Next photo in {{section}}": "Следующее фото: {{section}}",
+	"Aerial travel video of Istanbul": "Видео Стамбула с высоты",
+	"Pause travel video": "Приостановить видео",
+	"Play travel video": "Воспроизвести видео"
 }

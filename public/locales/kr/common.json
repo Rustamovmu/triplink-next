@@ -486,5 +486,17 @@
 	"Official website": "공식 웹사이트",
 	"Official website for {{event}} (opens in a new tab)": "{{event}} 공식 웹사이트 (새 탭에서 열림)",
 	"Agent tour count": "투어 {{count}}개",
-	"Agent follower count": "팔로워 {{count}}명"
+	"Agent follower count": "팔로워 {{count}}명",
+	"Make room for a memorable journey.": "잊지 못할 여행을 떠나보세요.",
+	"Explore featured tours and find a destination that stays with you.": "추천 투어를 둘러보고 오래도록 기억에 남을 여행지를 찾아보세요.",
+	"Let traveler reviews guide your next trip.": "여행자들의 후기로 다음 여행을 찾아보세요.",
+	"Meet the people behind your next adventure.": "다음 여행을 만들어줄 사람들을 만나보세요.",
+	"See what other travelers are exploring.": "다른 여행자들이 어떤 여행을 찾는지 살펴보세요.",
+	"Plan your travels around moments worth experiencing.": "특별한 순간을 만나는 여행을 계획해보세요.",
+	"Photo inspiration for {{section}}": "{{section}} 여행 사진",
+	"Previous photo in {{section}}": "{{section}} 이전 사진",
+	"Next photo in {{section}}": "{{section}} 다음 사진",
+	"Aerial travel video of Istanbul": "이스탄불 항공 여행 영상",
+	"Pause travel video": "여행 영상 일시 정지",
+	"Play travel video": "여행 영상 재생"
 }
