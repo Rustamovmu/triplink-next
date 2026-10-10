@@ -4,8 +4,9 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Avatar } from '@mui/material';
-import { IntroSlider, IntroVideo, introductionPhotos } from './IntroMedia';
+import { IntroVideo } from './IntroMedia';
 import { IntroGallery } from './IntroGallery';
+import { IntroCircularCarousel } from './IntroCircularCarousel';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
@@ -34,7 +35,7 @@ const introductions: Record<string, { text: string; detail?: string; photo?: str
 		detail: 'Explore featured tours and find a destination that stays with you.',
 		photo: '/img/homepage/featured/swiss-alps.jpg',
 	},
-	rated: { text: 'Let traveler reviews guide your next trip.', photo: '/img/homepage/rated/kyoto.jpg' },
+	rated: { text: 'Let traveler reviews guide your next trip.', photo: '/img/homepage/rated-circular/kyoto.jpg' },
 	agents: { text: 'Meet the people behind your next adventure.' },
 	top: { text: 'See what other travelers are exploring.', photo: '/video/top-tours-temple.jpg' },
 	events: { text: 'Plan your travels around moments worth experiencing.' },
@@ -77,7 +78,7 @@ function Section({
 					{id === 'featured' ? (
 						<IntroGallery title={title} />
 					) : id === 'rated' ? (
-						<IntroSlider photos={introductionPhotos[id]} title={title} />
+						<IntroCircularCarousel title={title} />
 					) : id === 'top' ? (
 						<IntroVideo />
 					) : (
