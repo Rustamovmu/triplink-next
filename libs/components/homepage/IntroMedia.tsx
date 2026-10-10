@@ -8,17 +8,10 @@ import PauseRoundedIcon from '@mui/icons-material/PauseRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 
 export const introductionPhotos = {
-	featured: [
-		'/img/homepage/swiss-alps.jpg',
-		'/img/homepage/dolomites.jpg',
-		'/img/homepage/patagonia.jpg',
-		'/img/homepage/lofoten.jpg',
-	],
 	rated: [
-		'/img/events/hirosaki-blossoms.jpg',
-		'/img/homepage/santorini.jpg',
-		'/img/homepage/bali.jpg',
-		'/img/homepage/cappadocia.jpg',
+		'/img/homepage/rated/kyoto.jpg',
+		'/img/homepage/rated/seoul.jpg',
+		'/img/homepage/rated/samarkand.jpg',
 	],
 };
 
@@ -155,7 +148,7 @@ export function IntroVideo() {
 		<div className="triplink-home-section__image triplink-intro-video">
 			{failed ? (
 				// eslint-disable-next-line @next/next/no-img-element
-				<img src="/img/homepage/istanbul.jpg" alt="" width={800} height={500} />
+				<img src="/video/top-tours-temple.jpg" alt="" width={800} height={500} />
 			) : (
 				<video
 					ref={video}

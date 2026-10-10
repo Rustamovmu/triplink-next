@@ -2152,10 +2152,11 @@
 	.triplink-home-section__image { min-width: 0; overflow: hidden; border-radius: 16px; aspect-ratio: 1.55; background: #d9eae7; }
 	.triplink-home-section__image img { display: block; width: 100%; height: 100%; object-fit: cover; }
 	.triplink-home-section--featured { background: #edf6f3; }
+	.triplink-home-section--featured .triplink-home-section__intro { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
 	.triplink-home-section--featured .triplink-home-tour { background: white; }
 	.triplink-home-section--rated { background: #f5f8fa; }
-	.triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: minmax(0, 1fr) 280px; }
-	.triplink-home-section--rated .triplink-home-section__image { aspect-ratio: 1.25; border-radius: 50% 50% 12px 12px; }
+	.triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.triplink-home-section--rated .triplink-home-section__image { aspect-ratio: 1.6; border-radius: 12px; }
 	.triplink-home-section--rated .triplink-home-tour { background: white; border: 1px solid #dce8e7; }
 	.triplink-home-section--agents {
 		background: #00343b;
@@ -2182,16 +2183,54 @@
 	.triplink-home-section--events { background: #eaf0f7; .triplink-home-event { background: white; } }
 	@media (max-width: 1023px) {
 		.triplink-home-section__intro--photo { gap: 28px; }
-		.triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: minmax(0, 1fr) 220px; }
 		.triplink-home-section--top .triplink-home-section__copy { padding: 28px; }
 	}
 	@media (max-width: 599px) {
 		.triplink-home-section { padding: 40px 0; }
 		.triplink-home-section__inner { padding: 0 20px; }
 		.triplink-home-section__intro { margin-bottom: 28px; }
-		.triplink-home-section__intro--photo, .triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: minmax(0, 1fr); }
-		.triplink-home-section--rated .triplink-home-section__image { width: 100%; aspect-ratio: 2; border-radius: 12px; }
+		.triplink-home-section__intro--photo, .triplink-home-section--featured .triplink-home-section__intro, .triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: minmax(0, 1fr); }
+		.triplink-home-section--rated .triplink-home-section__image { width: 100%; aspect-ratio: 1.6; border-radius: 12px; }
 		.triplink-home-section--top .triplink-home-section__image { min-height: 0; aspect-ratio: 1.6; }
+	}
+}
+
+// Accordion photo introduction inspired by React Bits; scoped to the homepage.
+.triplink-home-sections .triplink-intro-gallery {
+	min-width: 0;
+	&__panels { display: flex; gap: 10px; height: clamp(300px, 32vw, 390px); }
+	&__panel {
+		position: relative; display: block; flex: 1 1 0; min-width: 0; padding: 0;
+		border: 0; border-radius: 14px; overflow: hidden; background: #00343b; cursor: pointer;
+		transition: flex-grow 650ms cubic-bezier(0.22, 1, 0.36, 1);
+		img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) brightness(0.72); transition: filter 500ms ease; }
+		&:nth-child(3) img { object-position: 50% 65%; }
+		&::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0, 32, 38, 0.88)); }
+		&.is-active { flex-grow: 4; img { filter: none; } }
+		&:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+	}
+	&__caption {
+		position: absolute; z-index: 1; bottom: 22px; left: 20px; right: 16px;
+		border-left: 3px solid #f2a289; padding-left: 12px; color: white;
+		font-family: 'TripLink Outfit', Arial, sans-serif; font-size: clamp(18px, 2vw, 24px); line-height: 1.2;
+		opacity: 0; transform: translateX(-8px); transition: opacity 250ms ease, transform 400ms ease;
+	}
+	&__panel.is-active .triplink-intro-gallery__caption { opacity: 1; transform: none; }
+	&__navigation { display: flex; gap: 8px; }
+	&__footer {
+		display: flex; align-items: center; justify-content: space-between; height: 52px; color: #00343b;
+		span { font-size: 12px; letter-spacing: 0.12em; }
+		button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #93b4ae; border-radius: 50%; color: #00343b; background: transparent; cursor: pointer; }
+		button:hover { background: #d9eae7; }
+		button:focus-visible { outline: 3px solid #0f766e; outline-offset: 2px; }
+	}
+	@media (max-width: 599px) {
+		&__panels { flex-direction: column; height: 390px; gap: 8px; }
+		&__panel { min-height: 60px; }
+		&__caption { bottom: 18px; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		&__panel, &__panel img, &__caption { transition: none; }
 	}
 }
 
