@@ -65,3 +65,35 @@ test('profile article list filters public reads by the visited author, without o
  const publicTree=ArticlesList({memberId:'visited-writer'});assert.deepEqual(input.search,{memberId:'visited-writer'});assert.equal(input.page,1);assert.ok(!JSON.stringify(publicTree).includes('Edit'));
  const ownerTree=ArticlesList({mine:true});assert.deepEqual(input.search,{memberId:'visitor'});assert.ok(JSON.stringify(ownerTree).includes('Edit'));
 });
+
+test('profile like and follow actions have independent locks and send only their own mutation', async () => {
+ const saved=Object.fromEntries(['window','document','IS_REACT_ACT_ENVIRONMENT'].map(k=>[k,Object.getOwnPropertyDescriptor(global,k)]));
+ const dom=new JSDOM('<div id="root"></div>');global.window=dom.window;global.document=dom.window.document;global.IS_REACT_ACT_ENVIRONMENT=true;
+ const owner={_id:'a'.repeat(24),memberNick:'Guide',memberType:'AGENT',memberCountry:'Korea',memberDesc:'',memberFollowers:2,memberFollowings:1,memberLikes:3,memberTours:0,isFollowing:true};
+ let pathname='/agent/detail', calls=[], finishLike, finishFollow;
+ const box=({children})=>React.createElement('div',null,children);
+ const mui={Stack:box,Avatar:box,Typography:box,Container:box,Alert:box,CircularProgress:box,Pagination:()=>null,
+ Button:({children,onClick,disabled})=>React.createElement('button',{onClick,disabled},children)};
+ const shared={react:React,'next-i18next':{useTranslation:()=>({t:k=>k})},'@mui/material':mui,'../../../apollo/store':{memberVar:'member',sessionVar:'session'},
+ '@apollo/client':{useReactiveVar:v=>v==='member'?{_id:'visitor',memberType:'USER'}:'authenticated',useApolloClient:()=>({refetchQueries:async()=>{}}),
+ useQuery:()=>({loading:false,data:{result:owner},refetch:async()=>{}}),useMutation:doc=>[options=>{calls.push({doc,variables:options.variables});return new Promise(resolve=>{if(doc==='like')finishLike=resolve;else finishFollow=resolve;});}]}};
+ const common=load('libs/components/triplink/Common.tsx',{...shared,'../../triplink/errors':{errorMessage:e=>e.message}});
+ const icon=()=>null;
+ const {MemberProfile}=load('libs/components/triplink/Profiles.tsx',{...shared,'next/link':{__esModule:true,default:({href,children})=>React.createElement('a',{href},children)},'next/router':{useRouter:()=>({pathname,isReady:true,query:{agentId:owner._id}})},
+ '../../../apollo/user/triplink':{MEMBER:'memberQuery',MEMBER_LIKE:'like',FOLLOW_TOGGLE:'follow'},'../../types/triplink':{},'./Common':common,
+ './Members':{Follows:()=>null},'./Tours':{TourList:()=>null,PublicReviews:()=>null},'./Community':{ArticlesList:()=>null},'../../auth':{refreshCurrentMember:async()=>{}},
+ ...Object.fromEntries(['SearchRounded','PlaceOutlined','ArrowForwardRounded','CloseRounded','PersonAddAltRounded','CheckRounded','FavoriteBorderRounded'].map(k=>[`@mui/icons-material/${k}`,{__esModule:true,default:icon}]))});
+ const root=createRoot(document.getElementById('root'));
+ const button=text=>[...document.querySelectorAll('button')].find(b=>b.textContent===text);
+ try {
+  for(const route of ['/agent/detail','/member']) {
+   pathname=route;await act(async()=>root.render(React.createElement(MemberProfile,{key:route})));
+   const likeLabel=route==='/agent/detail'?'Like / unlike':'Toggle like';
+   calls=[];await act(async()=>{button(likeLabel).click();button(likeLabel).click();});
+   assert.deepEqual(calls,[{doc:'like',variables:{memberId:owner._id}}]);assert.equal(button(likeLabel).disabled,true);assert.equal(button('Unfollow').disabled,false);assert.equal(owner.isFollowing,true);
+   await act(async()=>button('Unfollow').click());assert.equal(calls[1].doc,'follow');assert.equal(button('Unfollow').disabled,true);
+   await act(async()=>finishLike({data:{result:owner}}));assert.equal(button(likeLabel).disabled,false);assert.equal(button('Unfollow').disabled,true);
+   await act(async()=>finishFollow({data:{result:{followed:false,member:owner}}}));assert.equal(button('Unfollow').disabled,false);
+  }
+ } finally {await act(async()=>root.unmount());dom.window.close();for(const[k,d]of Object.entries(saved)){if(d)Object.defineProperty(global,k,d);else delete global[k];}}
+});

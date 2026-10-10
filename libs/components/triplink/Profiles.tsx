@@ -225,7 +225,8 @@ function PublicMemberProfile() {
 	});
 	const [follow] = useMutation(FOLLOW_TOGGLE);
 	const [like] = useMutation(MEMBER_LIKE);
-	const action = useAction();
+	const followAction = useAction();
+	const likeAction = useAction();
 	const member = query.data?.result;
 	if (router.pathname === '/agent/detail') {
 		const name = member?.memberFullname || member?.memberNick || String(t('Travel agent'));
@@ -276,10 +277,10 @@ function PublicMemberProfile() {
 													<Button
 														variant={member.isFollowing ? 'outlined' : 'contained'}
 														disableElevation
-														disabled={action.busy}
+														disabled={followAction.busy}
 														startIcon={member.isFollowing ? <CheckRoundedIcon /> : <PersonAddAltRoundedIcon />}
 														onClick={() =>
-															void action.run(async () => {
+															void followAction.run(async () => {
 																await follow({ variables: { memberId: member._id } });
 																await refreshCurrentMember();
 																await client.refetchQueries({ include: [MEMBER, FOLLOWERS, FOLLOWINGS] });
@@ -290,10 +291,10 @@ function PublicMemberProfile() {
 													</Button>
 													<Button
 														variant="outlined"
-														disabled={action.busy}
+														disabled={likeAction.busy}
 														startIcon={<FavoriteBorderRoundedIcon />}
 														onClick={() =>
-															void action.run(async () => {
+															void likeAction.run(async () => {
 																await like({ variables: { memberId: member._id } });
 																await query.refetch();
 															}, t('Profile likes updated'))
@@ -333,7 +334,8 @@ function PublicMemberProfile() {
 											<dd>{member.memberLikes}</dd>
 										</div>
 									</dl>
-									{action.feedback}
+									{followAction.feedback}
+									{likeAction.feedback}
 								</section>
 								<nav className="triplink-profile__nav" aria-label={t('Agent profile sections')}>
 									{member.memberType === 'AGENT' && (
@@ -370,7 +372,7 @@ function PublicMemberProfile() {
 											/>
 										</section>
 										<section id="agent-reviews" className="triplink-profile__section">
-											<PublicReviews key={member._id} agentId={member._id} />
+											<PublicReviews key={member._id + '-reviews'} agentId={member._id} />
 										</section>
 									</>
 								)}
@@ -409,7 +411,8 @@ function PublicMemberProfile() {
 
 	return (
 		<Frame title={member?.memberFullname || member?.memberNick || 'Member'}>
-			{action.feedback}
+			{followAction.feedback}
+			{likeAction.feedback}
 			<QueryState
 				loading={!ready || !router.isReady || query.loading}
 				error={query.error ?? (router.isReady && !validId(id) ? new Error('Invalid member ID') : undefined)}
@@ -433,9 +436,9 @@ function PublicMemberProfile() {
 						{current && current.memberType !== 'ADMIN' && member._id !== current._id && (
 							<Stack direction="row" spacing={2}>
 								<Button
-									disabled={action.busy}
+									disabled={followAction.busy}
 									onClick={() =>
-										void action.run(async () => {
+										void followAction.run(async () => {
 											await follow({ variables: { memberId: member._id } });
 											await refreshCurrentMember();
 											await client.refetchQueries({ include: [MEMBER, FOLLOWERS, FOLLOWINGS] });
@@ -445,9 +448,9 @@ function PublicMemberProfile() {
 									{t(member.isFollowing ? 'Unfollow' : 'Follow')}
 								</Button>
 								<Button
-									disabled={action.busy}
+									disabled={likeAction.busy}
 									onClick={() =>
-										void action.run(async () => {
+										void likeAction.run(async () => {
 											await like({ variables: { memberId: member._id } });
 											await query.refetch();
 										})
@@ -483,7 +486,7 @@ function PublicMemberProfile() {
 									input={{ page: tourPage, limit: 12, search: { agentId: member._id } }}
 									onPage={setTourPage}
 								/>
-								<PublicReviews key={member._id} agentId={member._id} />
+								<PublicReviews key={member._id + '-reviews'} agentId={member._id} />
 							</>
 						)}
 					</Stack>

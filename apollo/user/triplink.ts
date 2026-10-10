@@ -1781,28 +1781,12 @@ export const FOLLOW_TOGGLE: TypedDocumentNode<
 		}
 	}
 `;
-export const MEMBER_LIKE: TypedDocumentNode<Result<Member>, { memberId: string }> = gql`
+// Member likes do not return viewer-specific follow state. Keep that state in the profile query.
+export const MEMBER_LIKE: TypedDocumentNode<Result<Pick<Member, '_id' | 'memberLikes'>>, { memberId: string }> = gql`
 	mutation MEMBER_LIKE($memberId: String!) {
 		result: likeTargetMember(memberId: $memberId) {
 			_id
-			memberType
-			memberStatus
-			memberNick
-			memberFullname
-			memberImage
-			memberCountry
-			memberDesc
-			memberFavoriteDestinations
-			memberTours
-			memberReviews
-			memberFollowers
-			memberFollowings
 			memberLikes
-			memberViews
-			memberComments
-			createdAt
-			updatedAt
-			isFollowing
 		}
 	}
 `;
