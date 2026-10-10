@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { Alert, Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import {
 	ARTICLES,
 	ARTICLE,
@@ -110,14 +110,114 @@ export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: 
 		</Stack>
 	);
 }
+const categoryLabels: Record<ArticleCategory, string> = {
+	FREE: 'Travel stories',
+	RECOMMEND: 'Tips & recommendations',
+	NEWS: 'Travel news',
+	HUMOR: 'Just for fun',
+};
+export function CommunityArticleCard({ article, onChanged }: { article: Article; onChanged: () => Promise<unknown> }) {
+	const { t } = useTranslation('common');
+	const { locale = 'en' } = useRouter();
+	const member = useReactiveVar(memberVar);
+	const action = useAction();
+	const [like] = useMutation(ARTICLE_LIKE);
+	const [failed, setFailed] = useState(false);
+	const href = `/community/detail?id=${article._id}`;
+	const author = article.memberData;
+	const authorName = author?.memberFullname || author?.memberNick || t('Unavailable member');
+	const authorHref =
+		author && author.memberType !== 'ADMIN'
+			? author.memberType === 'AGENT'
+				? `/agent/detail?agentId=${author._id}`
+				: `/member?memberId=${author._id}`
+			: null;
+	const date = new Date(article.createdAt);
+	return (
+		<article className="triplink-story-card">
+			<Link
+				href={href}
+				passHref
+				className={`triplink-story-card__visual triplink-story-card__visual--${article.articleCategory.toLowerCase()}`}
+				aria-label={t('Read {{title}}', { title: article.articleTitle })}
+			>
+				{article.articleImage && !failed ? (
+					// eslint-disable-next-line @next/next/no-img-element
+					<img
+						src={imageUrl(article.articleImage)}
+						alt={article.articleTitle}
+						width={600}
+						height={400}
+						loading="lazy"
+						onError={() => setFailed(true)}
+					/>
+				) : (
+					<span className="triplink-story-card__cover-text">{t(categoryLabels[article.articleCategory])}</span>
+				)}
+				<span className="triplink-story-card__badge">{t(categoryLabels[article.articleCategory])}</span>
+			</Link>
+			<div className="triplink-story-card__body">
+				{!Number.isNaN(date.getTime()) && (
+					<time dateTime={article.createdAt}>
+						{new Intl.DateTimeFormat(locale === 'kr' ? 'ko' : locale, {
+							month: 'short',
+							day: 'numeric',
+							year: 'numeric',
+						}).format(date)}
+					</time>
+				)}
+				<h3>
+					<Link href={href}>{article.articleTitle}</Link>
+				</h3>
+				<p className="triplink-story-card__excerpt">{article.articleContent}</p>
+				<div className="triplink-story-card__author">
+					<Avatar src={author?.memberImage ? imageUrl(author.memberImage) : undefined} alt={String(authorName)}>
+						{String(authorName)[0]?.toUpperCase()}
+					</Avatar>
+					{authorHref ? <Link href={authorHref}>{authorName}</Link> : <span>{authorName}</span>}
+				</div>
+				<div className="triplink-story-card__footer">
+					{member ? (
+						<button
+							type="button"
+							disabled={action.busy}
+							aria-pressed={article.meLiked}
+							aria-label={t(article.meLiked ? 'Unlike {{title}}' : 'Like {{title}}', { title: article.articleTitle })}
+							onClick={() =>
+								void action.run(async () => {
+									await like({ variables: { articleId: article._id } });
+									await onChanged();
+								}, null)
+							}
+						>
+							<span aria-hidden="true">{article.meLiked ? '♥' : '♡'}</span>{' '}
+							{t('Community like count', { count: article.articleLikes })}
+						</button>
+					) : (
+						<Link href="/account/join" aria-label={t('Login to like {{title}}', { title: article.articleTitle })}>
+							♡ {t('Community like count', { count: article.articleLikes })}
+						</Link>
+					)}
+					<span>{t('Home article comment count', { count: article.articleComments })}</span>
+					<Link href={href} passHref className="triplink-story-card__read">
+						{t('Read story')} <span aria-hidden="true">↗</span>
+					</Link>
+				</div>
+				{action.feedback}
+			</div>
+		</article>
+	);
+}
 export function ArticlesList({
 	mine = false,
 	admin = false,
 	memberId,
+	community = false,
 }: {
 	mine?: boolean;
 	admin?: boolean;
 	memberId?: string;
+	community?: boolean;
 }) {
 	const { t } = useTranslation('common');
 
@@ -152,6 +252,47 @@ export function ArticlesList({
 		fetchPolicy: 'network-only',
 	});
 	const query = admin ? adminQuery : publicQuery;
+	if (community)
+		return (
+			<section className="triplink-community__feed" aria-labelledby="community-feed-title">
+				<div className="triplink-community__feed-heading">
+					<div>
+						<h2 id="community-feed-title">{t('Stories from the community')}</h2>
+						<p>{t('Fresh perspectives for your next journey.')}</p>
+					</div>
+				</div>
+				<div className="triplink-community__filters" role="group" aria-label={t('Article categories')}>
+					{(['', ...categories] as const).map((value) => (
+						<button
+							type="button"
+							key={value || 'all'}
+							aria-pressed={category === value}
+							onClick={() => {
+								setCategory(value);
+								setPage(1);
+							}}
+						>
+							{t(value ? categoryLabels[value] : 'All stories')}
+						</button>
+					))}
+				</div>
+				<QueryState loading={!ready || query.loading} error={query.error} retry={() => query.refetch()}>
+					{query.data?.result.list.length ? (
+						<div className="triplink-community__grid">
+							{query.data.result.list.map((article) => (
+								<CommunityArticleCard key={article._id} article={article} onChanged={() => query.refetch()} />
+							))}
+						</div>
+					) : (
+						<div className="triplink-community__empty">
+							<h3>{t('No stories here yet')}</h3>
+							<p>{t('Try another category to discover more from the community.')}</p>
+						</div>
+					)}
+				</QueryState>
+				<Pager page={page} total={totalOf(query.data?.result)} onChange={setPage} />
+			</section>
+		);
 	if (editing)
 		return (
 			<Stack spacing={2}>
@@ -440,10 +581,33 @@ export function ArticleComments({
 }
 export function CommunityPage() {
 	const { t } = useTranslation('common');
+	const member = useReactiveVar(memberVar);
 	return (
-		<Frame title={t('TripLink community')}>
-			<ArticlesList />
-		</Frame>
+		<div className="triplink-community">
+			<section className="triplink-community__hero">
+				<div className="triplink-community__hero-inner">
+					<p className="triplink-community__eyebrow">{t('TripLink community')}</p>
+					<h1>{t('Every journey has a story.')}</h1>
+					<p className="triplink-community__intro">
+						{t('Discover travel stories, local tips, and moments worth sharing.')}
+					</p>
+					<a href="#community-feed-title" className="triplink-community__hero-link">
+						{t('Explore the stories')} <span aria-hidden="true">↓</span>
+					</a>
+				</div>
+			</section>
+			<div className="triplink-community__main">
+				<div className="triplink-community__welcome">
+					<p>{t('A place for curious travelers.')}</p>
+					{member?.memberType === 'AGENT' && (
+						<Link href="/mypage?category=writeArticle" passHref>
+							{t('Write article')} <span aria-hidden="true">↗</span>
+						</Link>
+					)}
+				</div>
+				<ArticlesList community />
+			</div>
+		</div>
 	);
 }
 export function CommunityDetail() {

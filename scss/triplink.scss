@@ -2598,3 +2598,59 @@
 .triplink-profile__stats a { color: inherit; text-decoration: none; }
 .triplink-profile__stats a:hover { text-decoration: underline; }
 #profile-followers, #profile-following, #profile-articles, #member-tours { scroll-margin-top: 120px; }
+
+.triplink-community {
+ color: #173e43; background: #f6f9f9; font-family: 'TripLink Jakarta', Arial, sans-serif;
+ &__hero { min-height: 380px; background: linear-gradient(90deg, rgba(4,34,40,.86), rgba(4,34,40,.25)), url('/img/homepage/istanbul.jpg') center 52% / cover; color: #fff; }
+ &__hero-inner { max-width: 1200px; margin: auto; padding: 52px 32px 56px; }
+ &__eyebrow { margin: 0 0 18px; font-size: 14px; color: #cee5e4; }
+ &__hero h1 { max-width: 640px; margin: 0 0 20px; font-family: Georgia, serif; font-size: clamp(36px, 4.5vw, 62px); line-height: 1.12; font-weight: 400; letter-spacing: -1.3px; }
+ &__intro { max-width: 460px; font-size: 16px; line-height: 1.7; color: #e1eeee; margin: 0 0 26px; }
+ &__hero-link { display: inline-flex; gap: 28px; align-items: center; color: #fff; padding-bottom: 8px; border-bottom: 1px solid #bdd9d7; font-size: 14px; }
+ &__main { max-width: 1200px; margin: auto; padding: 0 32px 64px; }
+ &__welcome { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #d7e4e4; padding: 24px 0; }
+ &__welcome p { margin: 0; font-family: Georgia, serif; font-size: 20px; }
+ &__welcome a { font-weight: 600; font-size: 14px; color: #125e5b; }
+ &__feed { padding-top: 38px; }
+ &__feed-heading h2 { font-family: 'TripLink Outfit', Arial, sans-serif; font-size: 28px; margin: 0 0 8px; font-weight: 600; letter-spacing: -.5px; }
+ &__feed-heading p { margin: 0; color: #5b7479; font-size: 14px; }
+ &__filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 28px; }
+ &__filters button { border: 1px solid #d3e1e1; background: #fff; color: #476469; border-radius: 8px; padding: 11px 18px; font: inherit; font-size: 13px; cursor: pointer; }
+ &__filters button[aria-pressed='true'] { color: #fff; background: #125e5b; border-color: #125e5b; }
+ &__filters button:hover { border-color: #125e5b; }
+ &__grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 24px; }
+ &__empty { padding: 48px 24px; text-align: center; border: 1px solid #d7e4e4; background: #fff; border-radius: 16px; }
+ &__empty h3 { margin: 0 0 12px; } &__empty p { color: #5b7479; }
+ .MuiPagination-root { margin-top: 32px; }
+ a:focus-visible, button:focus-visible { outline: 3px solid #288d83; outline-offset: 4px; }
+ &__hero a:focus-visible { outline-color: white; }
+ @media(max-width:1023px) { &__grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+ @media(max-width:600px) { &__hero { min-height: 320px; background-position: 60% center; } &__hero-inner { padding: 36px 20px; } &__main { padding: 0 20px 40px; } &__grid { grid-template-columns: minmax(0,1fr); } &__filters button { padding: 10px 12px; } }
+}
+.triplink-story-card {
+ display: flex; flex-direction: column; min-width: 0; background: #fff; border: 1px solid #dce6e6; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(17,61,67,.035);
+ a { color: inherit; text-decoration: none; }
+ &__visual { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 3/2; overflow: hidden; background: #e1eae5; }
+ &__visual img { width: 100%; height: 100%; object-fit: cover; }
+ &__visual--recommend { background: #e6ddd0; } &__visual--news { background: #dce8ee; } &__visual--humor { background: #e8deea; }
+ &__cover-text { max-width: 75%; font-family: Georgia,serif; font-size: 34px; line-height: 1.15; letter-spacing: -.7px; text-align: center; color: #35595b; }
+ &__badge { position: absolute; left: 18px; bottom: 18px; background: #fff; color: #21484c; border-radius: 5px; padding: 7px 10px; font-size: 11px; font-weight: 600; }
+ &__body { padding: 24px; display: flex; flex-direction: column; flex: 1; }
+ time { font-size: 11px; color: #637e83; }
+ h3 { font-family: 'TripLink Outfit',Arial,sans-serif; font-size: 23px; font-weight: 600; line-height: 1.35; margin: 12px 0; overflow-wrap: anywhere; }
+ h3 a:hover { color: #10736c; }
+ &__excerpt { color: #63767b; font-size: 13px; line-height: 1.8; margin: 0 0 22px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+ &__author { margin-top: auto; display: flex; gap: 10px; align-items: center; font-size: 12px; font-weight: 600; }
+ &__author .MuiAvatar-root { width: 30px; height: 30px; font-size: 12px; background: #e2eeed; color: #235c57; }
+ &__author a:hover { text-decoration: underline; }
+ &__footer { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e7eeee; font-size: 11px; color: #59767b; }
+ &__footer button { font: inherit; border: 0; padding: 0; color: inherit; background: transparent; cursor: pointer; }
+ &__footer button[aria-pressed='true'] { color: #ae392e; }
+ &__footer button:disabled { opacity: .5; cursor: wait; }
+ &__footer button > span { font-size: 21px; line-height: 1; vertical-align: middle; }
+ &__read { margin-left: auto; color: #145d59 !important; font-weight: 600; }
+ .MuiAlert-root { margin-top: 16px; }
+}
+.triplink-story-card h3, .triplink-story-card h3 a { white-space: normal; overflow-wrap: anywhere; }
+.triplink-story-card__body { min-width: 0; }
+#community-feed-title { scroll-margin-top: 120px; }
