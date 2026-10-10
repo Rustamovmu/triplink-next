@@ -702,5 +702,15 @@
 	"This tour has confirmed bookings and cannot be resubmitted for approval.": "이 투어에는 확정된 예약이 있어 승인을 다시 요청할 수 없습니다.",
 	"Cancel tour": "투어 취소",
 	"Submit for approval": "승인 요청",
-	"Return to draft": "초안으로 되돌리기"
+	"Return to draft": "초안으로 되돌리기",
+	"Tour overview": "투어 개요",
+	"Pricing and group size": "가격 및 그룹 규모",
+	"Travel arrangements": "여행 구성",
+	"Tour photos": "투어 사진",
+	"Daily itinerary": "일별 일정",
+	"Booking reference": "예약 번호",
+	"Payment reference": "결제 번호",
+	"Refund reference": "환불 번호",
+	"Return": "귀환",
+	"Total": "총액"
 }

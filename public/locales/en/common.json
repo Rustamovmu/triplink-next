@@ -709,5 +709,15 @@
 	"This tour has confirmed bookings and cannot be resubmitted for approval.": "This tour has confirmed bookings and cannot be resubmitted for approval.",
 	"Cancel tour": "Cancel tour",
 	"Submit for approval": "Submit for approval",
-	"Return to draft": "Return to draft"
+	"Return to draft": "Return to draft",
+	"Tour overview": "Tour overview",
+	"Pricing and group size": "Pricing and group size",
+	"Travel arrangements": "Travel arrangements",
+	"Tour photos": "Tour photos",
+	"Daily itinerary": "Daily itinerary",
+	"Booking reference": "Booking reference",
+	"Payment reference": "Payment reference",
+	"Refund reference": "Refund reference",
+	"Return": "Return",
+	"Total": "Total"
 }

@@ -124,256 +124,302 @@ export function TourForm({ tour, onSaved }: { tour?: Tour; onSaved: () => Promis
 		});
 	};
 	return (
-		<Stack component="form" spacing={2} onSubmit={submit}>
+		<Stack component="form" spacing={2} onSubmit={submit} className="triplink-workspace-form triplink-tour-form">
 			{action.feedback}
 			<Alert severity="info">
 				{t(
 					'Departure times use your local timezone and are saved as ISO instants. Drafts can have empty departures and itinerary; submission requires images, departures, and itinerary.',
 				)}
 			</Alert>
-			{(
-				['tourTitle', 'tourDescription', 'tourDestination', 'tourCountry', 'tourCity', 'tourAccommodation'] as const
-			).map((key) => (
-				<TextField
-					key={key}
-					label={t(key)}
-					required={key !== 'tourAccommodation'}
-					multiline={key === 'tourDescription'}
-					value={form[key] ?? ''}
-					onChange={(e) => field(key, e.target.value)}
-					inputProps={{
-						minLength: key === 'tourTitle' ? 5 : key === 'tourDescription' ? 20 : 2,
-						maxLength:
-							key === 'tourDescription'
-								? 10000
-								: key === 'tourTitle' || key === 'tourDestination'
-								? 150
-								: key === 'tourAccommodation'
-								? 500
-								: 100,
-					}}
-				/>
-			))}
-			<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-				{(['tourPrice', 'tourDurationDays', 'tourMaxGroupSize'] as const).map((key) => (
-					<TextField
-						key={key}
-						label={t(key)}
-						type="number"
-						required
-						value={form[key]}
-						onChange={(e) => field(key, Number(e.target.value))}
-						inputProps={{
-							min: key === 'tourPrice' ? 0 : 1,
-							step: key === 'tourPrice' ? 0.01 : 1,
-							...(key === 'tourDurationDays' ? { max: 365 } : {}),
-						}}
-					/>
-				))}
-				<TextField
-					label={t('Discount price (optional)')}
-					type="number"
-					value={form.tourDiscountPrice ?? ''}
-					onChange={(e) => field('tourDiscountPrice', e.target.value === '' ? undefined : Number(e.target.value))}
-					inputProps={{ min: 0, step: 0.01 }}
-				/>
-			</Stack>
-			<TextField
-				select
-				label={t('Category')}
-				value={form.tourCategory}
-				onChange={(e) => field('tourCategory', e.target.value as TourInput['tourCategory'])}
-			>
-				{tourCategories.map((value) => (
-					<MenuItem key={value} value={value}>
-						{t(String(value))}
-					</MenuItem>
-				))}
-			</TextField>
-			<TextField
-				select
-				label={t('Difficulty')}
-				value={form.tourDifficulty}
-				onChange={(e) => field('tourDifficulty', e.target.value as TourInput['tourDifficulty'])}
-			>
-				{tourDifficulties.map((value) => (
-					<MenuItem key={value} value={value}>
-						{t(String(value))}
-					</MenuItem>
-				))}
-			</TextField>
-			{(
-				['tourLanguages', 'tourTransportation', 'tourMeals', 'tourIncludedServices', 'tourExcludedServices'] as const
-			).map((key) => (
-				<TextField
-					key={key}
-					label={`${t(key)} (${t('One per line')})`}
-					multiline
-					value={form[key].join('\n')}
-					onChange={(e) => field(key, e.target.value.split('\n'))}
-				/>
-			))}
-			<Button component="label" disabled={action.busy}>
-				{t('Upload tour images')}
-				<input
-					type="file"
-					multiple
-					accept="image/jpeg,image/png"
-					hidden
-					onChange={(e) => {
-						const files = Array.from(e.target.files ?? []);
-						void action.run(async () => {
-							if (form.tourImages.length + files.length > 20) throw new Error('At most 20 tour images.');
-							field('tourImages', [...form.tourImages, ...(await uploadImages(files, 'tour'))]);
-						});
-						e.target.value = '';
-					}}
-				/>
-			</Button>
-			<Stack direction="row" flexWrap="wrap" gap={2}>
-				{form.tourImages.map((path, index) => (
-					<Stack key={path}>
-						<Box
-							component="img"
-							onError={(event: React.SyntheticEvent<HTMLImageElement>) => {
-								const target = event.currentTarget;
-								target.onerror = null;
-								if (!target.src.endsWith('/img/tour-placeholder.svg')) target.src = '/img/tour-placeholder.svg';
+			<fieldset className="triplink-editor-section triplink-tour-form__overview">
+				<legend>{t('Tour overview')}</legend>
+				<div className="triplink-tour-form__grid">
+					{(
+						['tourTitle', 'tourDescription', 'tourDestination', 'tourCountry', 'tourCity', 'tourAccommodation'] as const
+					).map((key) => (
+						<TextField
+							key={key}
+							className={['tourTitle', 'tourDescription'].includes(key) ? 'triplink-tour-form__wide' : undefined}
+							label={t(key)}
+							required={key !== 'tourAccommodation'}
+							multiline={key === 'tourDescription'}
+							minRows={key === 'tourDescription' ? 4 : undefined}
+							value={form[key] ?? ''}
+							onChange={(e) => field(key, e.target.value)}
+							inputProps={{
+								minLength: key === 'tourTitle' ? 5 : key === 'tourDescription' ? 20 : 2,
+								maxLength:
+									key === 'tourDescription'
+										? 10000
+										: key === 'tourTitle' || key === 'tourDestination'
+										? 150
+										: key === 'tourAccommodation'
+										? 500
+										: 100,
 							}}
-							src={imageUrl(path)}
-							alt={t('Tour upload')}
-							sx={{ width: 120, height: 90, objectFit: 'cover' }}
 						/>
-						<Button
-							disabled={action.busy}
-							onClick={() =>
-								field(
-									'tourImages',
-									form.tourImages.filter((_, i) => i !== index),
-								)
-							}
-						>
-							{t('Remove image')}
-						</Button>
-					</Stack>
-				))}
-			</Stack>
-			<Typography variant="h6">
-				{t('Departures · total seats')} {form.tourAvailableDates.reduce((sum, item) => sum + item.availableSeats, 0)}
-			</Typography>
-			{form.tourAvailableDates.map((date, index) => (
-				<Stack key={index} direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-					{(['startDate', 'endDate'] as const).map((key) => (
+					))}
+				</div>
+			</fieldset>
+			<fieldset className="triplink-editor-section">
+				<legend>{t('Pricing and group size')}</legend>
+				<div className="triplink-tour-form__grid triplink-tour-form__pricing">
+					{(['tourPrice', 'tourDurationDays', 'tourMaxGroupSize'] as const).map((key) => (
 						<TextField
 							key={key}
 							label={t(key)}
-							type="datetime-local"
+							type="number"
 							required
-							InputLabelProps={{ shrink: true }}
-							value={localDate(date[key])}
+							value={form[key]}
+							onChange={(e) => field(key, Number(e.target.value))}
+							inputProps={{
+								min: key === 'tourPrice' ? 0 : 1,
+								step: key === 'tourPrice' ? 0.01 : 1,
+								...(key === 'tourDurationDays' ? { max: 365 } : {}),
+							}}
+						/>
+					))}
+					<TextField
+						label={t('Discount price (optional)')}
+						type="number"
+						value={form.tourDiscountPrice ?? ''}
+						onChange={(e) => field('tourDiscountPrice', e.target.value === '' ? undefined : Number(e.target.value))}
+						inputProps={{ min: 0, step: 0.01 }}
+					/>
+				</div>
+			</fieldset>
+			<fieldset className="triplink-editor-section">
+				<legend>{t('Travel arrangements')}</legend>
+				<div className="triplink-tour-form__grid">
+					<TextField
+						select
+						label={t('Category')}
+						value={form.tourCategory}
+						onChange={(e) => field('tourCategory', e.target.value as TourInput['tourCategory'])}
+					>
+						{tourCategories.map((value) => (
+							<MenuItem key={value} value={value}>
+								{t(String(value))}
+							</MenuItem>
+						))}
+					</TextField>
+					<TextField
+						select
+						label={t('Difficulty')}
+						value={form.tourDifficulty}
+						onChange={(e) => field('tourDifficulty', e.target.value as TourInput['tourDifficulty'])}
+					>
+						{tourDifficulties.map((value) => (
+							<MenuItem key={value} value={value}>
+								{t(String(value))}
+							</MenuItem>
+						))}
+					</TextField>
+					{(
+						[
+							'tourLanguages',
+							'tourTransportation',
+							'tourMeals',
+							'tourIncludedServices',
+							'tourExcludedServices',
+						] as const
+					).map((key) => (
+						<TextField
+							key={key}
+							label={`${t(key)} (${t('One per line')})`}
+							multiline
+							minRows={2}
+							value={form[key].join('\n')}
+							onChange={(e) => field(key, e.target.value.split('\n'))}
+						/>
+					))}
+				</div>
+			</fieldset>
+			<fieldset className="triplink-editor-section triplink-tour-form__photos">
+				<legend>{t('Tour photos')}</legend>
+				<Button component="label" variant="outlined" disabled={action.busy}>
+					{t('Upload tour images')}
+					<input
+						type="file"
+						multiple
+						accept="image/jpeg,image/png"
+						hidden
+						onChange={(e) => {
+							const files = Array.from(e.target.files ?? []);
+							void action.run(async () => {
+								if (form.tourImages.length + files.length > 20) throw new Error('At most 20 tour images.');
+								field('tourImages', [...form.tourImages, ...(await uploadImages(files, 'tour'))]);
+							});
+							e.target.value = '';
+						}}
+					/>
+				</Button>
+				<Stack direction="row" flexWrap="wrap" gap={2}>
+					{form.tourImages.map((path, index) => (
+						<Stack key={path}>
+							<Box
+								component="img"
+								onError={(event: React.SyntheticEvent<HTMLImageElement>) => {
+									const target = event.currentTarget;
+									target.onerror = null;
+									if (!target.src.endsWith('/img/tour-placeholder.svg')) target.src = '/img/tour-placeholder.svg';
+								}}
+								src={imageUrl(path)}
+								alt={t('Tour upload')}
+								sx={{ width: 120, height: 90, objectFit: 'cover' }}
+							/>
+							<Button
+								variant="outlined"
+								className="triplink-danger-action"
+								disabled={action.busy}
+								onClick={() =>
+									field(
+										'tourImages',
+										form.tourImages.filter((_, i) => i !== index),
+									)
+								}
+							>
+								{t('Remove image')}
+							</Button>
+						</Stack>
+					))}
+				</Stack>
+			</fieldset>
+			<fieldset className="triplink-editor-section">
+				<legend>{t('Departures')}</legend>
+				<Typography className="triplink-tour-form__seat-total">
+					{t('Departures · total seats')} {form.tourAvailableDates.reduce((sum, item) => sum + item.availableSeats, 0)}
+				</Typography>
+				{form.tourAvailableDates.map((date, index) => (
+					<Stack
+						key={index}
+						direction={{ xs: 'column', sm: 'row' }}
+						spacing={1}
+						className="triplink-tour-form__departure"
+					>
+						{(['startDate', 'endDate'] as const).map((key) => (
+							<TextField
+								key={key}
+								label={t(key)}
+								type="datetime-local"
+								required
+								InputLabelProps={{ shrink: true }}
+								value={localDate(date[key])}
+								onChange={(e) =>
+									field(
+										'tourAvailableDates',
+										form.tourAvailableDates.map((item, i) =>
+											i === index
+												? { ...item, [key]: e.target.value ? new Date(e.target.value).toISOString() : '' }
+												: item,
+										),
+									)
+								}
+							/>
+						))}
+						<TextField
+							label={t('Available seats')}
+							type="number"
+							required
+							inputProps={{ min: 0, step: 1 }}
+							value={date.availableSeats}
 							onChange={(e) =>
 								field(
 									'tourAvailableDates',
 									form.tourAvailableDates.map((item, i) =>
-										i === index
-											? { ...item, [key]: e.target.value ? new Date(e.target.value).toISOString() : '' }
-											: item,
+										i === index ? { ...item, availableSeats: Number(e.target.value) } : item,
 									),
 								)
 							}
 						/>
-					))}
-					<TextField
-						label={t('Available seats')}
-						type="number"
-						required
-						inputProps={{ min: 0, step: 1 }}
-						value={date.availableSeats}
-						onChange={(e) =>
-							field(
-								'tourAvailableDates',
-								form.tourAvailableDates.map((item, i) =>
-									i === index ? { ...item, availableSeats: Number(e.target.value) } : item,
-								),
-							)
-						}
-					/>
-					<Button
-						onClick={() =>
-							field(
-								'tourAvailableDates',
-								form.tourAvailableDates.filter((_, i) => i !== index),
-							)
-						}
-					>
-						{t('Remove departure')}
-					</Button>
-				</Stack>
-			))}
-			<Button
-				disabled={form.tourAvailableDates.length >= 100}
-				onClick={() =>
-					field('tourAvailableDates', [...form.tourAvailableDates, { startDate: '', endDate: '', availableSeats: 1 }])
-				}
-			>
-				{t('Add departure')}
-			</Button>
-			<Typography variant="h6">{t('Itinerary')}</Typography>
-			{form.tourItinerary.map((item, index) => (
-				<Stack key={index} spacing={1}>
-					<TextField
-						label={t('Day')}
-						type="number"
-						required
-						inputProps={{ min: 1, max: form.tourDurationDays, step: 1 }}
-						value={item.day}
-						onChange={(e) =>
-							field(
-								'tourItinerary',
-								form.tourItinerary.map((row, i) => (i === index ? { ...row, day: Number(e.target.value) } : row)),
-							)
-						}
-					/>
-					{(['title', 'description'] as const).map((key) => (
+						<Button
+							variant="outlined"
+							className="triplink-danger-action"
+							onClick={() =>
+								field(
+									'tourAvailableDates',
+									form.tourAvailableDates.filter((_, i) => i !== index),
+								)
+							}
+						>
+							{t('Remove departure')}
+						</Button>
+					</Stack>
+				))}
+				<Button
+					variant="outlined"
+					disabled={form.tourAvailableDates.length >= 100}
+					onClick={() =>
+						field('tourAvailableDates', [...form.tourAvailableDates, { startDate: '', endDate: '', availableSeats: 1 }])
+					}
+				>
+					{t('Add departure')}
+				</Button>
+			</fieldset>
+			<fieldset className="triplink-editor-section">
+				<legend>{t('Daily itinerary')}</legend>
+				{form.tourItinerary.map((item, index) => (
+					<Stack key={index} spacing={1} className="triplink-tour-form__day">
 						<TextField
-							key={key}
-							label={t(key)}
+							label={t('Day')}
+							type="number"
 							required
-							multiline={key === 'description'}
-							value={item[key]}
+							inputProps={{ min: 1, max: form.tourDurationDays, step: 1 }}
+							value={item.day}
 							onChange={(e) =>
 								field(
 									'tourItinerary',
-									form.tourItinerary.map((row, i) => (i === index ? { ...row, [key]: e.target.value } : row)),
+									form.tourItinerary.map((row, i) => (i === index ? { ...row, day: Number(e.target.value) } : row)),
 								)
 							}
 						/>
-					))}
-					<Button
-						onClick={() =>
-							field(
-								'tourItinerary',
-								form.tourItinerary.filter((_, i) => i !== index),
-							)
-						}
-					>
-						{t('Remove day')}
-					</Button>
-				</Stack>
-			))}
-			<Button
-				onClick={() =>
-					field('tourItinerary', [
-						...form.tourItinerary,
-						{ day: form.tourItinerary.length + 1, title: '', description: '' },
-					])
-				}
-			>
-				{t('Add itinerary day')}
-			</Button>
-			<Button type="submit" variant="contained" disabled={action.busy}>
-				{t('Save draft')}
-			</Button>
+						{(['title', 'description'] as const).map((key) => (
+							<TextField
+								key={key}
+								label={t(key)}
+								required
+								multiline={key === 'description'}
+								minRows={key === 'description' ? 3 : undefined}
+								value={item[key]}
+								onChange={(e) =>
+									field(
+										'tourItinerary',
+										form.tourItinerary.map((row, i) => (i === index ? { ...row, [key]: e.target.value } : row)),
+									)
+								}
+							/>
+						))}
+						<Button
+							variant="outlined"
+							className="triplink-danger-action"
+							onClick={() =>
+								field(
+									'tourItinerary',
+									form.tourItinerary.filter((_, i) => i !== index),
+								)
+							}
+						>
+							{t('Remove day')}
+						</Button>
+					</Stack>
+				))}
+				<Button
+					variant="outlined"
+					onClick={() =>
+						field('tourItinerary', [
+							...form.tourItinerary,
+							{ day: form.tourItinerary.length + 1, title: '', description: '' },
+						])
+					}
+				>
+					{t('Add itinerary day')}
+				</Button>
+			</fieldset>
+			<div className="triplink-tour-form__footer">
+				<Button type="submit" variant="contained" disabled={action.busy}>
+					{t('Save draft')}
+				</Button>
+			</div>
 		</Stack>
 	);
 }

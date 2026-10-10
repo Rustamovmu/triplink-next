@@ -37,6 +37,7 @@ export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: 
 	return (
 		<Stack
 			component="form"
+			className="triplink-workspace-form triplink-article-form"
 			spacing={2}
 			onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
 				event.preventDefault();
@@ -78,7 +79,7 @@ export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: 
 				defaultValue={article?.articleContent ?? ''}
 				inputProps={{ minLength: 3, maxLength: 2000 }}
 			/>
-			<Button component="label" disabled={action.busy}>
+			<Button component="label" variant="outlined" disabled={action.busy}>
 				{t('Upload article image')}
 				<input
 					type="file"
@@ -307,42 +308,51 @@ export function ArticlesList({
 			</Stack>
 		);
 	return (
-		<Stack spacing={2}>
+		<Stack spacing={2} className={mine && !admin ? 'triplink-owned-articles' : undefined}>
 			{action.feedback}
-			{admin ? (
-				<TextField
-					select
-					label={t('Status')}
-					value={status}
-					onChange={(e) => {
-						setStatus(e.target.value as Article['articleStatus']);
-						setPage(1);
-					}}
-				>
-					{['ACTIVE', 'DELETE'].map((value) => (
-						<MenuItem key={value} value={value}>
-							{t(String(value))}
-						</MenuItem>
-					))}
-				</TextField>
-			) : (
-				<TextField
-					select
-					label={t('Category')}
-					value={category}
-					onChange={(e) => {
-						setCategory(e.target.value as ArticleCategory | '');
-						setPage(1);
-					}}
-				>
-					<MenuItem value="">{t('All')}</MenuItem>
-					{categories.map((value) => (
-						<MenuItem key={value} value={value}>
-							{t(String(value))}
-						</MenuItem>
-					))}
-				</TextField>
-			)}
+			<div className={mine && !admin ? 'triplink-owned-articles__toolbar' : undefined}>
+				{mine && !admin && query.data && !query.loading && !query.error && (
+					<Typography className="triplink-owned-articles__count">
+						<strong>{totalOf(query.data.result)}</strong> {t('Articles')}
+					</Typography>
+				)}
+				{admin ? (
+					<TextField
+						select
+						label={t('Status')}
+						value={status}
+						onChange={(e) => {
+							setStatus(e.target.value as Article['articleStatus']);
+							setPage(1);
+						}}
+					>
+						{['ACTIVE', 'DELETE'].map((value) => (
+							<MenuItem key={value} value={value}>
+								{t(String(value))}
+							</MenuItem>
+						))}
+					</TextField>
+				) : (
+					<TextField
+						select
+						label={t('Category')}
+						value={category}
+						SelectProps={{ displayEmpty: true }}
+						InputLabelProps={{ shrink: true }}
+						onChange={(e) => {
+							setCategory(e.target.value as ArticleCategory | '');
+							setPage(1);
+						}}
+					>
+						<MenuItem value="">{t('All')}</MenuItem>
+						{categories.map((value) => (
+							<MenuItem key={value} value={value}>
+								{t(String(value))}
+							</MenuItem>
+						))}
+					</TextField>
+				)}
+			</div>
 			<QueryState
 				loading={!ready || query.loading}
 				error={query.error}
@@ -350,30 +360,87 @@ export function ArticlesList({
 				retry={() => query.refetch()}
 			>
 				{query.data?.result.list.map((article) => (
-					<Card key={article._id} variant="outlined">
+					<Card
+						key={article._id}
+						variant="outlined"
+						className={mine && !admin ? 'triplink-owned-articles__card' : undefined}
+					>
 						<CardContent>
-							<Stack spacing={2}>
-								{article.articleStatus === 'ACTIVE' ? (
-									<Link href={`/community/detail?id=${article._id}`}>{article.articleTitle}</Link>
+							<Stack spacing={2} className={mine && !admin ? 'triplink-owned-articles__row' : undefined}>
+								{mine && !admin ? (
+									<>
+										<div className="triplink-owned-articles__photo">
+											<Box
+												component="img"
+												src={article.articleImage ? imageUrl(article.articleImage) : '/img/tour-placeholder.svg'}
+												alt=""
+												loading="lazy"
+												onError={(event: React.SyntheticEvent<HTMLImageElement>) => {
+													if (!event.currentTarget.src.endsWith('/img/tour-placeholder.svg'))
+														event.currentTarget.src = '/img/tour-placeholder.svg';
+												}}
+											/>
+										</div>
+										<div className="triplink-owned-articles__details">
+											<span className="triplink-owned-articles__category" data-category={article.articleCategory}>
+												{t(categoryLabels[article.articleCategory])}
+											</span>
+											<h3>
+												{article.articleStatus === 'ACTIVE' ? (
+													<Link href={`/community/detail?id=${article._id}`}>{article.articleTitle}</Link>
+												) : (
+													article.articleTitle
+												)}
+											</h3>
+											<p>{article.memberData?.memberNick ?? t('Unavailable member')}</p>
+											<dl className="triplink-owned-articles__metrics">
+												<div>
+													<dt>{t('Likes')}</dt>
+													<dd>{article.articleLikes}</dd>
+												</div>
+												<div>
+													<dt>{t('Comments')}</dt>
+													<dd>{article.articleComments}</dd>
+												</div>
+											</dl>
+										</div>
+									</>
 								) : (
-									<Typography>{article.articleTitle}</Typography>
+									<>
+										{article.articleStatus === 'ACTIVE' ? (
+											<Link href={`/community/detail?id=${article._id}`}>{article.articleTitle}</Link>
+										) : (
+											<Typography>{article.articleTitle}</Typography>
+										)}
+										<Typography>
+											{article.articleCategory} · {article.memberData?.memberNick ?? 'Unavailable member'} ·{' '}
+											{article.articleLikes} {t('likes ·')} {article.articleComments} {t('comments')}
+										</Typography>
+									</>
 								)}
-								<Typography>
-									{article.articleCategory} · {article.memberData?.memberNick ?? 'Unavailable member'} ·{' '}
-									{article.articleLikes} {t('likes ·')} {article.articleComments} {t('comments')}
-								</Typography>
-								<Stack direction="row" gap={1} flexWrap="wrap">
+								<Stack
+									direction="row"
+									gap={1}
+									flexWrap="wrap"
+									className={mine && !admin ? 'triplink-owned-articles__actions' : undefined}
+								>
 									{!memberId &&
 										member &&
 										member._id === article.memberId &&
 										article.articleStatus === 'ACTIVE' &&
 										['AGENT', 'ADMIN'].includes(member.memberType) && (
-											<Button disabled={action.busy} onClick={() => setEditing(article)}>
+											<Button
+												variant={mine && !admin ? 'contained' : 'text'}
+												disabled={action.busy}
+												onClick={() => setEditing(article)}
+											>
 												{t('Edit')}
 											</Button>
 										)}
 									{(admin || mine) && article.articleStatus === 'ACTIVE' && (
 										<Button
+											variant={mine && !admin ? 'outlined' : 'text'}
+											className={mine && !admin ? 'triplink-danger-action' : undefined}
 											disabled={action.busy}
 											onClick={() =>
 												void action.run(async () => {

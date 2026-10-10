@@ -723,5 +723,15 @@
 	"This tour has confirmed bookings and cannot be resubmitted for approval.": "У этого тура есть подтверждённые бронирования, поэтому его нельзя повторно отправить на одобрение.",
 	"Cancel tour": "Отменить тур",
 	"Submit for approval": "Отправить на одобрение",
-	"Return to draft": "Вернуть в черновики"
+	"Return to draft": "Вернуть в черновики",
+	"Tour overview": "Обзор тура",
+	"Pricing and group size": "Цена и размер группы",
+	"Travel arrangements": "Организация поездки",
+	"Tour photos": "Фотографии тура",
+	"Daily itinerary": "Программа по дням",
+	"Booking reference": "Номер бронирования",
+	"Payment reference": "Номер платежа",
+	"Refund reference": "Номер возврата",
+	"Return": "Возвращение",
+	"Total": "Итого"
 }

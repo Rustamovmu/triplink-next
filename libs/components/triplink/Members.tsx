@@ -56,7 +56,13 @@ export function ProfileForm({ member }: { member: Member }) {
 		});
 	};
 	return (
-		<Stack component="form" key={member.updatedAt} spacing={2} onSubmit={submit} className="triplink-profile-form">
+		<Stack
+			component="form"
+			key={member.updatedAt}
+			spacing={2}
+			onSubmit={submit}
+			className="triplink-profile-form triplink-workspace-form"
+		>
 			{action.feedback}
 			<div className="triplink-profile-form__photo">
 				<Avatar src={image ? imageUrl(image) : undefined} alt={member.memberNick} sx={{ width: 80, height: 80 }}>
@@ -65,7 +71,7 @@ export function ProfileForm({ member }: { member: Member }) {
 				<div>
 					<h3>{t('Profile photo')}</h3>
 					<p>{t('Choose a photo for your public profile.')}</p>
-					<Button component="label" disabled={action.busy}>
+					<Button component="label" variant="outlined" disabled={action.busy}>
 						{t('Upload profile image')}
 						<input
 							type="file"
@@ -90,6 +96,7 @@ export function ProfileForm({ member }: { member: Member }) {
 						required={key === 'memberNick'}
 						defaultValue={member[key] ?? ''}
 						multiline={key === 'memberDesc'}
+						minRows={key === 'memberDesc' ? 5 : undefined}
 						inputProps={{
 							minLength: key === 'memberNick' ? 3 : key === 'memberFullname' ? 2 : undefined,
 							maxLength: key === 'memberDesc' ? 1000 : key === 'memberNick' ? 20 : 100,

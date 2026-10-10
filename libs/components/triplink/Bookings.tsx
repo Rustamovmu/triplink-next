@@ -108,6 +108,7 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 	const { t } = useTranslation('common');
 
 	const member = useReactiveVar(memberVar)!;
+	const agentView = member.memberType === 'AGENT';
 	const action = useAction();
 	const client = useApolloClient();
 	const [reason, setReason] = useState('');
@@ -174,25 +175,78 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 		});
 	};
 	return (
-		<Card variant="outlined">
+		<Card variant="outlined" className={agentView ? 'triplink-booking-card' : undefined}>
 			<CardContent>
 				<Stack spacing={2}>
 					{action.feedback}
-					<Typography variant="h6">
-						{booking.bookingCode} · {booking.tourData?.tourTitle ?? 'Tour unavailable'}
-					</Typography>
-					<Typography>
-						{t(booking.bookingStatus)} / {t(booking.paymentStatus)} · {booking.numberOfPeople} {t('people')}
-					</Typography>
-					<Typography>
-						{displayDate(booking.selectedDate)} → {displayDate(booking.selectedEndDate)}
-					</Typography>
-					<Typography>
-						{t('Unit price:')} {booking.unitPrice} {t('· Total:')} {booking.totalPrice}
-					</Typography>
-					<Typography>
-						{t('Payment:')} {booking.paymentReference ?? '—'} {t('· Refund:')} {booking.refundReference ?? '—'}
-					</Typography>
+					{agentView ? (
+						<>
+							<div className="triplink-booking-card__heading">
+								<h3>{booking.tourData?.tourTitle ?? t('Tour unavailable')}</h3>
+								<p>
+									{t('Booking reference')} <strong>{booking.bookingCode}</strong>
+								</p>
+							</div>
+							<div className="triplink-booking-card__badges">
+								<span className="triplink-status-badge" data-status={booking.bookingStatus}>
+									{t('Booking status')}: {t(booking.bookingStatus)}
+								</span>
+								<span className="triplink-status-badge" data-status={booking.paymentStatus}>
+									{t('Payment status')}: {t(booking.paymentStatus)}
+								</span>
+							</div>
+							<dl className="triplink-booking-card__details">
+								<div>
+									<dt>{t('Departure')}</dt>
+									<dd>{displayDate(booking.selectedDate)}</dd>
+								</div>
+								<div>
+									<dt>{t('Return')}</dt>
+									<dd>{displayDate(booking.selectedEndDate)}</dd>
+								</div>
+								<div>
+									<dt>{t('Travelers')}</dt>
+									<dd>{booking.numberOfPeople}</dd>
+								</div>
+								<div>
+									<dt>{t('Unit price:')}</dt>
+									<dd>{booking.unitPrice.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}</dd>
+								</div>
+								<div className="triplink-booking-card__total">
+									<dt>{t('Total')}</dt>
+									<dd>{booking.totalPrice.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}</dd>
+								</div>
+							</dl>
+							<dl className="triplink-booking-card__references">
+								<div>
+									<dt>{t('Payment reference')}</dt>
+									<dd>{booking.paymentReference ?? '—'}</dd>
+								</div>
+								<div>
+									<dt>{t('Refund reference')}</dt>
+									<dd>{booking.refundReference ?? '—'}</dd>
+								</div>
+							</dl>
+						</>
+					) : (
+						<>
+							<Typography variant="h6">
+								{booking.bookingCode} · {booking.tourData?.tourTitle ?? 'Tour unavailable'}
+							</Typography>
+							<Typography>
+								{t(booking.bookingStatus)} / {t(booking.paymentStatus)} · {booking.numberOfPeople} {t('people')}
+							</Typography>
+							<Typography>
+								{displayDate(booking.selectedDate)} → {displayDate(booking.selectedEndDate)}
+							</Typography>
+							<Typography>
+								{t('Unit price:')} {booking.unitPrice} {t('· Total:')} {booking.totalPrice}
+							</Typography>
+							<Typography>
+								{t('Payment:')} {booking.paymentReference ?? '—'} {t('· Refund:')} {booking.refundReference ?? '—'}
+							</Typography>
+						</>
+					)}
 					{booking.cancellationReason && (
 						<Typography>
 							{t('Cancellation:')} {booking.cancellationReason}
@@ -217,7 +271,7 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 							multiline
 						/>
 					)}
-					<Stack direction="row" flexWrap="wrap" gap={1}>
+					<Stack direction="row" flexWrap="wrap" gap={1} className="triplink-booking-card__actions">
 						{acts.pay && (
 							<Button
 								disabled={action.busy}
@@ -234,6 +288,7 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 						)}
 						{acts.confirm && (
 							<Button
+								variant={agentView ? 'contained' : 'text'}
 								disabled={action.busy}
 								onClick={() =>
 									void action.run(async () => {
@@ -262,6 +317,8 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 						)}
 						{acts.reject && (
 							<Button
+								variant={agentView ? 'outlined' : 'text'}
+								className={agentView ? 'triplink-danger-action' : undefined}
 								disabled={action.busy || !reasonValid}
 								onClick={() =>
 									void action.run(async () => {
@@ -275,6 +332,7 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 						)}
 						{acts.complete && (
 							<Button
+								variant={agentView ? 'contained' : 'text'}
 								disabled={action.busy}
 								onClick={() =>
 									void action.run(async () => {
@@ -384,15 +442,17 @@ export function BookingsPanel({ admin = false }: { admin?: boolean }) {
 		notifyOnNetworkStatusChange: true,
 	});
 	return (
-		<Stack spacing={2}>
+		<Stack spacing={2} className={!admin && member?.memberType === 'AGENT' ? 'triplink-bookings' : undefined}>
 			<Alert severity="info">
 				{t('Payments and refunds are simulated. Booking status and payment status are independent.')}
 			</Alert>
-			<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+			<Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} className="triplink-bookings__filters">
 				<TextField
 					select
 					label={t('Booking status')}
 					value={status}
+					SelectProps={{ displayEmpty: true }}
+					InputLabelProps={{ shrink: true }}
 					onChange={(e) => {
 						setStatus(e.target.value as BookingStatus | '');
 						setPage(1);
@@ -409,6 +469,8 @@ export function BookingsPanel({ admin = false }: { admin?: boolean }) {
 					select
 					label={t('Payment status')}
 					value={payment}
+					SelectProps={{ displayEmpty: true }}
+					InputLabelProps={{ shrink: true }}
 					onChange={(e) => {
 						setPayment(e.target.value as PaymentStatus | '');
 						setPage(1);
