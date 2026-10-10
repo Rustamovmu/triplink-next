@@ -74,7 +74,7 @@ function TourPhotos({ images, href, title }: { images: string[]; href: string; t
 	);
 }
 
-export function TourCard({ tour }: { tour: Tour }) {
+export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: boolean }) {
 	const { t } = useTranslation('common');
 	const favorites = useTourFavorites();
 	const saved = favorites.saved.has(tour._id);
@@ -101,7 +101,7 @@ export function TourCard({ tour }: { tour: Tour }) {
 				/>
 				{(tour.tourFeatured || tour.tourStatus === 'SOLD_OUT') && (
 					<div className="triplink-tour-card__badges">
-						{tour.tourFeatured && <span>{t('Featured')}</span>}
+						{tour.tourFeatured && <span>{t(catalog ? 'Top tour' : 'Featured')}</span>}
 						{tour.tourStatus === 'SOLD_OUT' && <span className="triplink-tour-card__sold-out">{t('Sold out')}</span>}
 					</div>
 				)}
@@ -110,24 +110,38 @@ export function TourCard({ tour }: { tour: Tour }) {
 						href="/account/join"
 						passHref
 						className="triplink-tour-card__favorite"
-						aria-label={t('Login to save {{title}}', { title: tour.tourTitle })}
+						aria-label={t(catalog ? 'Login to like {{title}}' : 'Login to save {{title}}', { title: tour.tourTitle })}
 					>
 						<FavoriteBorderRoundedIcon aria-hidden="true" />
 					</Link>
 				) : (
-					favorites.eligible && (
+					(favorites.eligible || catalog) && (
 						<button
 							type="button"
 							className="triplink-tour-card__favorite"
 							aria-label={
 								favorites.error
 									? t('Retry saved tours')
-									: t(saved ? 'Unsave {{title}}' : 'Save {{title}}', { title: tour.tourTitle })
+									: t(
+											catalog
+												? saved
+													? 'Unlike {{title}}'
+													: 'Like {{title}}'
+												: saved
+												? 'Unsave {{title}}'
+												: 'Save {{title}}',
+											{ title: tour.tourTitle },
+									  )
 							}
-							aria-pressed={favorites.ready ? saved : undefined}
-							aria-busy={(!favorites.ready && !favorites.error) || favorites.pending.has(tour._id)}
-							disabled={(!favorites.ready && !favorites.error) || favorites.pending.has(tour._id)}
-							onClick={() => (favorites.error ? favorites.retry() : void favorites.toggle(tour._id))}
+							aria-pressed={favorites.eligible && favorites.ready ? saved : undefined}
+							aria-busy={
+								favorites.eligible && ((!favorites.ready && !favorites.error) || favorites.pending.has(tour._id))
+							}
+							title={!favorites.eligible ? t('Only travelers and agents can like tours.') : undefined}
+							disabled={
+								!favorites.eligible || (!favorites.ready && !favorites.error) || favorites.pending.has(tour._id)
+							}
+							onClick={() => (favorites.error ? favorites.retry() : void favorites.toggle(tour._id, favoriteCount))}
 						>
 							{saved ? <FavoriteRoundedIcon aria-hidden="true" /> : <FavoriteBorderRoundedIcon aria-hidden="true" />}
 						</button>
@@ -158,6 +172,12 @@ export function TourCard({ tour }: { tour: Tour }) {
 						<span className="triplink-tour-card__review-count">{t('No reviews yet')}</span>
 					)}
 				</div>
+				{catalog && (
+					<p className="triplink-tour-card__likes">
+						<FavoriteBorderRoundedIcon aria-hidden="true" />
+						{t('Tour likes', { count: favoriteCount, displayCount: number.format(favoriteCount) })}
+					</p>
+				)}
 				<div className="triplink-tour-card__stats">
 					<span>
 						<VisibilityOutlinedIcon aria-hidden="true" />
@@ -200,16 +220,24 @@ export function TourCard({ tour }: { tour: Tour }) {
 	);
 }
 
-export function TourGrid({ tours }: { tours: Tour[] }) {
+export function TourGrid({ tours, catalog = false }: { tours: Tour[]; catalog?: boolean }) {
 	return (
 		<div className="triplink-tour-grid">
 			{tours.map((tour) => (
-				<TourCard key={tour._id} tour={tour} />
+				<TourCard key={tour._id} tour={tour} catalog={catalog} />
 			))}
 		</div>
 	);
 }
-export function TourList({ input, onPage }: { input: Inquiry<TourSearch>; onPage?: (page: number) => void }) {
+export function TourList({
+	input,
+	onPage,
+	catalog = false,
+}: {
+	input: Inquiry<TourSearch>;
+	onPage?: (page: number) => void;
+	catalog?: boolean;
+}) {
 	const { t } = useTranslation('common');
 
 	const ready = usePublicReady();
@@ -222,7 +250,7 @@ export function TourList({ input, onPage }: { input: Inquiry<TourSearch>; onPage
 				empty={!query.data?.result.list.length}
 				retry={() => query.refetch()}
 			>
-				<TourGrid tours={query.data?.result.list ?? []} />
+				<TourGrid tours={query.data?.result.list ?? []} catalog={catalog} />
 			</QueryState>
 			{onPage && <Pager total={totalOf(query.data?.result)} page={input.page} limit={input.limit} onChange={onPage} />}
 		</Stack>

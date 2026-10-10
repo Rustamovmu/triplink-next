@@ -28,8 +28,8 @@ const withLayoutBasic = (Component: any) => {
 			switch (router.pathname) {
 				case '/tour':
 					title = 'Tours';
-					desc = 'We are glad to see you again!';
-					bgImage = '/img/banner/cities/SEOUL.webp';
+					desc = 'Find your next journey.';
+					bgImage = '/img/banner/tours-alpine-lake.jpg';
 					break;
 				case '/agent':
 					title = 'Agents';
@@ -78,6 +78,14 @@ const withLayoutBasic = (Component: any) => {
 
 			return { title, desc, bgImage };
 		}, [router.pathname]);
+		const toursBanner = router.pathname === '/tour' && (
+			<section className="triplink-tours-banner" aria-labelledby="tours-banner-title">
+				<div>
+					<h1 id="tours-banner-title">{t('Tours')}</h1>
+					<p>{t('Find your next journey.')}</p>
+				</div>
+			</section>
+		);
 
 		if (device == 'mobile') {
 			return (
@@ -98,6 +106,7 @@ const withLayoutBasic = (Component: any) => {
 						<Stack id={'top'}>
 							<Top />
 						</Stack>
+						{toursBanner}
 
 						<Stack id={'main'}>
 							<Component {...props} />
@@ -130,7 +139,8 @@ const withLayoutBasic = (Component: any) => {
 							<Top />
 						</Stack>
 
-						{memoizedValues.title && (
+						{toursBanner}
+						{memoizedValues.title && router.pathname !== '/tour' && (
 							<Stack
 								className="header-basic"
 								style={{

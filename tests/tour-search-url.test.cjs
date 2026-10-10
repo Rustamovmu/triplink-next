@@ -175,3 +175,20 @@ test('editing one date endpoint preserves the other during a repeated DST hour',
 		else process.env.TZ = previous;
 	}
 });
+
+test('calendar date endpoints include entire local days across DST and reject invalid dates', () => {
+	const { calendarDateInstant } = require('../libs/triplink/tourSearchUrl.ts');
+	const original = process.env.TZ;
+	try {
+		process.env.TZ = 'America/New_York';
+		const start = calendarDateInstant('2027-03-14');
+		const end = calendarDateInstant('2027-03-14', true);
+		assert.equal(start, '2027-03-14T05:00:00.000Z');
+		assert.equal(end, '2027-03-15T03:59:59.999Z');
+		for (const invalid of ['2027-02-30', '2027-13-01', '2027-00-01', '2027-12-00', '2027-12-01T09:00'])
+			assert.throws(() => calendarDateInstant(invalid));
+	} finally {
+		if (original === undefined) delete process.env.TZ;
+		else process.env.TZ = original;
+	}
+});

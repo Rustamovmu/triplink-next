@@ -28,7 +28,7 @@ const FavoritesContext = createContext({
 	eligible: false,
 	anonymous: false,
 	retry: () => {},
-	toggle: async (_id: string) => {},
+	toggle: async (_id: string, _count: number) => {},
 });
 
 // One favorite-list load per session, shared by every card and grid on the page.
@@ -71,15 +71,24 @@ export function TourFavoritesProvider({ children }: { children: React.ReactNode 
 		};
 	}, [client, owner, attempt]);
 	const current = snapshot.owner === owner ? snapshot : empty(owner);
-	const toggle = async (tourId: string) => {
+	const toggle = async (tourId: string, displayedCount: number) => {
 		if (!owner || !current.ready || locks.current.has(tourId)) return;
+		const wasSaved = current.saved.has(tourId);
+		const previousCount = current.counts[tourId] ?? displayedCount;
 		const operationLocks = locks.current;
 		operationLocks.add(tourId);
-		setSnapshot((previous) => ({
-			...previous,
-			pending: new Set(operationLocks),
-			errors: { ...previous.errors, [tourId]: '' },
-		}));
+		setSnapshot((previous) => {
+			const saved = new Set(previous.saved);
+			if (wasSaved) saved.delete(tourId);
+			else saved.add(tourId);
+			return {
+				...previous,
+				saved,
+				counts: { ...previous.counts, [tourId]: Math.max(0, previousCount + (wasSaved ? -1 : 1)) },
+				pending: new Set(operationLocks),
+				errors: { ...previous.errors, [tourId]: '' },
+			};
+		});
 		try {
 			const { data } = await client.mutate({ mutation: FAVORITE_TOGGLE, variables: { tourId } });
 			if (!data) throw new Error('Something went wrong!');
@@ -92,7 +101,17 @@ export function TourFavoritesProvider({ children }: { children: React.ReactNode 
 			});
 		} catch (error) {
 			if (activeOwner.current === owner && locks.current === operationLocks)
-				setSnapshot((previous) => ({ ...previous, errors: { ...previous.errors, [tourId]: errorMessage(error) } }));
+				setSnapshot((previous) => {
+					const saved = new Set(previous.saved);
+					if (wasSaved) saved.add(tourId);
+					else saved.delete(tourId);
+					return {
+						...previous,
+						saved,
+						counts: { ...previous.counts, [tourId]: previousCount },
+						errors: { ...previous.errors, [tourId]: errorMessage(error) },
+					};
+				});
 		} finally {
 			operationLocks.delete(tourId);
 			if (activeOwner.current === owner && locks.current === operationLocks)

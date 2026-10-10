@@ -7,6 +7,7 @@ import { Avatar } from '@mui/material';
 import { IntroVideo } from './IntroMedia';
 import { IntroGallery } from './IntroGallery';
 import { IntroCircularCarousel } from './IntroCircularCarousel';
+import { HomeArticles } from './HomeArticles';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
@@ -171,7 +172,7 @@ function SaveTour({ tour }: { tour: Tour }) {
 				aria-pressed={favorites.ready ? saved : undefined}
 				aria-busy={(!favorites.ready && !favorites.error) || favorites.pending.has(tour._id)}
 				disabled={(!favorites.ready && !favorites.error) || favorites.pending.has(tour._id)}
-				onClick={() => (favorites.error ? favorites.retry() : void favorites.toggle(tour._id))}
+				onClick={() => (favorites.error ? favorites.retry() : void favorites.toggle(tour._id, tour.tourFavoriteCount))}
 			>
 				{saved ? <FavoriteRoundedIcon aria-hidden="true" /> : <FavoriteBorderRoundedIcon aria-hidden="true" />}
 			</button>
@@ -400,6 +401,15 @@ export default function HomeSections() {
 			<TourSection variant="rated" />
 			<TopAgents />
 			<TourSection variant="top" />
+			<Section
+				id="articles"
+				title="Articles"
+				description="Travel stories from our community"
+				href="/community"
+				linkText="All articles"
+			>
+				<HomeArticles />
+			</Section>
 			<Events />
 		</div>
 	);
