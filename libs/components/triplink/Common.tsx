@@ -74,14 +74,14 @@ export function useAction() {
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<{ severity: 'error' | 'success'; text: string } | null>(null);
 	const { t } = useTranslation('common');
-	const run = async (action: () => Promise<unknown>, success = t('Saved')) => {
+	const run = async (action: () => Promise<unknown>, success: string | null = t('Saved')) => {
 		if (lock.current) return;
 		lock.current = true;
 		setBusy(true);
 		setNotice(null);
 		try {
 			await action();
-			setNotice({ severity: 'success', text: success });
+			if (success !== null) setNotice({ severity: 'success', text: success });
 		} catch (error: unknown) {
 			setNotice({ severity: 'error', text: t(errorMessage(error)) });
 		} finally {

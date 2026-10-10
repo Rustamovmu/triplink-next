@@ -284,7 +284,7 @@ function PublicMemberProfile() {
 																await follow({ variables: { memberId: member._id } });
 																await refreshCurrentMember();
 																await client.refetchQueries({ include: [MEMBER, FOLLOWERS, FOLLOWINGS] });
-															}, t(member.isFollowing ? 'Agent unfollowed' : 'Agent followed'))
+															}, null)
 														}
 													>
 														{t(member.isFollowing ? 'Unfollow' : 'Follow')}
@@ -297,7 +297,7 @@ function PublicMemberProfile() {
 															void likeAction.run(async () => {
 																await like({ variables: { memberId: member._id } });
 																await query.refetch();
-															}, t('Profile likes updated'))
+															}, null)
 														}
 													>
 														{t('Like / unlike')}
@@ -442,7 +442,7 @@ function PublicMemberProfile() {
 											await follow({ variables: { memberId: member._id } });
 											await refreshCurrentMember();
 											await client.refetchQueries({ include: [MEMBER, FOLLOWERS, FOLLOWINGS] });
-										})
+										}, null)
 									}
 								>
 									{t(member.isFollowing ? 'Unfollow' : 'Follow')}
@@ -453,7 +453,7 @@ function PublicMemberProfile() {
 										void likeAction.run(async () => {
 											await like({ variables: { memberId: member._id } });
 											await query.refetch();
-										})
+										}, null)
 									}
 								>
 									{t('Toggle like')}
