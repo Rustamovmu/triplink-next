@@ -2856,3 +2856,90 @@
  &__footer .MuiButton-disabled { opacity: .5; }
  @media(max-width:600px) { padding: 22px 18px; &__photo { gap: 16px; align-items: flex-start; } &__photo .MuiAvatar-root { width: 60px; height: 60px; } &__details,&__password > div { grid-template-columns: minmax(0,1fr); } &__footer .MuiButton-root { width: 100%; } }
 }
+
+// Administration: a compact workspace for daily account and content operations.
+.triplink-admin {
+ background: #f3f6f8; color: #203f49;
+ .admin-topbar { background: #0b3e4b; color: #fff; border-bottom: 1px solid #275663; }
+ .admin-topbar a { color: #fff; text-decoration: none; }
+ .admin-topbar .MuiButton-text { color: #fff; }
+ .admin-topbar .MuiToolbar-root { min-height: 64px; gap: 12px; }
+ .admin-brand { font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 20px; }
+ .admin-brand span { font-size: 12px; font-weight: 400; border-left: 1px solid #6b8992; padding-left: 20px; color: #c9dfe5; }
+ .admin-sidebar .MuiDrawer-paper { background: #fff; border-right: 1px solid #dde7eb; }
+ .admin-menu { padding: 26px 14px; }
+ .admin-menu a { border-radius: 9px; margin-bottom: 6px; padding: 12px; color: #536d78; font-size: 14px; }
+ .admin-menu .MuiListItemIcon-root { min-width: 36px; color: inherit; }
+ .admin-menu .Mui-selected { background: #e7f2f1; color: #08675e; font-weight: 600; }
+ .admin-menu .MuiListItemText-primary { font-size: 14px; }
+ .admin-main { padding-bottom: 40px; }
+ .MuiButton-root { text-transform: none; font-weight: 600; }
+ .MuiButton-contained { background: #0d6862; color: #fff; }
+ .MuiButton-outlined { border-color: #bfd3d8; color: #135c68; }
+ .MuiButton-text { color: #135c68; }
+ .MuiButton-root.Mui-disabled { color: #8b999e; }
+ .MuiButton-contained.Mui-disabled { background: #e5ebed; }
+ .MuiOutlinedInput-root { background: #fff; border-radius: 8px; }
+ .MuiOutlinedInput-notchedOutline { border-color: #d7e2e6; }
+ .Mui-focused .MuiOutlinedInput-notchedOutline { border-color: #0d6862 !important; }
+ .MuiInputLabel-root.Mui-focused { color: #0d6862; }
+ a:focus-visible, button:focus-visible { outline: 3px solid #d89966; outline-offset: 3px; }
+}
+.admin-members { max-width: 1480px; padding: 38px 36px; margin: auto; }
+.admin-members-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px;
+ h1 { font-size: 30px; font-weight: 700; margin: 0 0 8px; letter-spacing: -.7px; }
+ p { color: #637b85; font-size: 14px; margin: 0; }
+}
+.admin-member-summary { display: flex; align-items: center; gap: 32px; padding: 22px 0 28px; border-top: 1px solid #dce6ea;
+ > div { display: flex; flex-direction: column; min-width: 130px; gap: 5px; }
+ strong { font-size: 28px; font-weight: 600; }
+ span, p { color: #657e88; font-size: 13px; }
+ p { margin-left: auto; max-width: 245px; line-height: 1.7; }
+}
+.admin-member-directory { background: #fff; border: 1px solid #dce6ea; border-radius: 12px; overflow: hidden; }
+.admin-member-filters { display: grid; grid-template-columns: minmax(220px, 2fr) 1fr 1fr auto; gap: 16px; padding: 24px 24px 16px; }
+.admin-member-quickfilters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 24px 24px; color: #71838a; font-size: 12px;
+ span { margin-right: 8px; }
+ button { background: #fff; border: 1px solid #dce6ea; color: #526f78; padding: 6px 13px; border-radius: 20px; cursor: pointer; font: inherit; }
+ button[aria-pressed=true] { background: #e7f2f1; color: #0a655c; border-color: #b0d3cd; }
+}
+.admin-member-table-scroll { overflow-x: auto; }
+.admin-member-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 840px;
+ th { text-align: left; font-weight: 500; color: #627b86; background: #f7f9fa; padding: 14px 20px; border-block: 1px solid #e5ecef; }
+ td { padding: 20px; border-bottom: 1px solid #e5ecef; vertical-align: middle; }
+ tbody tr:hover { background: #fbfdfd; }
+}
+.admin-member-identity { display: flex; align-items: center; gap: 12px;
+ .MuiAvatar-root { background: #e7f2f1; color: #237169; width: 42px; height: 42px; font-size: 14px; }
+ > div:last-child { display: flex; flex-direction: column; gap: 3px; }
+ strong { font-size: 14px; } span, small { color: #71838a; }
+}
+.admin-status { display: inline-flex; padding: 5px 10px; border-radius: 5px; background: #edf1f3; color: #566b74; white-space: nowrap; }
+.admin-status-active { background: #e8f4ee; color: #256b48; }
+.admin-status-pending { background: #fff3dc; color: #83590d; }
+.admin-status-block, .admin-status-delete { background: #fcecec; color: #a03838; }
+.admin-status-suspended { background: #f1ecfb; color: #6b4a94; }
+.admin-member-activity { display: flex; flex-direction: column; gap: 5px; color: #6a808a; }
+.admin-member-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+ a { color: #135c68; text-underline-offset: 4px; }
+}
+.admin-member-editor { background: #f8fbfb !important; border-color: #d3e3e5 !important; box-shadow: none !important;
+ .MuiTextField-root { width: 100%; }
+}
+.admin-member-pagination { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; padding: 20px 24px; color: #69818b; font-size: 13px;
+ > span { margin-right: auto; }
+ .MuiTextField-root { min-width: 110px; width: 140px; flex: 0 0 140px; }
+}
+.admin-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); }
+@media (max-width: 1100px) { .admin-members { padding: 28px 20px; } .admin-member-summary { gap: 24px; p { display: none; } } }
+@media (max-width: 700px) {
+ .triplink-admin { .admin-brand span, .admin-current-user { display: none; } .admin-brand { font-size: 20px; } .admin-topbar .MuiToolbar-root { gap: 4px; padding-inline: 8px; } }
+ .admin-members { padding: 24px 14px; }
+ .admin-members-heading { align-items: flex-start; h1 { font-size: 24px; } p { line-height: 1.6; } }
+ .admin-member-summary { justify-content: space-between; gap: 10px; > div { min-width: 0; } strong { font-size: 24px; } span { font-size: 11px; } }
+ .admin-member-filters { grid-template-columns: 1fr 1fr; padding: 20px 16px; gap: 12px; > :first-child { grid-column: 1 / -1; } }
+ .admin-member-quickfilters { padding-inline: 16px; }
+ .admin-member-pagination { padding: 20px 16px; }
+}
+
+.admin-editor-footer { display: flex; justify-content: flex-end; gap: 12px; }
