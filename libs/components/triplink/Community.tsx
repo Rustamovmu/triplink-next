@@ -536,7 +536,9 @@ export function ArticleComments({
 	};
 	return (
 		<Stack spacing={2}>
-			<Typography variant="h5">{t('Comments')}</Typography>
+			<Typography variant="h5" component="h2">
+				{t('Comments')}
+			</Typography>
 			{action.feedback}
 			{member && !admin && (
 				<Stack
@@ -565,12 +567,9 @@ export function ArticleComments({
 					</Button>
 				</Stack>
 			)}
-			<QueryState
-				loading={!ready || query.loading}
-				error={query.error}
-				empty={!query.data?.result.list.length}
-				retry={() => query.refetch()}
-			>
+			{!member && !admin && ready && <Link href="/account/join">{t('Log in to join the conversation')}</Link>}
+			<QueryState loading={!ready || query.loading} error={query.error} retry={() => query.refetch()}>
+				{!query.data?.result.list.length && <Typography>{t('No comments yet. Start the conversation.')}</Typography>}
 				{query.data?.result.list.map((comment) => (
 					<CommentRow key={comment._id} comment={comment} admin={admin} refetch={changed} />
 				))}
@@ -612,7 +611,6 @@ export function CommunityPage() {
 }
 export function CommunityDetail() {
 	const { t } = useTranslation('common');
-
 	const router = useRouter();
 	const id = router.query.id;
 	const ready = usePublicReady();
@@ -625,56 +623,142 @@ export function CommunityDetail() {
 		fetchPolicy: 'network-only',
 	});
 	const article = query.data?.result;
+	const author = article?.memberData;
+	const authorName = author?.memberFullname || author?.memberNick || t('Unavailable member');
+	const authorHref =
+		author && author.memberType !== 'ADMIN'
+			? author.memberType === 'AGENT'
+				? `/agent/detail?agentId=${author._id}`
+				: `/member?memberId=${author._id}`
+			: null;
+	const date = article ? new Date(article.createdAt) : null;
+	const formattedDate =
+		date && !Number.isNaN(date.getTime())
+			? new Intl.DateTimeFormat(router.locale === 'kr' ? 'ko' : router.locale || 'en', {
+					month: 'long',
+					day: 'numeric',
+					year: 'numeric',
+			  }).format(date)
+			: null;
 	return (
-		<Frame title={article?.articleTitle ?? 'Article'}>
-			{action.feedback}
-			<QueryState
-				loading={!ready || !router.isReady || query.loading}
-				error={query.error ?? (router.isReady && !validId(id) ? new Error('Invalid article ID') : undefined)}
-				empty={!article}
-				retry={() => query.refetch()}
-			>
-				{article && (
-					<Stack spacing={3}>
-						<Typography>
-							{article.articleCategory} · {article.memberData?.memberNick ?? 'Unavailable member'}
-						</Typography>
-						{article.articleImage && (
-							<Box
-								component="img"
-								onError={(event: React.SyntheticEvent<HTMLImageElement>) => {
-									const target = event.currentTarget;
-									target.onerror = null;
-									if (!target.src.endsWith('/img/tour-placeholder.svg')) target.src = '/img/tour-placeholder.svg';
-								}}
-								src={imageUrl(article.articleImage)}
-								alt={article.articleTitle}
-								sx={{ maxWidth: '100%', maxHeight: 400, objectFit: 'contain' }}
-							/>
-						)}
-						<Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{article.articleContent}</Typography>
-						<Typography>
-							{article.articleLikes} {t('likes ·')} {article.articleViews} {t('views ·')} {article.articleComments}{' '}
-							{t('comments')}
-						</Typography>
-						{member && (
-							<Button
-								disabled={action.busy}
-								aria-pressed={article.meLiked}
-								onClick={() =>
-									void action.run(async () => {
-										await like({ variables: { articleId: article._id } });
-										await query.refetch();
-									})
-								}
-							>
-								{t(article.meLiked ? 'Unlike' : 'Like')}
-							</Button>
-						)}
-						<ArticleComments articleId={article._id} onChanged={() => query.refetch()} />
-					</Stack>
-				)}
-			</QueryState>
-		</Frame>
+		<div className="triplink-journal">
+			<section className="triplink-journal__hero">
+				<div>
+					<Link href="/community">← {t('Back to community')}</Link>
+					<p>{t('Stories that take you places.')}</p>
+					<span>{t('Travel experiences, shared by our community.')}</span>
+				</div>
+			</section>
+			<div className="triplink-journal__main">
+				<QueryState
+					loading={!ready || !router.isReady || query.loading}
+					error={query.error ?? (router.isReady && !validId(id) ? new Error('Invalid article ID') : undefined)}
+					empty={!article}
+					retry={() => query.refetch()}
+				>
+					{article && (
+						<div className="triplink-journal__layout">
+							<div className="triplink-journal__reading">
+								<article className="triplink-journal__article">
+									<header>
+										<span className="triplink-journal__category">{t(categoryLabels[article.articleCategory])}</span>
+										<h1>{article.articleTitle}</h1>
+										<div className="triplink-journal__byline">
+											<Avatar
+												src={author?.memberImage ? imageUrl(author.memberImage) : undefined}
+												alt={String(authorName)}
+											>
+												{String(authorName)[0]?.toUpperCase()}
+											</Avatar>
+											<div>
+												{authorHref ? <Link href={authorHref}>{authorName}</Link> : <span>{authorName}</span>}
+												{formattedDate && <time dateTime={article.createdAt}>{formattedDate}</time>}
+											</div>
+										</div>
+									</header>
+									{article.articleImage && (
+										<figure>
+											<Box
+												component="img"
+												src={imageUrl(article.articleImage)}
+												alt={article.articleTitle}
+												onError={(event: React.SyntheticEvent<HTMLImageElement>) => {
+													event.currentTarget.onerror = null;
+													event.currentTarget.src = '/img/tour-placeholder.svg';
+												}}
+											/>
+										</figure>
+									)}
+									<div className="triplink-journal__text">{article.articleContent}</div>
+									<footer className="triplink-journal__engagement">
+										{member ? (
+											<Button
+												variant={article.meLiked ? 'contained' : 'outlined'}
+												disableElevation
+												disabled={action.busy}
+												aria-pressed={article.meLiked}
+												onClick={() =>
+													void action.run(async () => {
+														await like({ variables: { articleId: article._id } });
+														await query.refetch();
+													}, null)
+												}
+											>
+												{article.meLiked ? '♥' : '♡'} {t(article.meLiked ? 'Unlike' : 'Like')}
+											</Button>
+										) : (
+											<Link href="/account/join">{t('Log in to like this story')}</Link>
+										)}
+										<span>{t('Community like count', { count: article.articleLikes })}</span>
+										<span>
+											{t('{{count}} views', { count: article.articleViews, displayCount: article.articleViews })}
+										</span>
+										<a href="#story-discussion">
+											{t('Home article comment count', { count: article.articleComments })}
+										</a>
+									</footer>
+									{action.feedback}
+								</article>
+								<section id="story-discussion" className="triplink-journal__discussion">
+									<ArticleComments key={article._id} articleId={article._id} onChanged={() => query.refetch()} />
+								</section>
+							</div>
+							<aside className="triplink-journal__sidebar" aria-label={t('About the author')}>
+								<div className="triplink-journal__author-card">
+									<h2>{t('About the author')}</h2>
+									<Avatar src={author?.memberImage ? imageUrl(author.memberImage) : undefined} alt={String(authorName)}>
+										{String(authorName)[0]?.toUpperCase()}
+									</Avatar>
+									<h3>{authorName}</h3>
+									{author && (
+										<p className="triplink-journal__author-role">
+											{t(
+												author.memberType === 'AGENT'
+													? 'Travel agent'
+													: author.memberType === 'ADMIN'
+													? 'Admin'
+													: 'Traveler',
+											)}
+											{author.memberCountry ? ` · ${author.memberCountry}` : ''}
+										</p>
+									)}
+									{author?.memberDesc?.trim() && <p>{author.memberDesc}</p>}
+									{authorHref && (
+										<Link href={authorHref} className="triplink-journal__profile-link">
+											{t('View profile')} ↗
+										</Link>
+									)}
+								</div>
+								<div className="triplink-journal__explore">
+									<h2>{t('Keep exploring')}</h2>
+									<p>{t('Find more stories and fresh perspectives from fellow travelers.')}</p>
+									<Link href="/community">{t('Explore the stories')} ↗</Link>
+								</div>
+							</aside>
+						</div>
+					)}
+				</QueryState>
+			</div>
+		</div>
 	);
 }

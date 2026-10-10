@@ -627,5 +627,14 @@
 	"Community like count_one": "{{count}} отметка «Нравится»",
 	"Community like count_few": "{{count}} отметки «Нравится»",
 	"Community like count_many": "{{count}} отметок «Нравится»",
-	"Community like count_other": "{{count}} отметки «Нравится»"
+	"Community like count_other": "{{count}} отметки «Нравится»",
+	"Back to community": "Назад в сообщество",
+	"Stories that take you places.": "Истории, открывающие новые места.",
+	"Travel experiences, shared by our community.": "Впечатления от путешествий нашего сообщества.",
+	"About the author": "Об авторе",
+	"Keep exploring": "Продолжить знакомство",
+	"Find more stories and fresh perspectives from fellow travelers.": "Откройте больше историй и новых идей от других путешественников.",
+	"Log in to like this story": "Войдите, чтобы оценить историю",
+	"Log in to join the conversation": "Войдите, чтобы присоединиться к обсуждению",
+	"No comments yet. Start the conversation.": "Пока нет комментариев. Начните обсуждение."
 }
