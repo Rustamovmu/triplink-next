@@ -56,58 +56,77 @@ export function ProfileForm({ member }: { member: Member }) {
 		});
 	};
 	return (
-		<Stack component="form" key={member.updatedAt} spacing={2} onSubmit={submit}>
+		<Stack component="form" key={member.updatedAt} spacing={2} onSubmit={submit} className="triplink-profile-form">
 			{action.feedback}
-			<Avatar src={imageUrl(image)} sx={{ width: 80, height: 80 }} />
-			<Button component="label" disabled={action.busy}>
-				{t('Upload profile image')}
-				<input
-					type="file"
-					accept="image/jpeg,image/png"
-					hidden
-					onChange={(e) => {
-						const files = Array.from(e.target.files ?? []);
-						void action.run(async () => setImage((await uploadImages(files, 'member'))[0]));
-						e.target.value = '';
-					}}
-				/>
-			</Button>
-			{(['memberNick', 'memberFullname', 'memberCountry', 'memberDesc'] as const).map((key) => (
+			<div className="triplink-profile-form__photo">
+				<Avatar src={image ? imageUrl(image) : undefined} alt={member.memberNick} sx={{ width: 80, height: 80 }}>
+					{member.memberNick[0]?.toUpperCase()}
+				</Avatar>
+				<div>
+					<h3>{t('Profile photo')}</h3>
+					<p>{t('Choose a photo for your public profile.')}</p>
+					<Button component="label" disabled={action.busy}>
+						{t('Upload profile image')}
+						<input
+							type="file"
+							accept="image/jpeg,image/png"
+							hidden
+							onChange={(e) => {
+								const files = Array.from(e.target.files ?? []);
+								void action.run(async () => setImage((await uploadImages(files, 'member'))[0]));
+								e.target.value = '';
+							}}
+						/>
+					</Button>
+				</div>
+			</div>
+			<fieldset className="triplink-profile-form__details">
+				<legend>{t('Personal details')}</legend>
+				{(['memberNick', 'memberFullname', 'memberCountry', 'memberDesc'] as const).map((key) => (
+					<TextField
+						key={key}
+						name={key}
+						label={t(key)}
+						required={key === 'memberNick'}
+						defaultValue={member[key] ?? ''}
+						multiline={key === 'memberDesc'}
+						inputProps={{
+							minLength: key === 'memberNick' ? 3 : key === 'memberFullname' ? 2 : undefined,
+							maxLength: key === 'memberDesc' ? 1000 : key === 'memberNick' ? 20 : 100,
+						}}
+					/>
+				))}
 				<TextField
-					key={key}
-					name={key}
-					label={t(key)}
-					required={key === 'memberNick'}
-					defaultValue={member[key] ?? ''}
-					multiline={key === 'memberDesc'}
-					inputProps={{
-						minLength: key === 'memberNick' ? 3 : key === 'memberFullname' ? 2 : undefined,
-						maxLength: key === 'memberDesc' ? 1000 : key === 'memberNick' ? 20 : 100,
-					}}
+					name="destinations"
+					label={t('Favorite destinations (comma separated)')}
+					defaultValue={member.memberFavoriteDestinations.join(', ')}
 				/>
-			))}
-			<TextField
-				name="destinations"
-				label={t('Favorite destinations (comma separated)')}
-				defaultValue={member.memberFavoriteDestinations.join(', ')}
-			/>
-			<TextField
-				name="currentPassword"
-				label={t('Current password')}
-				type="password"
-				inputProps={{ maxLength: 72 }}
-				autoComplete="current-password"
-			/>
-			<TextField
-				name="newPassword"
-				label={t('New password')}
-				type="password"
-				inputProps={{ maxLength: 72 }}
-				autoComplete="new-password"
-			/>
-			<Button disabled={action.busy} type="submit" variant="contained">
-				{t('Save profile')}
-			</Button>
+			</fieldset>
+			<details className="triplink-profile-form__password">
+				<summary>{t('Change password (optional)')}</summary>
+				<p>{t('Leave these fields blank to keep your current password.')}</p>
+				<div>
+					<TextField
+						name="currentPassword"
+						label={t('Current password')}
+						type="password"
+						inputProps={{ maxLength: 72 }}
+						autoComplete="current-password"
+					/>
+					<TextField
+						name="newPassword"
+						label={t('New password')}
+						type="password"
+						inputProps={{ maxLength: 72 }}
+						autoComplete="new-password"
+					/>
+				</div>
+			</details>
+			<div className="triplink-profile-form__footer">
+				<Button disabled={action.busy} type="submit" variant="contained" disableElevation>
+					{t('Save profile')}
+				</Button>
+			</div>
 		</Stack>
 	);
 }

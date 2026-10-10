@@ -2809,3 +2809,50 @@
  @media(max-width:900px) { &__story { gap: 32px; } &__cards { gap: 16px; } &__cards > a { padding: 22px; } &__invitation { flex-direction: column; align-items: flex-start; } }
  @media(max-width:700px) { &__hero > div { padding: 48px 24px 56px; } &__main { padding: 36px 20px 28px; } &__story { grid-template-columns: minmax(0,1fr); gap: 24px; } &__cards { grid-template-columns: minmax(0,1fr); } &__discover { margin-top: 40px; } &__cards svg { margin-bottom: 20px; } &__invitation { padding: 28px 24px; margin-top: 36px; } &__project-note { align-items: flex-start; flex-direction: column; gap: 12px; } }
 }
+
+.triplink-workspace {
+ background: #f5f8f8; color: #193e43; font-family: 'TripLink Jakarta',Arial,sans-serif;
+ h1,h2,h3,p,strong,span,a { white-space: normal; overflow-wrap: anywhere; }
+ &__hero { color: white; background: linear-gradient(90deg,rgba(4,31,37,.80),rgba(4,31,37,.20)),url('/img/homepage/cappadocia.jpg') center 56% / cover; }
+ &__hero > div { max-width: 1320px; margin: auto; padding: 40px 32px 44px; }
+ h1 { font: 400 clamp(32px,3.5vw,44px)/1.15 Georgia,serif; margin: 0 0 14px; }
+ &__hero p { font-size: 14px; color: #e2efec; line-height: 1.8; margin: 0; }
+ &__layout { max-width: 1320px; margin: auto; padding: 36px 32px 56px; display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 28px; align-items: start; }
+ &__sidebar { background: white; border: 1px solid #dae6e6; border-radius: 14px; overflow: hidden; }
+ &__account { padding: 24px 20px; border-bottom: 1px solid #e5eceb; }
+ &__account .MuiAvatar-root { width: 56px; height: 56px; background: #e1eeea; color: #23695e; margin-bottom: 14px; }
+ &__account strong { display: block; font-size: 16px; line-height: 1.5; }
+ &__account span { display: block; font-size: 11px; color: #668088; margin-top: 5px; }
+ nav { padding: 12px; display: flex; flex-direction: column; gap: 5px; }
+ nav a { text-decoration: none; color: #5a7279; font-size: 13px; line-height: 1.5; padding: 11px 13px; border-radius: 8px; }
+ nav a:hover { background: #f0f6f4; color: #135e57; }
+ nav a[aria-current=page] { background: #135e57; color: white !important; font-weight: 600; }
+ &__content { min-width: 0; }
+ &__content > h2 { font: 600 28px/1.3 'TripLink Outfit',Arial,sans-serif; margin: 0 0 22px; }
+ &__content .MuiTypography-root { white-space: normal; overflow-wrap: anywhere; }
+ &__content .MuiButton-root { text-transform: none; }
+ a:focus-visible,button:focus-visible,summary:focus-visible { outline: 3px solid #288d83; outline-offset: 4px; }
+ @media(max-width:900px) { &__layout { grid-template-columns: minmax(0,1fr); gap: 24px; } &__account { display: flex; align-items: center; gap: 14px; padding: 18px; } &__account .MuiAvatar-root { margin: 0; width: 40px; height: 40px; flex-shrink: 0; } &__account span { margin: 0 0 0 auto; } nav { flex-direction: row; flex-wrap: wrap; } }
+ @media(max-width:600px) { &__hero > div { padding: 28px 20px 32px; } &__layout { padding: 24px 16px 40px; } &__account strong { font-size: 14px; } nav a { font-size: 12px; padding: 9px 11px; } &__content > h2 { font-size: 25px; } }
+}
+.triplink-profile-form {
+ background: white; border: 1px solid #dae6e6; border-radius: 14px; padding: 28px;
+ &__photo { display: flex; align-items: center; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid #e5eceb; }
+ &__photo .MuiAvatar-root { background: #e1eeea; color: #23695e; font-size: 26px; }
+ h3 { font: 600 18px/1.4 'TripLink Outfit',Arial,sans-serif; margin: 0 0 6px; }
+ p { font: 12px/1.8 'TripLink Jakarta',Arial,sans-serif; color: #668088; margin: 0 0 10px; white-space: normal; }
+ &__photo .MuiButton-root { padding: 7px 0; color: #135e57; font-size: 12px; text-transform: none; font-weight: 600; }
+ &__details { border: 0; padding: 20px 0 8px; margin: 0; min-width: 0; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+ legend { font: 600 18px/1.4 'TripLink Outfit',Arial,sans-serif; color: #193e43; padding: 0; }
+ &__details .MuiTextField-root:nth-last-child(-n+2) { grid-column: 1 / -1; }
+ .MuiOutlinedInput-root { font-family: 'TripLink Jakarta',Arial,sans-serif; border-radius: 9px; }
+ .MuiInputLabel-root { font-family: 'TripLink Jakarta',Arial,sans-serif; }
+ &__password { padding-top: 20px; border-top: 1px solid #e5eceb; }
+ summary { font: 600 15px/1.6 'TripLink Jakarta',Arial,sans-serif; color: #193e43; cursor: pointer; white-space: normal; }
+ &__password p { margin: 12px 0 18px; }
+ &__password > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+ &__footer { display: flex; justify-content: flex-end; border-top: 1px solid #e5eceb; padding-top: 20px; }
+ &__footer .MuiButton-root { background: #135e57; color: white; padding: 11px 24px; border-radius: 8px; text-transform: none; }
+ &__footer .MuiButton-disabled { opacity: .5; }
+ @media(max-width:600px) { padding: 22px 18px; &__photo { gap: 16px; align-items: flex-start; } &__photo .MuiAvatar-root { width: 60px; height: 60px; } &__details,&__password > div { grid-template-columns: minmax(0,1fr); } &__footer .MuiButton-root { width: 100%; } }
+}
