@@ -140,21 +140,24 @@ const withLayoutBasic = (Component: any) => {
 						</Stack>
 
 						{toursBanner}
-						{memoizedValues.title && router.pathname !== '/tour' && router.pathname !== '/agent' && (
-							<Stack
-								className="header-basic"
-								style={{
-									backgroundImage: `url(${memoizedValues.bgImage})`,
-									backgroundSize: 'cover',
-									boxShadow: 'inset 10px 40px 150px 40px rgb(24 22 36)',
-								}}
-							>
-								<Stack className={'container'}>
-									<strong>{t(memoizedValues.title)}</strong>
-									<span>{t(memoizedValues.desc)}</span>
+						{memoizedValues.title &&
+							router.pathname !== '/tour' &&
+							router.pathname !== '/agent' &&
+							router.pathname !== '/agent/detail' && (
+								<Stack
+									className="header-basic"
+									style={{
+										backgroundImage: `url(${memoizedValues.bgImage})`,
+										backgroundSize: 'cover',
+										boxShadow: 'inset 10px 40px 150px 40px rgb(24 22 36)',
+									}}
+								>
+									<Stack className={'container'}>
+										<strong>{t(memoizedValues.title)}</strong>
+										<span>{t(memoizedValues.desc)}</span>
+									</Stack>
 								</Stack>
-							</Stack>
-						)}
+							)}
 
 						<Stack id={'main'}>
 							<Component {...props} />

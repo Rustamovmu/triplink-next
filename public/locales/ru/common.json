@@ -588,5 +588,19 @@
 	"Unfollow {{name}}": "Отписаться от {{name}}",
 	"Agent followed": "Вы подписались на агента",
 	"Agent unfollowed": "Вы отписались от агента",
-	"Log in to follow": "Войдите, чтобы подписаться"
+	"Log in to follow": "Войдите, чтобы подписаться",
+	"All travel agents": "Все туристические агенты",
+	"A local perspective. A memorable journey.": "Местный взгляд. Незабываемое путешествие.",
+	"Agent profile sections": "Разделы профиля агента",
+	"Connections": "Связи",
+	"Likes": "Отметки «Нравится»",
+	"Tours by {{name}}": "Туры от {{name}}",
+	"Find a journey that feels right for you.": "Найдите путешествие по душе.",
+	"Agent rating": "★ {{rating}} / 5 · отзывов: {{count}}",
+	"Agent rating_one": "★ {{rating}} / 5 · {{count}} отзыв",
+	"Agent rating_few": "★ {{rating}} / 5 · {{count}} отзыва",
+	"Agent rating_many": "★ {{rating}} / 5 · {{count}} отзывов",
+	"Agent rating_other": "★ {{rating}} / 5 · {{count}} отзывов",
+	"Like / unlike": "Нравится / отменить",
+	"Profile likes updated": "Отметки профиля обновлены"
 }

@@ -157,9 +157,19 @@ export function Follows({ memberId, following = false }: { memberId: string; fol
 						<CardContent>
 							<Stack direction="row" alignItems="center" spacing={2}>
 								<Avatar src={imageUrl(row.memberData?.memberImage)} />
-								<Link href={`/member?memberId=${row.memberData?._id ?? ''}`}>
-									{row.memberData?.memberNick ?? 'Unavailable member'}
-								</Link>
+								{row.memberData ? (
+									<Link
+										href={
+											row.memberData.memberType === 'AGENT'
+												? `/agent/detail?agentId=${row.memberData._id}`
+												: `/member?memberId=${row.memberData._id}`
+										}
+									>
+										{row.memberData.memberFullname || row.memberData.memberNick}
+									</Link>
+								) : (
+									<Typography>{t('Unavailable member')}</Typography>
+								)}
 								{current && current.memberType !== 'ADMIN' && row.memberData && row.memberData._id !== current._id && (
 									<Button
 										disabled={action.busy}

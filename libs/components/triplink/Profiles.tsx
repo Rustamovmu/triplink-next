@@ -1,5 +1,5 @@
 import { useTranslation } from 'next-i18next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useReactiveVar } from '@apollo/client';
 import { Avatar, Button, Stack, Typography } from '@mui/material';
@@ -17,6 +17,7 @@ import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import PersonAddAltRoundedIcon from '@mui/icons-material/PersonAddAltRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 export function AgentDirectory() {
 	const { t } = useTranslation('common');
 
@@ -180,7 +181,7 @@ export function AgentDirectory() {
 										)}
 										<Link
 											className="triplink-agents__profile"
-												passHref
+											passHref
 											href={`/agent/detail?agentId=${member._id}`}
 											aria-label={t('View profile of {{name}}', { name })}
 										>
@@ -210,6 +211,7 @@ export function MemberProfile() {
 	const ready = usePublicReady();
 	const current = useReactiveVar(memberVar);
 	const [tourPage, setTourPage] = useState(1);
+	useEffect(() => setTourPage(1), [id]);
 	const query = useQuery(MEMBER, {
 		variables: { memberId: typeof id === 'string' ? id : '' },
 		skip: !ready || !validId(id),
@@ -219,6 +221,168 @@ export function MemberProfile() {
 	const [like] = useMutation(MEMBER_LIKE);
 	const action = useAction();
 	const member = query.data?.result;
+	if (router.pathname === '/agent/detail') {
+		const name = member?.memberFullname || member?.memberNick || String(t('Travel agent'));
+		return (
+			<div className="triplink-profile">
+				<section className="triplink-profile__hero">
+					<div className="triplink-profile__hero-inner">
+						<Link href="/agent" className="triplink-profile__back">
+							{t('All travel agents')}
+						</Link>
+						<p>{t('A local perspective. A memorable journey.')}</p>
+					</div>
+				</section>
+				<div className="triplink-profile__main">
+					<QueryState
+						loading={!ready || !router.isReady || query.loading}
+						error={query.error ?? (router.isReady && !validId(id) ? new Error('Invalid member ID') : undefined)}
+						empty={!member}
+						retry={() => query.refetch()}
+					>
+						{member && (
+							<>
+								<section className="triplink-profile__summary" aria-labelledby="profile-name">
+									<div className="triplink-profile__identity">
+										<Avatar
+											src={member.memberImage ? imageUrl(member.memberImage) : undefined}
+											className="triplink-profile__avatar"
+												alt={name}
+										>
+											{name
+												.trim()
+												.split(/\s+/)
+												.slice(0, 2)
+												.map((part) => part[0])
+												.join('')
+												.toUpperCase()}
+										</Avatar>
+										<div>
+											<h1 id="profile-name">{name}</h1>
+											<p className="triplink-profile__location">
+												<PlaceOutlinedIcon aria-hidden="true" />
+												{member.memberCountry || t('Travel agent')}
+											</p>
+										</div>
+										<div className="triplink-profile__actions">
+											{current && current.memberType !== 'ADMIN' && member._id !== current._id && (
+												<>
+													<Button
+														variant={member.isFollowing ? 'outlined' : 'contained'}
+														disableElevation
+														disabled={action.busy}
+														startIcon={member.isFollowing ? <CheckRoundedIcon /> : <PersonAddAltRoundedIcon />}
+														onClick={() =>
+															void action.run(async () => {
+																await follow({ variables: { memberId: member._id } });
+																await refreshCurrentMember();
+																await query.refetch();
+															}, t(member.isFollowing ? 'Agent unfollowed' : 'Agent followed'))
+														}
+													>
+														{t(member.isFollowing ? 'Unfollow' : 'Follow')}
+													</Button>
+													<Button
+														variant="outlined"
+														disabled={action.busy}
+														startIcon={<FavoriteBorderRoundedIcon />}
+														onClick={() =>
+															void action.run(async () => {
+																await like({ variables: { memberId: member._id } });
+																await query.refetch();
+															}, t('Profile likes updated'))
+														}
+													>
+														{t('Like / unlike')}
+													</Button>
+												</>
+											)}
+											{!current && ready && <Link href="/account/join">{t('Log in to follow')}</Link>}
+										</div>
+									</div>
+									{member.memberDesc?.trim() && <p className="triplink-profile__bio">{member.memberDesc}</p>}
+									<dl className="triplink-profile__stats">
+										<div>
+											<dt>{t('Tours')}</dt>
+											<dd>{member.agentTourCount ?? member.memberTours}</dd>
+										</div>
+										<div>
+											<dt>{t('Followers')}</dt>
+											<dd>{member.memberFollowers}</dd>
+										</div>
+										<div>
+											<dt>{t('Following')}</dt>
+											<dd>{member.memberFollowings}</dd>
+										</div>
+										<div>
+											<dt>{t('Likes')}</dt>
+											<dd>{member.memberLikes}</dd>
+										</div>
+									</dl>
+									{action.feedback}
+								</section>
+								<nav className="triplink-profile__nav" aria-label={t('Agent profile sections')}>
+									{member.memberType === 'AGENT' && (
+										<>
+											<a href="#agent-tours">{t('Tours')}</a>
+											<a href="#agent-reviews">{t('Reviews')}</a>
+										</>
+									)}
+									<a href="#agent-connections">{t('Connections')}</a>
+								</nav>
+								{member.memberType === 'AGENT' && (
+									<>
+										<section id="agent-tours" className="triplink-profile__section" aria-labelledby="agent-tours-title">
+											<div className="triplink-profile__section-header">
+												<div>
+													<h2 id="agent-tours-title">{t('Tours by {{name}}', { name })}</h2>
+													<p>{t('Find a journey that feels right for you.')}</p>
+												</div>
+												<span className="triplink-profile__rating">
+													{(member.agentReviewCount ?? 0) > 0
+														? t('Agent rating', {
+																rating: member.agentAverageRating ?? 0,
+																count: member.agentReviewCount ?? 0,
+														  })
+														: t('No reviews yet')}
+												</span>
+											</div>
+											<TourList
+												key={member._id}
+												input={{ page: tourPage, limit: 12, search: { agentId: member._id } }}
+												onPage={setTourPage}
+											/>
+										</section>
+										<section id="agent-reviews" className="triplink-profile__section">
+											<PublicReviews key={member._id} agentId={member._id} />
+										</section>
+									</>
+								)}
+								<section
+									id="agent-connections"
+									className="triplink-profile__section triplink-profile__network"
+									aria-labelledby="agent-connections-title"
+								>
+									<h2 id="agent-connections-title">{t('Connections')}</h2>
+									<div className="triplink-profile__connections">
+										<div>
+											<h3>{t('Followers')}</h3>
+											<Follows key={member._id + 'followers'} memberId={member._id} />
+										</div>
+										<div>
+											<h3>{t('Following')}</h3>
+											<Follows key={member._id + 'following'} memberId={member._id} following />
+										</div>
+									</div>
+								</section>
+							</>
+						)}
+					</QueryState>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<Frame title={member?.memberFullname || member?.memberNick || 'Member'}>
 			{action.feedback}

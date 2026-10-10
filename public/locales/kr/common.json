@@ -570,5 +570,19 @@
 	"Unfollow {{name}}": "{{name}}님 팔로우 취소",
 	"Agent followed": "여행 전문가를 팔로우했습니다",
 	"Agent unfollowed": "여행 전문가 팔로우를 취소했습니다",
-	"Log in to follow": "로그인하고 팔로우하기"
+	"Log in to follow": "로그인하고 팔로우하기",
+	"All travel agents": "모든 여행 전문가",
+	"A local perspective. A memorable journey.": "현지의 시선으로, 기억에 남을 여행.",
+	"Agent profile sections": "여행 전문가 프로필 섹션",
+	"Connections": "연결",
+	"Likes": "좋아요",
+	"Tours by {{name}}": "{{name}}님의 투어",
+	"Find a journey that feels right for you.": "나에게 맞는 여행을 찾아보세요.",
+	"Agent rating": "★ {{rating}} / 5 · 리뷰 {{count}}개",
+	"Agent rating_one": "★ {{rating}} / 5 · 리뷰 {{count}}개",
+	"Agent rating_few": "★ {{rating}} / 5 · 리뷰 {{count}}개",
+	"Agent rating_many": "★ {{rating}} / 5 · 리뷰 {{count}}개",
+	"Agent rating_other": "★ {{rating}} / 5 · 리뷰 {{count}}개",
+	"Like / unlike": "좋아요 / 취소",
+	"Profile likes updated": "프로필 좋아요가 업데이트되었습니다"
 }

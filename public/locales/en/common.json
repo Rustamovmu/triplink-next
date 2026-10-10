@@ -576,5 +576,19 @@
 	"Unfollow {{name}}": "Unfollow {{name}}",
 	"Agent followed": "Agent followed",
 	"Agent unfollowed": "Agent unfollowed",
-	"Log in to follow": "Log in to follow"
+	"Log in to follow": "Log in to follow",
+	"All travel agents": "All travel agents",
+	"A local perspective. A memorable journey.": "A local perspective. A memorable journey.",
+	"Agent profile sections": "Agent profile sections",
+	"Connections": "Connections",
+	"Likes": "Likes",
+	"Tours by {{name}}": "Tours by {{name}}",
+	"Find a journey that feels right for you.": "Find a journey that feels right for you.",
+	"Agent rating": "★ {{rating}} / 5 · {{count}} reviews",
+	"Agent rating_one": "★ {{rating}} / 5 · {{count}} review",
+	"Agent rating_few": "★ {{rating}} / 5 · {{count}} reviews",
+	"Agent rating_many": "★ {{rating}} / 5 · {{count}} reviews",
+	"Agent rating_other": "★ {{rating}} / 5 · {{count}} reviews",
+	"Like / unlike": "Like / unlike",
+	"Profile likes updated": "Profile likes updated"
 }

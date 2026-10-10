@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, Rating, Stack, Typography } from '@mui/material';
 import { useQuery } from '@apollo/client';
@@ -20,36 +20,63 @@ function TourPhotos({ images, href, title }: { images: string[]; href: string; t
 	const { t } = useTranslation('common');
 	const [index, setIndex] = useState(0);
 	const [failed, setFailed] = useState<string[]>([]);
-	const path = images[index];
-	const src = path && !failed.includes(path) ? imageUrl(path) : tourPlaceholder;
+	const track = useRef<HTMLDivElement>(null);
+	const slides = images.length ? images : [''];
+	const goTo = (next: number) => {
+		const target = (next + slides.length) % slides.length;
+		track.current?.scrollTo({
+			left: target * track.current.clientWidth,
+			behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+		});
+	};
 	return (
 		<div className="triplink-tour-card__media">
-			<Link
-				href={href}
-				passHref
-				className="triplink-tour-card__photo-link"
-				aria-label={t('View tour: {{title}}', { title })}
+			<div
+				ref={track}
+				className="triplink-tour-card__slides"
+				onScroll={(event) => {
+					const { scrollLeft, clientWidth } = event.currentTarget;
+					if (clientWidth) setIndex(Math.max(0, Math.min(slides.length - 1, Math.round(scrollLeft / clientWidth))));
+				}}
 			>
-				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img
-					key={src}
-					src={src}
-					alt={title}
-					width={600}
-					height={400}
-					loading="lazy"
-					decoding="async"
-					onError={() => {
-						if (path && src !== tourPlaceholder) setFailed((previous) => [...previous, path]);
-					}}
-				/>
-			</Link>
+				{slides.map((path, photoIndex) => {
+					const src = path && !failed.includes(path) ? imageUrl(path) : tourPlaceholder;
+					return (
+						<Link
+							key={`${path}-${photoIndex}`}
+							href={href}
+							passHref
+							className="triplink-tour-card__photo-link"
+							aria-label={t('View tour: {{title}}', { title })}
+							tabIndex={photoIndex === index ? 0 : -1}
+							aria-hidden={photoIndex !== index}
+						>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={src}
+								alt={
+									t('Photo {{current}} of {{total}}', { current: photoIndex + 1, total: slides.length }) + ': ' + title
+								}
+								width={600}
+								height={400}
+								loading="lazy"
+								decoding="async"
+								draggable={false}
+								onError={() => {
+									if (path && src !== tourPlaceholder)
+										setFailed((previous) => (previous.includes(path) ? previous : [...previous, path]));
+								}}
+							/>
+						</Link>
+					);
+				})}
+			</div>
 			{images.length > 1 && (
 				<div className="triplink-tour-card__gallery">
 					<button
 						type="button"
 						aria-label={t('Previous photo of {{title}}', { title })}
-						onClick={() => setIndex((previous) => (previous - 1 + images.length) % images.length)}
+						onClick={() => goTo(index - 1)}
 					>
 						<ChevronLeftRoundedIcon aria-hidden="true" />
 					</button>
@@ -61,11 +88,7 @@ function TourPhotos({ images, href, title }: { images: string[]; href: string; t
 							{t('Photo {{current}} of {{total}}', { current: index + 1, total: images.length })}
 						</span>
 					</span>
-					<button
-						type="button"
-						aria-label={t('Next photo of {{title}}', { title })}
-						onClick={() => setIndex((previous) => (previous + 1) % images.length)}
-					>
+					<button type="button" aria-label={t('Next photo of {{title}}', { title })} onClick={() => goTo(index + 1)}>
 						<ChevronRightRoundedIcon aria-hidden="true" />
 					</button>
 				</div>
@@ -110,7 +133,7 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 						href="/account/join"
 						passHref
 						className="triplink-tour-card__favorite"
-						aria-label={t(catalog ? 'Login to like {{title}}' : 'Login to save {{title}}', { title: tour.tourTitle })}
+						aria-label={t('Login to like {{title}}', { title: tour.tourTitle })}
 					>
 						<FavoriteBorderRoundedIcon aria-hidden="true" />
 					</Link>
@@ -122,16 +145,7 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 							aria-label={
 								favorites.error
 									? t('Retry saved tours')
-									: t(
-											catalog
-												? saved
-													? 'Unlike {{title}}'
-													: 'Like {{title}}'
-												: saved
-												? 'Unsave {{title}}'
-												: 'Save {{title}}',
-											{ title: tour.tourTitle },
-									  )
+									: t(saved ? 'Unlike {{title}}' : 'Like {{title}}', { title: tour.tourTitle })
 							}
 							aria-pressed={favorites.eligible && favorites.ready ? saved : undefined}
 							aria-busy={
@@ -172,6 +186,7 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 						<span className="triplink-tour-card__review-count">{t('No reviews yet')}</span>
 					)}
 				</div>
+
 				{catalog && (
 					<p className="triplink-tour-card__likes">
 						<FavoriteBorderRoundedIcon aria-hidden="true" />
@@ -185,7 +200,7 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 					</span>
 					<span>
 						<FavoriteBorderRoundedIcon aria-hidden="true" />
-						{t('{{count}} saves', { count: favoriteCount, displayCount: number.format(favoriteCount) })}
+						{t('Tour likes', { count: favoriteCount, displayCount: number.format(favoriteCount) })}
 					</span>
 				</div>
 				{(favorites.error || favorites.errors[tour._id]) && (
@@ -272,13 +287,13 @@ export function PublicReviews({ tourId, agentId }: { tourId?: string; agentId?: 
 	const query = agentId ? agent : tour;
 	return (
 		<Stack spacing={2}>
-			<Typography variant="h5">{t('Reviews')}</Typography>
+			<Typography variant="h5" component="h2">{t('Reviews')}</Typography>
 			<QueryState
 				loading={!ready || query.loading}
 				error={query.error}
-				empty={!query.data?.result.list.length}
 				retry={() => query.refetch()}
 			>
+				{!query.data?.result.list.length && <Typography color="text.secondary">{t('No reviews yet')}</Typography>}
 				{query.data?.result.list.map((review) => (
 					<Card variant="outlined" key={review._id}>
 						<CardContent>

@@ -57,7 +57,7 @@ test('agent controls use server follow state and counts, lock pending actions, r
 		'../../types/triplink': { totalOf: (result) => result?.metaCounter[0]?.total ?? 0 },
 		'./Common': common, './Tours': {}, './Members': {},
 		'../../auth': { refreshCurrentMember: async () => { hydrationCount++; } },
-		...Object.fromEntries(['SearchRounded', 'PlaceOutlined', 'ArrowForwardRounded', 'CloseRounded', 'PersonAddAltRounded', 'CheckRounded'].map((name) => [`@mui/icons-material/${name}`, { __esModule: true, default: icon }])),
+		...Object.fromEntries(['SearchRounded', 'PlaceOutlined', 'ArrowForwardRounded', 'CloseRounded', 'PersonAddAltRounded', 'CheckRounded', 'FavoriteBorderRounded'].map((name) => [`@mui/icons-material/${name}`, { __esModule: true, default: icon }])),
 	});
 	const root = createRoot(document.getElementById('root'));
 	const render = () => act(async () => root.render(React.createElement(profiles.AgentDirectory)));
