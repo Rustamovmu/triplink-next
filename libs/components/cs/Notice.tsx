@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
-import {
-	Button,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	List,
-	ListItemButton,
-	ListItemText,
-	Stack,
-	TextField,
-	Typography,
-} from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField, Typography } from '@mui/material';
+import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import { useTranslation } from 'next-i18next';
 import { HELP_ENTRIES, HELP_ENTRY } from '../../../apollo/user/triplink';
 import { Pager, QueryState, usePublicReady, displayDate } from '../triplink/Common';
@@ -36,28 +25,51 @@ export default function Notice() {
 	});
 	return (
 		<Stack spacing={2} className="triplink-help-center">
-			<TextField
-				label={t('Search Help Center')}
-				value={text}
-				inputProps={{ maxLength: 100 }}
-				onChange={(e) => {
-					setText(e.target.value);
-					setPage(1);
-				}}
-			/>
-			<QueryState
-				loading={!ready || query.loading}
-				error={query.error}
-				empty={!query.data?.result.list.length}
-				retry={() => query.refetch()}
-			>
-				<List>
+			<div className="triplink-support__answer-heading">
+				<div>
+					<h2>{t('Latest notices')}</h2>
+					<p>{t('News and updates from TripLink.')}</p>
+				</div>
+				<TextField
+					label={t('Search Help Center')}
+					value={text}
+					inputProps={{ maxLength: 100 }}
+					onChange={(e) => {
+						setText(e.target.value);
+						setPage(1);
+					}}
+				/>
+			</div>
+			<QueryState loading={!ready || query.loading} error={query.error} retry={() => query.refetch()}>
+				{!query.data?.result.list.length && (
+					<div className="triplink-support__empty">
+						<CampaignOutlinedIcon aria-hidden="true" />
+						<h3>{t(text.trim() ? 'No notices match your search' : 'No notices published yet')}</h3>
+						<p>{t(text.trim() ? 'Try a different search term.' : 'Updates from TripLink will appear here.')}</p>
+						{text.trim() && (
+							<button
+								type="button"
+								onClick={() => {
+									setText('');
+									setPage(1);
+								}}
+							>
+								{t('Clear filters')}
+							</button>
+						)}
+					</div>
+				)}
+				<div className="triplink-support__notices">
 					{query.data?.result.list.map((entry) => (
-						<ListItemButton key={entry._id} onClick={() => setSelected(entry._id)}>
-							<ListItemText primary={entry.noticeTitle} secondary={displayDate(entry.createdAt)} />
-						</ListItemButton>
+						<button type="button" key={entry._id} onClick={() => setSelected(entry._id)} aria-haspopup="dialog">
+							<CampaignOutlinedIcon aria-hidden="true" />
+							<time dateTime={entry.createdAt}>{displayDate(entry.createdAt)}</time>
+							<h3>{entry.noticeTitle}</h3>
+							<p>{entry.noticeContent}</p>
+							<span>{t('Read notice')}</span>
+						</button>
 					))}
-				</List>
+				</div>
 			</QueryState>
 			<Pager total={query.data?.result.metaCounter[0]?.total ?? 0} page={page} onChange={setPage} />
 			<Dialog
@@ -66,10 +78,16 @@ export default function Notice() {
 				fullWidth
 				maxWidth="md"
 				aria-labelledby="notice-dialog-title"
+				className="triplink-support-dialog"
 			>
 				<DialogTitle id="notice-dialog-title">{detail.data?.result.noticeTitle || t('Notice')}</DialogTitle>
 				<DialogContent>
-					<QueryState loading={detail.loading} error={detail.error} retry={() => detail.refetch()}>
+					<QueryState
+						loading={detail.loading}
+						error={detail.error}
+						empty={!detail.data?.result}
+						retry={() => detail.refetch()}
+					>
 						<Typography className="help-center-content">{detail.data?.result.noticeContent}</Typography>
 					</QueryState>
 				</DialogContent>

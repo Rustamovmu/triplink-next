@@ -145,7 +145,8 @@ const withLayoutBasic = (Component: any) => {
 							router.pathname !== '/agent' &&
 							router.pathname !== '/agent/detail' &&
 							router.pathname !== '/community' &&
-							router.pathname !== '/community/detail' && (
+							router.pathname !== '/community/detail' &&
+							router.pathname !== '/help-center' && (
 								<Stack
 									className="header-basic"
 									style={{
