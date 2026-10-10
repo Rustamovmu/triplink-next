@@ -451,7 +451,13 @@ export function OwnedTours({ admin = false }: { admin?: boolean }) {
 											}
 											onClick={() =>
 												void action.run(async () => {
-													if (!window.confirm(t('Change this tour to {{status}}?', { status: t(next) }))) return;
+													const resubmitting = !admin && tour.tourStatus === 'ACTIVE' && next === 'PENDING';
+													const confirmation = resubmitting
+														? t(
+																'Resubmit this tour for admin approval? It will be hidden from public listings. Tours with confirmed bookings cannot be resubmitted.',
+														  )
+														: t('Change this tour to {{status}}?', { status: t(next) });
+													if (!window.confirm(confirmation)) return;
 													const input = { tourId: tour._id, tourStatus: next };
 													if (admin) await adminUpdate({ variables: { input } });
 													else await ownerUpdate({ variables: { input } });
@@ -459,7 +465,9 @@ export function OwnedTours({ admin = false }: { admin?: boolean }) {
 												})
 											}
 										>
-											{t(next)}
+											{t(
+												!admin && tour.tourStatus === 'ACTIVE' && next === 'PENDING' ? 'Resubmit for approval' : next,
+											)}
 										</Button>
 									))}
 									{admin && tour.tourStatus === 'ACTIVE' && (
@@ -478,6 +486,13 @@ export function OwnedTours({ admin = false }: { admin?: boolean }) {
 										</Button>
 									)}
 								</Stack>
+								{!admin && tour.tourStatus === 'ACTIVE' && (
+									<Typography variant="body2" color="text.secondary">
+										{t(
+											'Resubmitting returns this tour to Pending for admin approval. Tours with confirmed bookings cannot be resubmitted.',
+										)}
+									</Typography>
+								)}
 							</Stack>
 						</CardContent>
 					</Card>

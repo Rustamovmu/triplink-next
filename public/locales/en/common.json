@@ -702,5 +702,9 @@
 	"Your account connects your bookings, saved tours, and travel community.": "Your account connects your bookings, saved tours, and travel community.",
 	"Show password": "Show password",
 	"Hide password": "Hide password",
-	"Please wait…": "Please wait…"
+	"Please wait…": "Please wait…",
+	"Resubmit for approval": "Resubmit for approval",
+	"Resubmitting returns this tour to Pending for admin approval. Tours with confirmed bookings cannot be resubmitted.": "Resubmitting returns this tour to Pending for admin approval. Tours with confirmed bookings cannot be resubmitted.",
+	"Resubmit this tour for admin approval? It will be hidden from public listings. Tours with confirmed bookings cannot be resubmitted.": "Resubmit this tour for admin approval? It will be hidden from public listings. Tours with confirmed bookings cannot be resubmitted.",
+	"This tour has confirmed bookings and cannot be resubmitted for approval.": "This tour has confirmed bookings and cannot be resubmitted for approval."
 }

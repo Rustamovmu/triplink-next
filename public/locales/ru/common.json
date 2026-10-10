@@ -716,5 +716,9 @@
 	"Your account connects your bookings, saved tours, and travel community.": "Ваш аккаунт объединяет бронирования, сохранённые туры и сообщество путешественников.",
 	"Show password": "Показать пароль",
 	"Hide password": "Скрыть пароль",
-	"Please wait…": "Подождите…"
+	"Please wait…": "Подождите…",
+	"Resubmit for approval": "Повторно отправить на одобрение",
+	"Resubmitting returns this tour to Pending for admin approval. Tours with confirmed bookings cannot be resubmitted.": "Повторная отправка возвращает тур в статус ожидания одобрения администратора. Туры с подтверждёнными бронированиями нельзя отправить повторно.",
+	"Resubmit this tour for admin approval? It will be hidden from public listings. Tours with confirmed bookings cannot be resubmitted.": "Повторно отправить этот тур на одобрение администратора? Он будет скрыт из публичного каталога. Туры с подтверждёнными бронированиями нельзя отправить повторно.",
+	"This tour has confirmed bookings and cannot be resubmitted for approval.": "У этого тура есть подтверждённые бронирования, поэтому его нельзя повторно отправить на одобрение."
 }

@@ -16,6 +16,8 @@ export function errorMessage(error: unknown): string {
 			case 'NOT_FOUND':
 				return 'This record is unavailable.';
 			case 'CONFLICT':
+				if (graphql.message === 'Cannot resubmit a tour with confirmed bookings.')
+					return 'This tour has confirmed bookings and cannot be resubmitted for approval.';
 				return 'This record changed. Refresh and try again.';
 			case 'INTERNAL_SERVER_ERROR':
 				return 'Something went wrong!';
