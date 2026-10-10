@@ -141,6 +141,7 @@ const withLayoutBasic = (Component: any) => {
 
 						{toursBanner}
 						{memoizedValues.title &&
+							router.pathname !== '/account/join' &&
 							router.pathname !== '/tour' &&
 							router.pathname !== '/agent' &&
 							router.pathname !== '/agent/detail' &&
