@@ -10,12 +10,19 @@ import { useReactiveVar } from '@apollo/client';
 import { memberVar } from '../../../apollo/store';
 import { imageUrl } from '../triplink/Common';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 const drawerWidth = 248;
 export default function withAdminLayout(Component: ComponentType) {
 	function AdminLayout(props: object) {
+		const router = useRouter();
 		const [open, setOpen] = useState(false);
 		const { t } = useTranslation('common');
 		const member = useReactiveVar(memberVar);
+		const logout = () => {
+			setOpen(false);
+			logOut();
+			void router.push('/');
+		};
 		return (
 			<Access roles={['ADMIN']}>
 				<Head>
@@ -43,7 +50,7 @@ export default function withAdminLayout(Component: ComponentType) {
 								{member?.memberNick}
 							</Typography>
 							<Link href="/">{t('Home')}</Link>
-							<Button color="inherit" onClick={logOut}>
+							<Button color="inherit" onClick={logout}>
 								{t('Logout')}
 							</Button>
 						</Toolbar>

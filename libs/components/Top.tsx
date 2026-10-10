@@ -90,6 +90,7 @@ export default function Top() {
 	const logout = () => {
 		close();
 		logOut();
+		void router.push('/');
 	};
 	const language = () => (
 		<label className="triplink-top__language">
