@@ -140,7 +140,7 @@ const withLayoutBasic = (Component: any) => {
 						</Stack>
 
 						{toursBanner}
-						{memoizedValues.title && router.pathname !== '/tour' && (
+						{memoizedValues.title && router.pathname !== '/tour' && router.pathname !== '/agent' && (
 							<Stack
 								className="header-basic"
 								style={{

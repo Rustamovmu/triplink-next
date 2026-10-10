@@ -2,7 +2,7 @@ import { useTranslation } from 'next-i18next';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useReactiveVar } from '@apollo/client';
-import { Avatar, Button, Card, CardContent, Stack, TextField, Typography } from '@mui/material';
+import { Avatar, Button, Stack, Typography } from '@mui/material';
 import { AGENTS, MEMBER, FOLLOW_TOGGLE, MEMBER_LIKE } from '../../../apollo/user/triplink';
 import { memberVar } from '../../../apollo/store';
 import { totalOf } from '../../types/triplink';
@@ -11,6 +11,12 @@ import { PublicReviews, TourList } from './Tours';
 import { Follows } from './Members';
 import { refreshCurrentMember } from '../../auth';
 import { useRouter } from 'next/router';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import PersonAddAltRoundedIcon from '@mui/icons-material/PersonAddAltRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 export function AgentDirectory() {
 	const { t } = useTranslation('common');
 
@@ -21,47 +27,181 @@ export function AgentDirectory() {
 		variables: { input: { page, limit: 12, search: { text }, sort: 'memberFollowers', direction: 'DESC' } },
 		skip: !ready,
 	});
+	const current = useReactiveVar(memberVar);
+	const [follow] = useMutation(FOLLOW_TOGGLE);
+	const action = useAction();
+	const total = totalOf(query.data?.result);
 	return (
-		<Frame title={t('Travel agents')}>
-			<TextField
-				label={t('Search agents')}
-				value={text}
-				onChange={(e) => {
-					setText(e.target.value);
-					setPage(1);
-				}}
-			/>
-			<QueryState
-				loading={!ready || query.loading}
-				error={query.error}
-				empty={!query.data?.result.list.length}
-				retry={() => query.refetch()}
-			>
-				<Stack spacing={2}>
-					{query.data?.result.list.map((member) => (
-						<Card variant="outlined" key={member._id}>
-							<CardContent>
-								<Stack direction="row" spacing={2}>
-									<Avatar src={imageUrl(member.memberImage)} />
-									<Stack>
-										<Link href={`/agent/detail?agentId=${member._id}`}>
-											{member.memberFullname || member.memberNick}
+		<div className="triplink-agents">
+			<section className="triplink-agents__hero" aria-labelledby="agents-title">
+				<div className="triplink-agents__hero-inner">
+					<div className="triplink-agents__intro">
+						<h1 id="agents-title">{t('Good journeys begin with good people.')}</h1>
+						<p>
+							{t(
+								'Meet the travel agents behind your next adventure. Explore their tours, get to know their story, and find your kind of guide.',
+							)}
+						</p>
+						<a href="#agent-directory" className="triplink-agents__explore">
+							{t('Meet our agents')} <ArrowForwardRoundedIcon aria-hidden="true" />
+						</a>
+					</div>
+				</div>
+			</section>
+			<section id="agent-directory" className="triplink-agents__directory" aria-labelledby="agent-directory-title">
+				<div className="triplink-agents__toolbar">
+					<div>
+						<h2 id="agent-directory-title">{t('Travel agents')}</h2>
+						<p>{t('A personal connection. A different perspective.')}</p>
+					</div>
+					<div className="triplink-agents__search">
+						<SearchRoundedIcon aria-hidden="true" />
+						<input
+							aria-label={t('Search agents')}
+							placeholder={t('Search agents by name')}
+							type="search"
+							maxLength={100}
+							value={text}
+							onChange={(e) => {
+								setText(e.target.value);
+								setPage(1);
+							}}
+						/>
+						{text && (
+							<button
+								type="button"
+								aria-label={t('Clear search')}
+								onClick={() => {
+									setText('');
+									setPage(1);
+								}}
+							>
+								<CloseRoundedIcon />
+							</button>
+						)}
+					</div>
+				</div>
+				<div className="triplink-agents__results" role="status">
+					{!ready || query.loading
+						? t('Finding travel agents…')
+						: query.error
+						? t('Travel agents')
+						: `${total} ${t('Travel agents')}`}
+				</div>
+				{action.feedback}
+				<QueryState loading={!ready || query.loading} error={query.error} retry={() => query.refetch()}>
+					{!query.data?.result.list.length ? (
+						<div className="triplink-agents__empty">
+							<SearchRoundedIcon aria-hidden="true" />
+							<h3>{t('No agents found')}</h3>
+							<p>{t('Try another name or clear your search to see all agents.')}</p>
+							{text && (
+								<Button
+									onClick={() => {
+										setText('');
+										setPage(1);
+									}}
+								>
+									{t('Clear search')}
+								</Button>
+							)}
+						</div>
+					) : (
+						<div className="triplink-agents__grid">
+							{query.data?.result.list.map((member) => {
+								const name = member.memberFullname || member.memberNick;
+								const initials = name
+									.trim()
+									.split(/\s+/)
+									.slice(0, 2)
+									.map((part) => part[0])
+									.join('')
+									.toUpperCase();
+								return (
+									<article className="triplink-agents__card" key={member._id}>
+										<div className="triplink-agents__identity">
+											<Avatar
+												src={member.memberImage ? imageUrl(member.memberImage) : undefined}
+												className="triplink-agents__avatar"
+											>
+												{initials}
+											</Avatar>
+											<div>
+												<h3>
+													<Link href={`/agent/detail?agentId=${member._id}`}>{name}</Link>
+												</h3>
+												{member.memberCountry ? (
+													<p className="triplink-agents__location">
+														<PlaceOutlinedIcon aria-hidden="true" />
+														{member.memberCountry}
+													</p>
+												) : (
+													<p className="triplink-agents__location">{t('Travel agent')}</p>
+												)}
+											</div>
+										</div>
+										<p className="triplink-agents__bio">
+											{member.memberDesc?.trim() ||
+												t('Get to know this agent and explore their tours on their profile.')}
+										</p>
+										<dl className="triplink-agents__stats">
+											<div>
+												<dt>{t('Tours')}</dt>
+												<dd>{member.memberTours}</dd>
+											</div>
+											<div>
+												<dt>{t('Followers')}</dt>
+												<dd>{member.memberFollowers}</dd>
+											</div>
+										</dl>
+										{current && current.memberType !== 'ADMIN' && current._id !== member._id && (
+											<Button
+												className="triplink-agents__follow"
+												variant={member.isFollowing ? 'outlined' : 'contained'}
+												disableElevation
+												disabled={action.busy}
+												aria-label={t(member.isFollowing ? 'Unfollow {{name}}' : 'Follow {{name}}', { name })}
+												startIcon={member.isFollowing ? <CheckRoundedIcon /> : <PersonAddAltRoundedIcon />}
+												onClick={() =>
+													void action.run(async () => {
+														await follow({ variables: { memberId: member._id } });
+														await refreshCurrentMember();
+														await query.refetch();
+													}, t(member.isFollowing ? 'Agent unfollowed' : 'Agent followed'))
+												}
+											>
+												{t(member.isFollowing ? 'Unfollow' : 'Follow')}
+											</Button>
+										)}
+										{!current && ready && (
+											<Link className="triplink-agents__login" href="/account/join">
+												{t('Log in to follow')}
+											</Link>
+										)}
+										<Link
+											className="triplink-agents__profile"
+												passHref
+											href={`/agent/detail?agentId=${member._id}`}
+											aria-label={t('View profile of {{name}}', { name })}
+										>
+											{t('View profile')} <ArrowForwardRoundedIcon aria-hidden="true" />
 										</Link>
-										<Typography>
-											{member.memberCountry} · {member.memberTours} {t('tours ·')} {member.memberFollowers}{' '}
-											{t('followers')}
-										</Typography>
-									</Stack>
-								</Stack>
-							</CardContent>
-						</Card>
-					))}
-				</Stack>
-			</QueryState>
-			<Pager page={page} total={totalOf(query.data?.result)} onChange={setPage} />
-		</Frame>
+									</article>
+								);
+							})}
+						</div>
+					)}
+				</QueryState>
+				{!query.loading && !query.error && (
+					<div className="triplink-agents__pagination">
+						<Pager page={page} total={total} onChange={setPage} />
+					</div>
+				)}
+			</section>
+		</div>
 	);
 }
+
 export function MemberProfile() {
 	const { t } = useTranslation('common');
 
