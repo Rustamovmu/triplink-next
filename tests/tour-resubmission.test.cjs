@@ -87,6 +87,7 @@ test('owned-tour resubmission explains its effect and renders a booking restrict
 		'../../triplink/errors': { errorMessage }, '../../../apollo/store': {},
 	});
 	const { OwnedTours } = load('libs/components/triplink/TourManagement.tsx', {
+		'next/image': function TestImage() { return null; },
 		react: React, '@mui/material': mui, '@apollo/client': apollo,
 		'next-i18next': { useTranslation: () => ({ t }) }, './Common': common,
 		'../../../apollo/user/triplink': { UPDATE_TOUR: 'owner-update' },
@@ -111,7 +112,9 @@ test('owned-tour resubmission explains its effect and renders a booking restrict
 		assert.deepEqual(mutations[0], {
 			operation: 'owner-update', variables: { input: { tourId: 'tour-id', tourStatus: 'PENDING' } },
 		});
-		assert.match(document.body.textContent, /ACTIVE · 23/);
+		assert.equal(document.querySelector('[data-status]').textContent, 'ACTIVE');
+		assert.equal(document.querySelector('dd').textContent, '23');
+		assert(button('Cancel tour'));
 
 		// A historical booking count is not a confirmed-booking count; the API still decides eligibility.
 		fail = false;
@@ -121,9 +124,9 @@ test('owned-tour resubmission explains its effect and renders a booking restrict
 
 		status = 'DRAFT';
 		await act(async () => root.render(React.createElement(OwnedTours)));
-		assert(button('PENDING'));
+		assert(button('Submit for approval'));
 		assert.equal(button('Resubmit for approval'), undefined);
-		await click(button('PENDING'));
+		await click(button('Submit for approval'));
 		assert.equal(confirmations.at(-1), 'Change this tour to PENDING?');
 
 		status = 'ACTIVE';

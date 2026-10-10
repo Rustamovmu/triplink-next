@@ -699,5 +699,8 @@
 	"Resubmit for approval": "승인 재요청",
 	"Resubmitting returns this tour to Pending for admin approval. Tours with confirmed bookings cannot be resubmitted.": "재제출하면 관리자 승인을 기다리는 대기 상태로 돌아갑니다. 확정된 예약이 있는 투어는 재제출할 수 없습니다.",
 	"Resubmit this tour for admin approval? It will be hidden from public listings. Tours with confirmed bookings cannot be resubmitted.": "이 투어의 관리자 승인을 다시 요청할까요? 공개 목록에서 숨겨집니다. 확정된 예약이 있는 투어는 재제출할 수 없습니다.",
-	"This tour has confirmed bookings and cannot be resubmitted for approval.": "이 투어에는 확정된 예약이 있어 승인을 다시 요청할 수 없습니다."
+	"This tour has confirmed bookings and cannot be resubmitted for approval.": "이 투어에는 확정된 예약이 있어 승인을 다시 요청할 수 없습니다.",
+	"Cancel tour": "투어 취소",
+	"Submit for approval": "승인 요청",
+	"Return to draft": "초안으로 되돌리기"
 }

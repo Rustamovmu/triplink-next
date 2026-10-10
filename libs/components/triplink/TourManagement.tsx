@@ -1,5 +1,6 @@
 import { useTranslation } from 'next-i18next';
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useMutation, useQuery } from '@apollo/client';
 import { Alert, Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { AGENT_TOURS, CREATE_TOUR, UPDATE_TOUR } from '../../../apollo/user/triplink';
@@ -401,24 +402,34 @@ export function OwnedTours({ admin = false }: { admin?: boolean }) {
 			</Stack>
 		);
 	return (
-		<Stack spacing={2}>
+		<Stack spacing={2} className={admin ? undefined : 'triplink-owned-tours'}>
 			{action.feedback}
-			<TextField
-				select
-				label={t('Status')}
-				value={t(status)}
-				onChange={(e) => {
-					setStatus(e.target.value as TourStatus | '');
-					setPage(1);
-				}}
-			>
-				<MenuItem value="">{t('All')}</MenuItem>
-				{['DRAFT', 'PENDING', 'ACTIVE', 'SOLD_OUT', 'COMPLETED', 'CANCELLED'].map((value) => (
-					<MenuItem key={value} value={value}>
-						{t(String(value))}
-					</MenuItem>
-				))}
-			</TextField>
+			<div className="triplink-owned-tours__toolbar">
+				{!admin && query.data && !query.loading && !query.error && (
+					<Typography className="triplink-owned-tours__count">
+						<strong>{totalOf(query.data.result)}</strong> {t('Tours')}
+					</Typography>
+				)}
+				<TextField
+					className="triplink-owned-tours__filter"
+					select
+					label={t('Status')}
+					value={status}
+					SelectProps={{ displayEmpty: true }}
+					InputLabelProps={{ shrink: true }}
+					onChange={(e) => {
+						setStatus(e.target.value as TourStatus | '');
+						setPage(1);
+					}}
+				>
+					<MenuItem value="">{t('All')}</MenuItem>
+					{['DRAFT', 'PENDING', 'ACTIVE', 'SOLD_OUT', 'COMPLETED', 'CANCELLED'].map((value) => (
+						<MenuItem key={value} value={value}>
+							{t(String(value))}
+						</MenuItem>
+					))}
+				</TextField>
+			</div>
 			<QueryState
 				loading={query.loading}
 				error={query.error}
@@ -426,23 +437,75 @@ export function OwnedTours({ admin = false }: { admin?: boolean }) {
 				retry={() => query.refetch()}
 			>
 				{query.data?.result.list.map((tour) => (
-					<Card variant="outlined" key={tour._id}>
+					<Card variant="outlined" key={tour._id} className="triplink-owned-tours__card">
 						<CardContent>
-							<Stack spacing={2}>
-								<Typography variant="h6">{tour.tourTitle}</Typography>
-								<Typography>
-									{t(tour.tourStatus)} · {tour.tourAvailableSeats} {t('seats ·')} {tour.tourBookingCount}{' '}
-									{t('bookings ·')} {t(tour.tourFeatured ? 'Featured' : 'Not featured')}
-								</Typography>
-								<Stack direction="row" flexWrap="wrap" gap={1}>
+							<div className="triplink-owned-tours__row">
+								{!admin && (
+									<div className="triplink-owned-tours__photo">
+										<Image
+											fill
+											unoptimized
+											alt=""
+											loading="lazy"
+											sizes="(max-width: 600px) 88px, 140px"
+											src={tour.tourImages[0] ? imageUrl(tour.tourImages[0]) : '/img/tour-placeholder.svg'}
+											onError={(event) => {
+												if (!event.currentTarget.src.endsWith('/img/tour-placeholder.svg'))
+													event.currentTarget.src = '/img/tour-placeholder.svg';
+											}}
+										/>
+									</div>
+								)}
+								<div className="triplink-owned-tours__details">
+									{admin ? (
+										<>
+											<Typography variant="h6">{tour.tourTitle}</Typography>
+											<Typography>
+												{t(tour.tourStatus)} · {tour.tourAvailableSeats} {t('seats ·')} {tour.tourBookingCount}{' '}
+												{t('bookings ·')} {t(tour.tourFeatured ? 'Featured' : 'Not featured')}
+											</Typography>
+										</>
+									) : (
+										<>
+											<div className="triplink-owned-tours__badges">
+												<span className="triplink-owned-tours__status" data-status={tour.tourStatus}>
+													<span aria-hidden="true" />
+													{t(tour.tourStatus)}
+												</span>
+												<span className="triplink-owned-tours__featured" data-featured={tour.tourFeatured}>
+													{t(tour.tourFeatured ? 'Featured' : 'Not featured')}
+												</span>
+											</div>
+											<Typography component="h3" variant="h6" className="triplink-owned-tours__title">
+												{tour.tourTitle}
+											</Typography>
+											<Typography className="triplink-owned-tours__location">
+												{[tour.tourDestination, tour.tourCountry].filter(Boolean).join(', ')}
+											</Typography>
+											<dl className="triplink-owned-tours__metrics">
+												<div>
+													<dt>{t('Available seats')}</dt>
+													<dd>{tour.tourAvailableSeats}</dd>
+												</div>
+												<div>
+													<dt>{t('Bookings')}</dt>
+													<dd>{tour.tourBookingCount}</dd>
+												</div>
+											</dl>
+										</>
+									)}
+								</div>
+								<Stack direction="row" flexWrap="wrap" gap={1} className="triplink-owned-tours__actions">
 									{!admin && ['DRAFT', 'PENDING'].includes(tour.tourStatus) && (
-										<Button disabled={action.busy} onClick={() => setEditing(tour)}>
+										<Button variant="outlined" disabled={action.busy} onClick={() => setEditing(tour)}>
 											{t('Edit draft')}
 										</Button>
 									)}
 									{(admin ? adminTransitions : ownerTransitions)[tour.tourStatus]?.map((next) => (
 										<Button
 											key={t(next)}
+											variant={admin ? 'text' : next === 'CANCELLED' ? 'outlined' : 'contained'}
+											className={!admin && next === 'CANCELLED' ? 'triplink-owned-tours__cancel' : undefined}
 											disabled={
 												action.busy ||
 												(next === 'PENDING' &&
@@ -466,7 +529,17 @@ export function OwnedTours({ admin = false }: { admin?: boolean }) {
 											}
 										>
 											{t(
-												!admin && tour.tourStatus === 'ACTIVE' && next === 'PENDING' ? 'Resubmit for approval' : next,
+												admin
+													? next
+													: next === 'CANCELLED'
+													? 'Cancel tour'
+													: next === 'DRAFT'
+													? 'Return to draft'
+													: next === 'PENDING'
+													? tour.tourStatus === 'ACTIVE'
+														? 'Resubmit for approval'
+														: 'Submit for approval'
+													: next,
 											)}
 										</Button>
 									))}
@@ -486,14 +559,16 @@ export function OwnedTours({ admin = false }: { admin?: boolean }) {
 										</Button>
 									)}
 								</Stack>
-								{!admin && tour.tourStatus === 'ACTIVE' && (
-									<Typography variant="body2" color="text.secondary">
+							</div>
+							{!admin && tour.tourStatus === 'ACTIVE' && (
+								<Typography component="p" variant="body2" className="triplink-owned-tours__note">
+									<span>
 										{t(
 											'Resubmitting returns this tour to Pending for admin approval. Tours with confirmed bookings cannot be resubmitted.',
 										)}
-									</Typography>
-								)}
-							</Stack>
+									</span>
+								</Typography>
+							)}
 						</CardContent>
 					</Card>
 				))}
