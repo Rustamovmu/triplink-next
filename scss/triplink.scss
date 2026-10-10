@@ -2035,30 +2035,28 @@
 		border-radius: 12px;
 		overflow: hidden;
 	}
-	.triplink-home-event__illustration {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 24px;
+	.triplink-home-event__photo {
+		position: relative;
+		aspect-ratio: 1.6;
+		overflow: hidden;
 		background: #f1f7f6;
-		color: #00343b;
-		svg {
-			width: 64px;
-			height: 64px;
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
 		}
 		span {
+			position: absolute;
+			bottom: 14px;
+			left: 16px;
+			padding: 6px 12px;
+			border-radius: 20px;
+			background: white;
+			color: #00343b;
 			font-size: 12px;
 			font-weight: 600;
 		}
-	}
-	.triplink-home-event:nth-child(2) .triplink-home-event__illustration {
-		background: #fbe8e1;
-	}
-	.triplink-home-event:nth-child(3) .triplink-home-event__illustration {
-		background: #f3efdf;
-	}
-	.triplink-home-event:nth-child(4) .triplink-home-event__illustration {
-		background: #e6edf8;
 	}
 	.triplink-home-event__body {
 		display: flex;

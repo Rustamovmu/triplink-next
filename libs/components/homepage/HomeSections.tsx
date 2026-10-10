@@ -7,10 +7,6 @@ import { Avatar } from '@mui/material';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import TheaterComedyOutlinedIcon from '@mui/icons-material/TheaterComedyOutlined';
-import LocalFloristOutlinedIcon from '@mui/icons-material/LocalFloristOutlined';
-import CelebrationOutlinedIcon from '@mui/icons-material/CelebrationOutlined';
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import { TOURS, AGENTS } from '../../../apollo/user/triplink';
 import { Inquiry, Tour, TourSearch } from '../../types/triplink';
@@ -299,7 +295,7 @@ const events = [
 		location: 'Venice, Italy',
 		description: 'Masks, costumes, and performances across Venice.',
 		season: 'Winter',
-		icon: TheaterComedyOutlinedIcon,
+		image: '/img/events/venice-carnival.jpg',
 		href: 'https://carnevale.venezia.it/en/the-venice-carnival/',
 	},
 	{
@@ -307,7 +303,7 @@ const events = [
 		location: 'Hirosaki, Japan',
 		description: 'Cherry blossoms frame the castle grounds of Hirosaki Park.',
 		season: 'Spring',
-		icon: LocalFloristOutlinedIcon,
+		image: '/img/events/hirosaki-blossoms.jpg',
 		href: 'https://sakura.hirosakipark.jp/en',
 	},
 	{
@@ -315,7 +311,7 @@ const events = [
 		location: 'Munich, Germany',
 		description: 'Explore Munich’s traditional folk festival.',
 		season: 'Autumn',
-		icon: CelebrationOutlinedIcon,
+		image: '/img/events/oktoberfest.jpg',
 		href: 'https://www.oktoberfest.de/en',
 	},
 	{
@@ -323,7 +319,7 @@ const events = [
 		location: 'Taiwan',
 		description: 'Discover illuminated lantern art and cultural performances.',
 		season: 'Winter',
-		icon: LightModeOutlinedIcon,
+		image: '/img/events/taiwan-lanterns.jpg',
 		href: 'https://www.taiwan.net.tw/m1.aspx?sno=0027328',
 	},
 ];
@@ -334,8 +330,9 @@ function Events() {
 			<div className="triplink-home-grid triplink-home-grid--events">
 				{events.map((event) => (
 					<article className="triplink-home-event" key={event.name}>
-						<div className="triplink-home-event__illustration">
-							<event.icon aria-hidden="true" />
+						<div className="triplink-home-event__photo">
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img src={event.image} alt={t(event.name)} width={1000} height={625} loading="lazy" decoding="async" />
 							<span>{t(event.season)}</span>
 						</div>
 						<div className="triplink-home-event__body">
