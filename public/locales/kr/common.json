@@ -584,5 +584,9 @@
 	"Agent rating_many": "★ {{rating}} / 5 · 리뷰 {{count}}개",
 	"Agent rating_other": "★ {{rating}} / 5 · 리뷰 {{count}}개",
 	"Like / unlike": "좋아요 / 취소",
-	"Profile likes updated": "프로필 좋아요가 업데이트되었습니다"
+	"Profile likes updated": "프로필 좋아요가 업데이트되었습니다",
+	"Member followed": "회원을 팔로우했습니다",
+	"Member unfollowed": "회원 팔로우를 취소했습니다",
+	"No followers yet.": "아직 팔로워가 없습니다.",
+	"Not following anyone yet.": "아직 팔로우하는 사람이 없습니다."
 }

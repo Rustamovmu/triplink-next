@@ -7,6 +7,7 @@ import {
 	FAVORITES,
 	VISITED,
 	PROFILE_UPDATE,
+	MEMBER,
 	FOLLOWERS,
 	FOLLOWINGS,
 	FOLLOW_TOGGLE,
@@ -15,7 +16,7 @@ import {
 import { memberVar } from '../../../apollo/store';
 import { acceptAuth, refreshCurrentMember } from '../../auth';
 import { Member, MemberUpdate, totalOf } from '../../types/triplink';
-import { imageUrl, Pager, QueryState, useAction } from './Common';
+import { imageUrl, Pager, QueryState, useAction, usePublicReady } from './Common';
 import { TourGrid } from './Tours';
 import { uploadImages } from '../../uploads';
 export function ProfileForm({ member }: { member: Member }) {
@@ -133,61 +134,85 @@ export function SavedTours({ visited = false }: { visited?: boolean }) {
 	);
 }
 export function Follows({ memberId, following = false }: { memberId: string; following?: boolean }) {
+	const ready = usePublicReady();
+	const current = useReactiveVar(memberVar);
+	if (!ready) return <QueryState loading>{null}</QueryState>;
+	return (
+		<FollowsList
+			key={`${memberId}-${following}-${current?._id ?? 'anonymous'}`}
+			memberId={memberId}
+			following={following}
+		/>
+	);
+}
+function FollowsList({ memberId, following }: { memberId: string; following: boolean }) {
 	const { t } = useTranslation('common');
-
 	const [page, setPage] = useState(1);
 	const current = useReactiveVar(memberVar);
+	const client = useApolloClient();
 	const action = useAction();
 	const [toggle] = useMutation(FOLLOW_TOGGLE);
 	const query = useQuery(following ? FOLLOWINGS : FOLLOWERS, {
 		variables: { input: { page, limit: 12, search: { memberId } } },
 		fetchPolicy: 'network-only',
+		notifyOnNetworkStatusChange: true,
 	});
 	return (
-		<Stack spacing={2}>
+		<Stack spacing={2} className="triplink-connections-list">
 			{action.feedback}
-			<QueryState
-				loading={query.loading}
-				error={query.error}
-				empty={!query.data?.result.list.length}
-				retry={() => query.refetch()}
-			>
-				{query.data?.result.list.map((row) => (
-					<Card variant="outlined" key={row._id}>
-						<CardContent>
-							<Stack direction="row" alignItems="center" spacing={2}>
-								<Avatar src={imageUrl(row.memberData?.memberImage)} />
-								{row.memberData ? (
-									<Link
-										href={
-											row.memberData.memberType === 'AGENT'
-												? `/agent/detail?agentId=${row.memberData._id}`
-												: `/member?memberId=${row.memberData._id}`
-										}
-									>
-										{row.memberData.memberFullname || row.memberData.memberNick}
-									</Link>
-								) : (
-									<Typography>{t('Unavailable member')}</Typography>
-								)}
-								{current && current.memberType !== 'ADMIN' && row.memberData && row.memberData._id !== current._id && (
+			<QueryState loading={query.loading} error={query.error} retry={() => query.refetch()}>
+				{!query.data?.result.list.length && (
+					<Typography>{t(following ? 'Not following anyone yet.' : 'No followers yet.')}</Typography>
+				)}
+				{query.data?.result.list.map((row) => {
+					const person = row.memberData;
+					if (!person) return <Typography key={row._id}>{t('Unavailable member')}</Typography>;
+					const name = person.memberFullname || person.memberNick;
+					const href =
+						person.memberType === 'AGENT' ? `/agent/detail?agentId=${person._id}` : `/member?memberId=${person._id}`;
+					return (
+						<Card variant="outlined" key={row._id}>
+							<CardContent className="triplink-connection">
+								<Link href={href} passHref className="triplink-connection__person">
+									<Avatar src={person.memberImage ? imageUrl(person.memberImage) : undefined} alt={name}>
+										{name[0]?.toUpperCase()}
+									</Avatar>
+									<span>
+										<strong>{name}</strong>
+										<span>
+											{t(person.memberType === 'AGENT' ? 'Travel agent' : 'Traveler')}
+											{person.memberCountry ? ` · ${person.memberCountry}` : ''}
+										</span>
+									</span>
+								</Link>
+								<div className="triplink-connection__stats">
+									<span>{t('Agent follower count', { count: person.memberFollowers })}</span>
+									{person.memberType === 'AGENT' && <span>{t('Agent tour count', { count: person.memberTours })}</span>}
+								</div>
+								{current && ['USER', 'AGENT'].includes(current.memberType) && person._id !== current._id && (
 									<Button
+										variant={row.isFollowing ? 'outlined' : 'contained'}
+										disableElevation
 										disabled={action.busy}
+										aria-label={t(row.isFollowing ? 'Unfollow {{name}}' : 'Follow {{name}}', { name })}
+										aria-pressed={row.isFollowing}
 										onClick={() =>
 											void action.run(async () => {
-												const result = await toggle({ variables: { memberId: row.memberData!._id } });
-												if (result.data?.result) await refreshCurrentMember();
-												await query.refetch();
-											})
+												const result = await toggle({ variables: { memberId: person._id } });
+												if (!result.data?.result) throw new Error('Follow request failed');
+												await refreshCurrentMember();
+												await client.refetchQueries({ include: [FOLLOWERS, FOLLOWINGS, MEMBER] });
+											}, t(row.isFollowing ? 'Member unfollowed' : 'Member followed'))
 										}
 									>
 										{t(row.isFollowing ? 'Unfollow' : 'Follow')}
 									</Button>
 								)}
-							</Stack>
-						</CardContent>
-					</Card>
-				))}
+								{!current && <Link href="/account/join">{t('Log in to follow')}</Link>}
+							</CardContent>
+						</Card>
+					);
+				})}
 			</QueryState>
 			<Pager page={page} total={totalOf(query.data?.result)} onChange={setPage} />
 		</Stack>

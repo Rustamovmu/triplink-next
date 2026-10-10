@@ -110,7 +110,15 @@ export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: 
 		</Stack>
 	);
 }
-export function ArticlesList({ mine = false, admin = false }: { mine?: boolean; admin?: boolean }) {
+export function ArticlesList({
+	mine = false,
+	admin = false,
+	memberId,
+}: {
+	mine?: boolean;
+	admin?: boolean;
+	memberId?: string;
+}) {
 	const { t } = useTranslation('common');
 
 	const member = useReactiveVar(memberVar);
@@ -131,7 +139,7 @@ export function ArticlesList({ mine = false, admin = false }: { mine?: boolean; 
 				limit: 12,
 				search: {
 					...(category ? { articleCategory: category } : {}),
-					...(mine && member ? { memberId: member._id } : {}),
+					...(memberId ? { memberId } : mine && member ? { memberId: member._id } : {}),
 				},
 			},
 		},
@@ -214,7 +222,8 @@ export function ArticlesList({ mine = false, admin = false }: { mine?: boolean; 
 									{article.articleLikes} {t('likes ·')} {article.articleComments} {t('comments')}
 								</Typography>
 								<Stack direction="row" gap={1} flexWrap="wrap">
-									{member &&
+									{!memberId &&
+										member &&
 										member._id === article.memberId &&
 										article.articleStatus === 'ACTIVE' &&
 										['AGENT', 'ADMIN'].includes(member.memberType) && (

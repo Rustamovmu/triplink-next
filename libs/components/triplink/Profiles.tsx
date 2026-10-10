@@ -1,14 +1,15 @@
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useQuery, useMutation, useReactiveVar } from '@apollo/client';
+import { useQuery, useMutation, useReactiveVar, useApolloClient } from '@apollo/client';
 import { Avatar, Button, Stack, Typography } from '@mui/material';
-import { AGENTS, MEMBER, FOLLOW_TOGGLE, MEMBER_LIKE } from '../../../apollo/user/triplink';
+import { AGENTS, MEMBER, FOLLOW_TOGGLE, MEMBER_LIKE, FOLLOWERS, FOLLOWINGS } from '../../../apollo/user/triplink';
 import { memberVar } from '../../../apollo/store';
 import { totalOf } from '../../types/triplink';
 import { Frame, imageUrl, Pager, QueryState, usePublicReady, useAction, validId } from './Common';
 import { PublicReviews, TourList } from './Tours';
 import { Follows } from './Members';
+import { ArticlesList } from './Community';
 import { refreshCurrentMember } from '../../auth';
 import { useRouter } from 'next/router';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -204,6 +205,11 @@ export function AgentDirectory() {
 }
 
 export function MemberProfile() {
+	const current = useReactiveVar(memberVar);
+	return <PublicMemberProfile key={current?._id ?? 'anonymous'} />;
+}
+function PublicMemberProfile() {
+	const client = useApolloClient();
 	const { t } = useTranslation('common');
 
 	const router = useRouter();
@@ -247,7 +253,7 @@ export function MemberProfile() {
 										<Avatar
 											src={member.memberImage ? imageUrl(member.memberImage) : undefined}
 											className="triplink-profile__avatar"
-												alt={name}
+											alt={name}
 										>
 											{name
 												.trim()
@@ -276,7 +282,7 @@ export function MemberProfile() {
 															void action.run(async () => {
 																await follow({ variables: { memberId: member._id } });
 																await refreshCurrentMember();
-																await query.refetch();
+																await client.refetchQueries({ include: [MEMBER, FOLLOWERS, FOLLOWINGS] });
 															}, t(member.isFollowing ? 'Agent unfollowed' : 'Agent followed'))
 														}
 													>
@@ -307,12 +313,20 @@ export function MemberProfile() {
 											<dd>{member.agentTourCount ?? member.memberTours}</dd>
 										</div>
 										<div>
-											<dt>{t('Followers')}</dt>
-											<dd>{member.memberFollowers}</dd>
+											<dt>
+												<a href="#profile-followers">{t('Followers')}</a>
+											</dt>
+											<dd>
+												<a href="#profile-followers">{member.memberFollowers}</a>
+											</dd>
 										</div>
 										<div>
-											<dt>{t('Following')}</dt>
-											<dd>{member.memberFollowings}</dd>
+											<dt>
+												<a href="#profile-following">{t('Following')}</a>
+											</dt>
+											<dd>
+												<a href="#profile-following">{member.memberFollowings}</a>
+											</dd>
 										</div>
 										<div>
 											<dt>{t('Likes')}</dt>
@@ -328,7 +342,9 @@ export function MemberProfile() {
 											<a href="#agent-reviews">{t('Reviews')}</a>
 										</>
 									)}
-									<a href="#agent-connections">{t('Connections')}</a>
+									<a href="#profile-articles">{t('Articles')}</a>
+									<a href="#profile-followers">{t('Followers')}</a>
+									<a href="#profile-following">{t('Following')}</a>
 								</nav>
 								{member.memberType === 'AGENT' && (
 									<>
@@ -359,6 +375,14 @@ export function MemberProfile() {
 									</>
 								)}
 								<section
+									id="profile-articles"
+									className="triplink-profile__section"
+									aria-labelledby="profile-articles-title"
+								>
+									<h2 id="profile-articles-title">{t('Articles')}</h2>
+									<ArticlesList key={member._id} memberId={member._id} />
+								</section>
+								<section
 									id="agent-connections"
 									className="triplink-profile__section triplink-profile__network"
 									aria-labelledby="agent-connections-title"
@@ -366,11 +390,11 @@ export function MemberProfile() {
 									<h2 id="agent-connections-title">{t('Connections')}</h2>
 									<div className="triplink-profile__connections">
 										<div>
-											<h3>{t('Followers')}</h3>
+											<h3 id="profile-followers">{t('Followers')}</h3>
 											<Follows key={member._id + 'followers'} memberId={member._id} />
 										</div>
 										<div>
-											<h3>{t('Following')}</h3>
+											<h3 id="profile-following">{t('Following')}</h3>
 											<Follows key={member._id + 'following'} memberId={member._id} following />
 										</div>
 									</div>
@@ -394,6 +418,12 @@ export function MemberProfile() {
 			>
 				{member && (
 					<Stack spacing={3}>
+						<Stack component="nav" direction="row" gap={2} flexWrap="wrap" aria-label={t('Agent profile sections')}>
+							{member.memberType === 'AGENT' && <a href="#member-tours">{t('Tours')}</a>}
+							<a href="#profile-articles">{t('Articles')}</a>
+							<a href="#profile-followers">{t('Followers')}</a>
+							<a href="#profile-following">{t('Following')}</a>
+						</Stack>
 						<Avatar src={imageUrl(member.memberImage)} sx={{ width: 100, height: 100 }} />
 						<Typography sx={{ whiteSpace: 'pre-wrap' }}>{member.memberDesc}</Typography>
 						<Typography>
@@ -408,7 +438,7 @@ export function MemberProfile() {
 										void action.run(async () => {
 											await follow({ variables: { memberId: member._id } });
 											await refreshCurrentMember();
-											await query.refetch();
+											await client.refetchQueries({ include: [MEMBER, FOLLOWERS, FOLLOWINGS] });
 										})
 									}
 								>
@@ -427,9 +457,19 @@ export function MemberProfile() {
 								</Button>
 							</Stack>
 						)}
-						<Typography variant="h5">{t('Followers')}</Typography>
+						<section id="profile-articles">
+							<Typography variant="h5" component="h2">
+								{t('Articles')}
+							</Typography>
+							<ArticlesList key={member._id} memberId={member._id} />
+						</section>
+						<Typography variant="h5" id="profile-followers">
+							{t('Followers')}
+						</Typography>
 						<Follows key={member._id + 'followers'} memberId={member._id} />
-						<Typography variant="h5">{t('Following')}</Typography>
+						<Typography variant="h5" id="profile-following">
+							{t('Following')}
+						</Typography>
 						<Follows key={member._id + 'following'} memberId={member._id} following />
 						{member.memberType === 'AGENT' && (
 							<>
@@ -437,8 +477,13 @@ export function MemberProfile() {
 									★ {member.agentAverageRating ?? 0} · {member.agentReviewCount ?? 0} {t('reviews ·')}{' '}
 									{member.agentTourCount ?? 0} {t('tours')}
 								</Typography>
-								<TourList input={{ page: tourPage, limit: 12, search: { agentId: member._id } }} onPage={setTourPage} />
-								<PublicReviews agentId={member._id} />
+								<div id="member-tours" />
+								<TourList
+									key={member._id}
+									input={{ page: tourPage, limit: 12, search: { agentId: member._id } }}
+									onPage={setTourPage}
+								/>
+								<PublicReviews key={member._id} agentId={member._id} />
 							</>
 						)}
 					</Stack>

@@ -590,5 +590,9 @@
 	"Agent rating_many": "★ {{rating}} / 5 · {{count}} reviews",
 	"Agent rating_other": "★ {{rating}} / 5 · {{count}} reviews",
 	"Like / unlike": "Like / unlike",
-	"Profile likes updated": "Profile likes updated"
+	"Profile likes updated": "Profile likes updated",
+	"Member followed": "Member followed",
+	"Member unfollowed": "Member unfollowed",
+	"No followers yet.": "No followers yet.",
+	"Not following anyone yet.": "Not following anyone yet."
 }

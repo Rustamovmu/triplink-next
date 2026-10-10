@@ -602,5 +602,9 @@
 	"Agent rating_many": "★ {{rating}} / 5 · {{count}} отзывов",
 	"Agent rating_other": "★ {{rating}} / 5 · {{count}} отзывов",
 	"Like / unlike": "Нравится / отменить",
-	"Profile likes updated": "Отметки профиля обновлены"
+	"Profile likes updated": "Отметки профиля обновлены",
+	"Member followed": "Вы подписались на участника",
+	"Member unfollowed": "Вы отписались от участника",
+	"No followers yet.": "Пока нет подписчиков.",
+	"Not following anyone yet.": "Пока ни на кого не подписан."
 }

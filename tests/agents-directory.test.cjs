@@ -55,7 +55,7 @@ test('agent controls use server follow state and counts, lock pending actions, r
 		'next/router': { useRouter: () => ({}) },
 		'../../../apollo/user/triplink': { AGENTS: 'agents', FOLLOW_TOGGLE: 'follow' },
 		'../../types/triplink': { totalOf: (result) => result?.metaCounter[0]?.total ?? 0 },
-		'./Common': common, './Tours': {}, './Members': {},
+		'./Common': common, './Tours': {}, './Members': {}, './Community': {},
 		'../../auth': { refreshCurrentMember: async () => { hydrationCount++; } },
 		...Object.fromEntries(['SearchRounded', 'PlaceOutlined', 'ArrowForwardRounded', 'CloseRounded', 'PersonAddAltRounded', 'CheckRounded', 'FavoriteBorderRounded'].map((name) => [`@mui/icons-material/${name}`, { __esModule: true, default: icon }])),
 	});
