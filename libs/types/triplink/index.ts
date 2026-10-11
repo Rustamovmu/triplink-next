@@ -239,11 +239,17 @@ export interface Comment {
 	createdAt: string;
 	updatedAt: string;
 }
+export type ChatMember = Pick<Member, '_id' | 'memberNick' | 'memberType'>;
+export interface ChatPresence {
+	list: ChatMember[];
+	totalMembers: number;
+	totalClients: number;
+}
 export interface ChatMessage {
 	_id: string;
 	text: string;
 	createdAt: string;
-	memberData: Pick<Member, '_id' | 'memberNick' | 'memberType'>;
+	memberData: ChatMember;
 }
 export const tourCategories: TourCategory[] = [
 	'ADVENTURE',

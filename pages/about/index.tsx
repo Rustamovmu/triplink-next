@@ -88,7 +88,7 @@ function About() {
 					</Link>
 				</section>
 				<div className="triplink-about__project-note">
-					<p>{t('Payments are simulated. Chat history contains the latest five messages.')}</p>
+					<p>{t('Payments are simulated. Chat history contains the latest 50 messages.')}</p>
 					<Link href="/help-center">{t('Help Center')}</Link>
 				</div>
 			</div>

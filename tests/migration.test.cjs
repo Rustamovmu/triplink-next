@@ -93,19 +93,19 @@ test('return paths prevent external and malformed redirects', () => {
 		assert.equal(safeReturnUrl(value), '/');
 	assert.equal(safeReturnUrl('/tour/detail?id=abc'), '/tour/detail?id=abc');
 });
-test('chat history merges stable IDs and retains only the latest five', () => {
-	const messages = Array.from({ length: 7 }, (_, i) => ({
+test('chat history merges stable IDs and retains only the latest 50', () => {
+	const messages = Array.from({ length: 52 }, (_, i) => ({
 		_id: String(i),
 		text: 'message ' + i,
-		createdAt: `2026-10-09T00:00:0${i}Z`,
+		createdAt: new Date(Date.parse('2026-10-09T00:00:00Z') + i * 1000).toISOString(),
 		memberData: { _id: 'user', memberNick: 'traveler', memberType: 'USER' },
 	}));
 	const result = mergeMessages(messages.slice(0, 5), messages.slice(3));
 	assert.deepEqual(
 		result.map((item) => item._id),
-		['2', '3', '4', '5', '6'],
+		Array.from({ length: 50 }, (_, i) => String(i + 2)),
 	);
-	assert.equal(mergeMessages(result, result).length, 5);
+	assert.equal(mergeMessages(result, result).length, 50);
 });
 test('multipart uploads map exactly the selected file count without a boundary override', async () => {
 	const originals = { window: global.window, localStorage: global.localStorage, fetch: global.fetch };

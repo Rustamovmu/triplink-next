@@ -3239,3 +3239,512 @@
   }
   .triplink-rich-content th, .triplink-rich-content td { padding: 6px; }
 }
+
+// Shared travel lounge. Scoped outside page wrappers because MUI dialogs use a portal.
+.triplink-chat-launcher.MuiButton-root {
+	position: fixed;
+	right: 24px;
+	bottom: 24px;
+	z-index: 1200;
+	background: #155e59;
+	color: #fff;
+	border-radius: 28px;
+	padding: 12px 20px;
+	font: 600 14px 'TripLink Jakarta', Arial, sans-serif;
+	text-transform: none;
+	box-shadow: 0 6px 20px rgba(21, 94, 89, 0.2);
+	&:hover {
+		background: #104e49;
+	}
+	&:focus-visible {
+		outline: 3px solid #dc5e3e;
+		outline-offset: 3px;
+	}
+
+}
+.triplink-chat-launcher__dot {
+ display: inline-block; width: 7px; height: 7px; margin-left: 12px;
+ border-radius: 50%; background: #b5c9c7;
+}
+.triplink-chat-launcher__dot.is-online {
+	background: #a4edcd;
+}
+.triplink-chat-dialog {
+	pointer-events: none;
+	.MuiDialog-container {
+		align-items: flex-end;
+		justify-content: flex-end;
+	}
+	.MuiDialog-paper {
+		margin: 24px;
+		pointer-events: auto;
+	}
+	.MuiBackdrop-root {
+		pointer-events: auto;
+	}
+}
+.triplink-chat.MuiPaper-root {
+	display: flex;
+	flex-direction: column;
+	width: 420px;
+	height: min(680px, calc(100dvh - 48px));
+	max-height: calc(100dvh - 48px);
+	max-width: calc(100vw - 48px);
+	border-radius: 20px;
+	border: 1px solid #d2e2df;
+	box-shadow: 0 16px 56px rgba(25, 63, 67, 0.22);
+	overflow: hidden;
+	color: #193f43;
+	background: #fff;
+	font: 14px/1.5 'TripLink Jakarta', Arial, sans-serif;
+	&.is-expanded {
+		width: 760px;
+		height: min(800px, calc(100dvh - 48px));
+	}
+	button,
+	input,
+	textarea {
+		font-family: inherit;
+	}
+	.MuiButton-root {
+		font-family: inherit;
+		text-transform: none;
+	}
+	.MuiIconButton-root {
+		color: #496b6b;
+	}
+	button:focus-visible,
+	a:focus-visible {
+		outline: 2px solid #155e59;
+		outline-offset: 2px;
+	}
+	.MuiIconButton-root:focus-visible {
+		outline-offset: -2px;
+	}
+}
+.triplink-chat {
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex-shrink: 0;
+		padding: 18px 16px;
+		background: #edf7f5;
+	}
+	&__room-icon {
+		display: grid;
+		place-items: center;
+		flex-shrink: 0;
+		width: 42px;
+		height: 42px;
+		border-radius: 13px;
+		background: #155e59;
+		color: #fff;
+	}
+	&__heading {
+		flex: 1;
+		min-width: 0;
+		h2 {
+			font: 600 22px/1.2 'TripLink Outfit', Arial, sans-serif;
+			margin: 0 0 6px;
+		}
+		p {
+			display: flex;
+			align-items: center;
+			gap: 7px;
+			margin: 0;
+			color: #496b6b;
+			font-size: 12px;
+		}
+	}
+	&__status {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: #93a6a4;
+		&.is-online {
+			background: #16805a;
+		}
+	}
+	&__tabs {
+		display: flex;
+		gap: 22px;
+		border-bottom: 1px solid #e2ece9;
+		padding: 0 20px;
+		flex-shrink: 0;
+		button {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			border: 0;
+			border-bottom: 3px solid transparent;
+			padding: 12px 0;
+			background: none;
+			font-size: 13px;
+			font-weight: 600;
+			color: #587272;
+			cursor: pointer;
+		}
+		button[aria-pressed='true'] {
+			border-bottom-color: #155e59;
+			color: #155e59;
+		}
+		span {
+			background: #edf7f5;
+			padding: 1px 7px;
+			border-radius: 10px;
+			font-size: 11px;
+		}
+	}
+	&__feed {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		padding: 20px 16px 4px;
+		scrollbar-width: thin;
+	}
+	&__empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		min-height: 150px;
+		text-align: center;
+		padding: 12px;
+		box-sizing: border-box;
+		> span {
+			font-size: 36px;
+			color: #155e59;
+		}
+		h3 {
+			font: 500 22px/1.3 'TripLink Outfit', Arial, sans-serif;
+			margin: 16px 0 8px;
+		}
+		p {
+			max-width: 260px;
+			font-size: 13px;
+			color: #587272;
+			margin: 0;
+		}
+	}
+	&__message {
+		display: flex;
+		align-items: flex-start;
+		gap: 8px;
+		margin-bottom: 16px;
+	}
+	&__message-body {
+		min-width: 0;
+		max-width: calc(100% - 42px);
+	}
+	&__avatar.MuiAvatar-root {
+		flex-shrink: 0;
+		width: 32px;
+		height: 32px;
+		font: 600 11px 'TripLink Jakarta', Arial, sans-serif;
+		background: #edf7f5;
+		color: #155e59;
+	}
+	&__avatar--agent.MuiAvatar-root {
+		background: #e9effb;
+		color: #385888;
+	}
+	&__avatar--admin.MuiAvatar-root {
+		background: #fbece8;
+		color: #943e29;
+	}
+	&__identity {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 5px 6px;
+		align-items: baseline;
+		min-width: 0;
+		margin-bottom: 6px;
+		font-size: 12px;
+		a,
+		strong {
+			color: #193f43;
+			font-weight: 600;
+			overflow-wrap: anywhere;
+			text-decoration: none;
+		}
+		a:hover {
+			text-decoration: underline;
+		}
+	}
+	&__you {
+		color: #587272;
+		font-size: 11px;
+	}
+	&__role {
+		font-size: 10px;
+		line-height: 1.6;
+		padding: 1px 6px;
+		border-radius: 5px;
+		background: #edf7f5;
+		color: #155e59;
+		white-space: nowrap;
+		&--agent {
+			background: #e9effb;
+			color: #385888;
+		}
+		&--admin {
+			background: #fbece8;
+			color: #943e29;
+		}
+	}
+	&__bubble {
+		margin: 0;
+		padding: 10px 13px;
+		border-radius: 4px 14px 14px;
+		background: #f0f5f4;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		line-height: 1.6;
+	}
+	&__message.is-own {
+		flex-direction: row-reverse;
+	}
+	&__message.is-own &__identity {
+		justify-content: flex-end;
+	}
+	&__message.is-own &__bubble {
+		background: #155e59;
+		color: #fff;
+		border-radius: 14px 4px 14px 14px;
+	}
+	&__message.is-own &__message-meta {
+		justify-content: flex-end;
+	}
+	&__message-meta {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: 3px;
+		color: #647e7d;
+		font-size: 10px;
+		.MuiIconButton-root {
+			padding: 5px;
+		}
+		svg {
+			width: 13px;
+			height: 13px;
+		}
+	}
+	&__typing {
+		flex-shrink: 0;
+		min-height: 24px;
+		padding: 0 20px;
+		color: #587272;
+		font-size: 11px;
+		overflow-wrap: anywhere;
+	}
+	&__composer {
+		padding: 10px 16px 8px;
+		border-top: 1px solid #e2ece9;
+		flex-shrink: 0;
+	}
+	&__input {
+		width: 100%;
+		.MuiOutlinedInput-root {
+			font: inherit;
+			background: #f7faf9;
+			border-radius: 12px;
+			padding: 12px;
+		}
+		fieldset {
+			border-color: #d2e2df;
+		}
+		.Mui-focused fieldset {
+			border-color: #155e59 !important;
+		}
+	}
+	&__composer-tools {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		margin-top: 6px;
+	}
+	&__counter {
+		margin-right: auto;
+		font-size: 11px;
+		color: #587272;
+		&.is-full {
+			color: #943e29;
+		}
+	}
+	&__send.MuiButton-root {
+		padding: 7px 14px;
+		background: #155e59;
+		border-radius: 9px;
+		box-shadow: none;
+		font-size: 12px;
+		&:hover {
+			background: #104e49;
+		}
+		&.Mui-disabled {
+			background: #e2ece9;
+			color: #607876;
+		}
+		svg {
+			width: 16px;
+		}
+	}
+	&__hint {
+		font-size: 10px;
+		color: #587272;
+		margin: 5px 0 0;
+	}
+	&__footer {
+		padding: 10px 16px;
+		background: #f7faf9;
+		font-size: 10px;
+		color: #587272;
+		border-top: 1px solid #e2ece9;
+		flex-shrink: 0;
+	}
+	&__notice {
+		padding: 0 16px;
+		color: #155e59;
+		font-size: 11px;
+		flex-shrink: 0;
+		&:not(:empty) {
+			padding-top: 6px;
+			padding-bottom: 6px;
+		}
+	}
+	&__people {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		padding: 16px 20px;
+	}
+	&__people-summary,
+	&__connection-count {
+		font-size: 12px;
+		color: #587272;
+		margin: 0 0 16px;
+	}
+	&__connection-count {
+		margin-top: 18px;
+	}
+	&__person {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 14px 0;
+		border-bottom: 1px solid #edf3f1;
+		.triplink-chat__identity {
+			flex: 1;
+			margin: 0;
+		}
+	}
+	&__online-label {
+		color: #155e59;
+		font-size: 10px;
+		flex-shrink: 0;
+	}
+	&__reconnect {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 6px 16px;
+		background: #f7faf9;
+		p {
+			font-size: 12px;
+			margin: 0;
+		}
+	}
+	&__alert {
+		flex-shrink: 0;
+		font-family: inherit !important;
+	}
+	&__jump.MuiButton-root {
+		align-self: center;
+		font-size: 12px;
+		color: #155e59;
+		padding: 4px 12px;
+		background: #edf7f5;
+	}
+}
+.triplink-chat-emojis {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 4px;
+	padding: 12px;
+	button {
+		border: 0;
+		background: none;
+		font-size: 24px;
+		width: 44px;
+		height: 44px;
+		cursor: pointer;
+		border-radius: 8px;
+		&:hover {
+			background: #edf7f5;
+		}
+		&:focus-visible {
+			outline: 2px solid #155e59;
+		}
+	}
+}
+@media (max-width: 599px) {
+	.triplink-chat-launcher.MuiButton-root {
+		right: 16px;
+		bottom: max(16px, env(safe-area-inset-bottom));
+	}
+	.triplink-chat-dialog.is-mobile {
+		pointer-events: auto;
+		.MuiDialog-container {
+			align-items: stretch;
+		}
+	}
+	.triplink-chat-dialog.is-mobile .triplink-chat.MuiPaper-root {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100dvh;
+		max-width: none;
+		max-height: none;
+		margin: 0;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+	}
+	.triplink-chat__header {
+		padding-top: max(16px, env(safe-area-inset-top));
+	}
+	.triplink-chat__footer {
+		padding-bottom: max(10px, env(safe-area-inset-bottom));
+	}
+	.triplink-chat__message-meta .MuiIconButton-root {
+		min-width: 44px;
+		min-height: 36px;
+	}
+	.triplink-chat__tabs button {
+		min-height: 44px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.triplink-chat-dialog *,
+	.triplink-chat-launcher {
+		transition: none !important;
+		animation: none !important;
+	}
+}
+
+.triplink-chat-dock {
+	position: fixed;
+	inset: 0;
+	z-index: 1300;
+	.triplink-chat {
+		position: absolute;
+		right: 24px;
+		bottom: 24px;
+		margin: 0;
+		pointer-events: auto;
+	}
+}
