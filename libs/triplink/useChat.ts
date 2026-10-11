@@ -72,6 +72,15 @@ export function useChat(memberId: string | undefined, token: string | null) {
 			remoteTimers.current.forEach(clearTimeout);
 			remoteTimers.current.clear();
 		};
+		const refreshPhoto = (person: ChatMember) => {
+			if (person.memberImage === undefined) return;
+			setPresence((previous) => ({
+				...previous,
+				list: previous.list.map((entry) =>
+					entry._id === person._id ? { ...entry, memberImage: person.memberImage } : entry,
+				),
+			}));
+		};
 		const timeout = setTimeout(() => {
 			if (active && !authenticated.current) {
 				setError('Chat authentication timed out');
@@ -106,6 +115,7 @@ export function useChat(memberId: string | undefined, token: string | null) {
 						break;
 					case 'message':
 						if (!authenticated.current || !isChatMessage(data)) throw new Error();
+						refreshPhoto(data.memberData);
 						setMessages((previous) => mergeMessages(previous, [data]));
 						break;
 					case 'presence':
@@ -121,6 +131,7 @@ export function useChat(memberId: string | undefined, token: string | null) {
 						if (!authenticated.current || !isChatMember(data?.memberData) || typeof data.isTyping !== 'boolean')
 							throw new Error();
 						const id = data.memberData._id;
+						refreshPhoto(data.memberData);
 						if (id === memberId) break;
 						clearTimeout(remoteTimers.current.get(id));
 						remoteTimers.current.delete(id);

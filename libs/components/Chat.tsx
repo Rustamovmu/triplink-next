@@ -26,7 +26,7 @@ import KeyboardArrowDownRounded from '@mui/icons-material/KeyboardArrowDownRound
 import { memberVar } from '../../apollo/store';
 import { getJwtToken } from '../auth/token';
 import { ChatMember } from '../types/triplink';
-import { CHAT_MESSAGE_LIMIT, chatInitials, chatProfile, chatRole } from '../triplink/chat';
+import { CHAT_MESSAGE_LIMIT, chatImageUrl, chatInitials, chatProfile, chatRole } from '../triplink/chat';
 import { useChat } from '../triplink/useChat';
 
 // Desktop remains a modeless dock; mobile uses MUI's modal focus/scroll handling.
@@ -198,6 +198,14 @@ export default function Chat() {
 			input.current?.focus();
 		}
 	};
+	const avatarSource = (person: ChatMember) => {
+		const online = chat.presence.list.find((entry) => entry._id === person._id);
+		// Prefer the current roster; an empty image explicitly removes an older photo.
+		return chatImageUrl(
+			online?.memberImage ??
+				(person._id === member?._id ? member?.memberImage ?? person.memberImage : person.memberImage),
+		);
+	};
 	const identity = (person: ChatMember) => {
 		const href = chatProfile(person);
 		return (
@@ -349,6 +357,7 @@ export default function Chat() {
 									className={`triplink-chat__message ${message.memberData._id === member._id ? 'is-own' : ''}`}
 								>
 									<Avatar
+										src={avatarSource(message.memberData)}
 										className={`triplink-chat__avatar triplink-chat__avatar--${message.memberData.memberType.toLowerCase()}`}
 										aria-hidden="true"
 									>
@@ -488,6 +497,7 @@ export default function Chat() {
 						{chat.presence.list.map((person) => (
 							<div className="triplink-chat__person" key={person._id}>
 								<Avatar
+									src={avatarSource(person)}
 									className={`triplink-chat__avatar triplink-chat__avatar--${person.memberType.toLowerCase()}`}
 									aria-hidden="true"
 								>

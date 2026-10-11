@@ -239,7 +239,7 @@ export interface Comment {
 	createdAt: string;
 	updatedAt: string;
 }
-export type ChatMember = Pick<Member, '_id' | 'memberNick' | 'memberType'>;
+export type ChatMember = Pick<Member, '_id' | 'memberNick' | 'memberType'> & Partial<Pick<Member, 'memberImage'>>;
 export interface ChatPresence {
 	list: ChatMember[];
 	totalMembers: number;

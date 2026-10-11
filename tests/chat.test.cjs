@@ -34,6 +34,7 @@ function environment() {
 		'document',
 		'navigator',
 		'WebSocket',
+		'Image',
 		'IS_REACT_ACT_ENVIRONMENT',
 		'requestAnimationFrame',
 		'cancelAnimationFrame',
@@ -47,7 +48,15 @@ function environment() {
 		timerId = 0;
 	const timers = new Map();
 	const originalNow = Date.now;
-	const ctx = { member: traveler, token: 'private-token', socket: null, sockets: [], copied: [], copyFails: false };
+	const ctx = {
+		member: traveler,
+		token: 'private-token',
+		socket: null,
+		sockets: [],
+		images: [],
+		copied: [],
+		copyFails: false,
+	};
 	class Socket {
 		static OPEN = 1;
 		static CONNECTING = 0;
@@ -91,6 +100,15 @@ function environment() {
 			},
 		},
 		WebSocket: { configurable: true, writable: true, value: Socket },
+		Image: {
+			configurable: true,
+			writable: true,
+			value: class Image {
+				constructor() {
+					ctx.images.push(this);
+				}
+			},
+		},
 		IS_REACT_ACT_ENVIRONMENT: { configurable: true, writable: true, value: true },
 		requestAnimationFrame: { configurable: true, writable: true, value: (callback) => setTimeout(callback, 0) },
 		cancelAnimationFrame: { configurable: true, writable: true, value: (id) => clearTimeout(id) },
@@ -131,8 +149,11 @@ function environment() {
 		return ctx.socket;
 	};
 	const hook = load('libs/triplink/useChat.ts', { '../../apollo/store': store, './chat': helpers });
-	const button = React.forwardRef(({ children, onClick, disabled, className, type = 'button', ...props }, ref) =>
-		React.createElement(
+	const button = React.forwardRef(function TestButton(
+		{ children, onClick, disabled, className, type = 'button', ...props },
+		ref,
+	) {
+		return React.createElement(
 			'button',
 			{
 				onClick,
@@ -145,15 +166,15 @@ function environment() {
 				ref,
 			},
 			children,
-		),
-	);
+		);
+	});
 	const mui = {
-		Paper: React.forwardRef(({ children, ...props }, ref) =>
-			React.createElement('section', { ...props, ref }, children),
-		),
+		Paper: React.forwardRef(function TestPaper({ children, ...props }, ref) {
+			return React.createElement('section', { ...props, ref }, children);
+		}),
 		Button: button,
 		IconButton: button,
-		Avatar: ({ children, className }) => React.createElement('span', { className }, children),
+		Avatar: require('@mui/material/Avatar').default,
 		Alert: ({ children }) => React.createElement('div', { role: 'alert' }, children),
 		Tooltip: ({ children }) => children,
 		useMediaQuery: (query) => (query.includes('max-width') ? Boolean(ctx.mobile) : false),
@@ -212,7 +233,10 @@ function environment() {
 		...icons,
 	});
 	const root = createRoot(document.getElementById('root'));
-	ctx.render = () => act(async () => root.render(React.createElement(Chat)));
+	const { CacheProvider } = require('@emotion/react');
+	const cache = require('@emotion/cache').default({ key: 'chat-test', container: document.head });
+	ctx.render = () =>
+		act(async () => root.render(React.createElement(CacheProvider, { value: cache }, React.createElement(Chat))));
 	ctx.click = async (label) =>
 		act(async () => {
 			const node = [...document.querySelectorAll('button')].find(
@@ -252,6 +276,74 @@ test('chat wire validation rejects malformed identities, dates and duplicate pre
 	assert.equal(helpers.chatProfile(admin), null);
 	assert.equal(helpers.chatRole(traveler.memberType), 'Traveler');
 	assert.equal(helpers.chatInitials('😊Guide'), '😊G');
+	assert.equal(helpers.isChatMember({ ...agent, memberImage: 42 }), false);
+	assert.equal(helpers.isChatMember({ ...agent, memberImage: '' }), true);
+	for (const path of [
+		undefined,
+		'',
+		' ',
+		'javascript:alert(1)',
+		'data:image/png;base64,abc',
+		'//other.test/a.png',
+		'\\other.test/a.png',
+	])
+		assert.equal(helpers.chatImageUrl(path), undefined);
+	assert.equal(helpers.chatImageUrl('/img/profile/avatar.png'), '/img/profile/avatar.png');
+	assert.equal(helpers.chatImageUrl('https://images.example/avatar.png'), 'https://images.example/avatar.png');
+	const origin = (process.env.REACT_APP_API_URL || 'http://localhost:3007').replace(/\/$/, '');
+	assert.equal(helpers.chatImageUrl('/uploads/member/avatar.png'), `${origin}/uploads/member/avatar.png`);
+});
+
+test('chat uses profile photos for every role, current presence for older messages, and initials on image failure', async () => {
+	const ctx = environment();
+	try {
+		const people = [
+			{ ...traveler, memberImage: '/img/profile/traveler.png' },
+			{ ...agent, memberImage: 'uploads/member/agent.png' },
+			{ ...admin, memberImage: '/img/profile/admin.png' },
+		];
+		ctx.member = people[0];
+		await ctx.render();
+		await ctx.authenticate();
+		await ctx.click('Shared chat');
+		await ctx.frame('presence', { list: people, totalMembers: 3, totalClients: 3 });
+		await ctx.frame('getMessages', {
+			list: [message('own'), message('guide', people[1]), message('admin', people[2])],
+		});
+		const avatars = () => [...document.querySelectorAll('.triplink-chat__avatar')];
+		const sources = () => avatars().map((avatar) => avatar.querySelector('img')?.getAttribute('src'));
+		const expected = people.map((person) => helpers.chatImageUrl(person.memberImage));
+		assert.deepEqual(sources(), expected);
+		assert.equal(avatars()[0].textContent, '');
+		await act(async () => ctx.images.find((image) => image.src === expected[2]).onerror());
+		assert.equal(avatars()[2].querySelector('img'), null);
+		assert.equal(avatars()[2].textContent, 'AD');
+		// A changed or removed profile image overrides retained message snapshots.
+		const updated = [
+			people[0],
+			{ ...people[1], memberImage: '/img/profile/new-guide.png' },
+			{ ...people[2], memberImage: '' },
+		];
+		await ctx.frame('presence', { list: updated, totalMembers: 3, totalClients: 3 });
+		assert.deepEqual(sources(), [expected[0], updated[1].memberImage, undefined]);
+		await ctx.click('People3');
+		assert.deepEqual(sources(), [expected[0], updated[1].memberImage, undefined]);
+		assert.equal(avatars()[2].textContent, 'AD');
+		assert.equal(document.querySelector('a[href*="admin"]'), null);
+		await ctx.click('Messages');
+		await ctx.frame('presence', { list: [people[0]], totalMembers: 1, totalClients: 1 });
+		// Offline senders retain the photo captured in their message.
+		assert.deepEqual(sources(), expected);
+		await ctx.frame('presence', { list: people, totalMembers: 3, totalClients: 3 });
+		await ctx.frame('message', message('new-guide', updated[1]));
+		assert.equal(sources()[1], updated[1].memberImage);
+		await ctx.frame('typing', { memberData: updated[2], isTyping: true });
+		assert.equal(sources()[2], undefined);
+		await ctx.click('People3');
+		assert.deepEqual(sources(), [expected[0], updated[1].memberImage, undefined]);
+	} finally {
+		await ctx.cleanup();
+	}
 });
 
 test('chat renders real identities and distinct people, sends multiline text with IME protection, copies and scrolls', async () => {

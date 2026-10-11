@@ -9,7 +9,8 @@ export const isChatMember = (value: unknown): value is ChatMember =>
 	Boolean(value._id) &&
 	typeof value.memberNick === 'string' &&
 	Boolean(value.memberNick) &&
-	['USER', 'AGENT', 'ADMIN'].includes(value.memberType as string);
+	['USER', 'AGENT', 'ADMIN'].includes(value.memberType as string) &&
+	(value.memberImage === undefined || typeof value.memberImage === 'string');
 export const isChatPresence = (value: unknown): value is ChatPresence =>
 	record(value) &&
 	Array.isArray(value.list) &&
@@ -37,6 +38,14 @@ export function mergeMessages(previous: ChatMessage[], incoming: ChatMessage[]) 
 export const chatRole = (role: ChatMember['memberType']) =>
 	({ USER: 'Traveler', AGENT: 'Agent', ADMIN: 'Admin' }[role]);
 export const chatInitials = (nick: string) => Array.from(nick.trim()).slice(0, 2).join('').toLocaleUpperCase();
+export function chatImageUrl(image?: string) {
+	const path = image?.trim();
+	if (!path || /^\/\/|\\/.test(path)) return undefined;
+	if (/^https?:\/\//i.test(path)) return path;
+	if (/^[a-z][a-z\d+.-]*:/i.test(path)) return undefined;
+	if (path.startsWith('/') && !path.startsWith('/uploads/')) return path;
+	return `${(process.env.REACT_APP_API_URL || 'http://localhost:3007').replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+}
 export const chatProfile = (member: ChatMember) =>
 	member.memberType === 'ADMIN'
 		? null
