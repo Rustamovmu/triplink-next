@@ -166,6 +166,20 @@
 	font-style: normal;
 	font-display: swap;
 }
+@font-face {
+	font-family: 'TripLink Literata';
+	src: url('/fonts/agents-atlas/Literata.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'TripLink Manrope';
+	src: url('/fonts/agents-atlas/Manrope.woff2') format('woff2');
+	font-weight: 200 800;
+	font-style: normal;
+	font-display: swap;
+}
 .triplink-home-intro {
 	padding-top: 0;
 	color: #131d20;
@@ -2138,6 +2152,25 @@
 	}
 }
 
+// Decorative atlas composition inspired by Aceternity's World Map. No location data.
+.triplink-agents-atlas {
+	position: relative; min-width: 0; aspect-ratio: 179 / 72; pointer-events: none;
+	img { display: block; width: 100%; height: 100%; }
+	svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+	&__route { fill: none; stroke: #2747dd; stroke-width: 0.45; stroke-linecap: round; }
+	&__endpoint { fill: #ffc29c; stroke: #2747dd; stroke-width: 0.3; }
+	&.is-animated &__route {
+		animation: triplink-atlas-route 2.2s ease-out backwards;
+		&:nth-child(2) { animation-delay: 0.2s; }
+		&:nth-child(3) { animation-delay: 0.4s; }
+	}
+	@media (prefers-reduced-motion: reduce) { &.is-animated &__route { animation: none; } }
+}
+@keyframes triplink-atlas-route {
+	from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+	to { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+
 // Full-width editorial bands, aligned to the existing 1200px content width.
 .triplink-home-sections {
 	.triplink-home-section { padding: 72px 0; }
@@ -2159,15 +2192,67 @@
 	.triplink-home-section--rated .triplink-home-section__image { aspect-ratio: 1.6; border-radius: 12px; }
 	.triplink-home-section--rated .triplink-home-tour { background: white; border: 1px solid #dce8e7; }
 	.triplink-home-section--agents {
-		background: #00343b;
-		color: white;
-		.MuiCircularProgress-root { color: #bde4d9; }
-		.triplink-home-section__copy h2 { color: #bde4d9; }
-		.triplink-home-section__description { color: #d7e8e6; }
-		.triplink-home-section__link { color: white; }
-		.triplink-home-agent { padding: 16px; border-radius: 12px; background: white; color: #00343b; }
-		.triplink-home-agent a:focus-visible { outline-color: #0f766e; }
-		.triplink-home-section__copy a:focus-visible { outline-color: #f2a289; }
+		position: relative;
+		isolation: isolate;
+		background: #eef2ff;
+		color: #17234d;
+		font-family: 'TripLink Manrope', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+		&::before {
+			content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+			background: url('/img/homepage/agents-atlas/contours.svg') center / cover no-repeat;
+			mask-image: linear-gradient(transparent, #000 38%, #000 70%, transparent);
+		}
+		.MuiCircularProgress-root { color: #2747dd; }
+		.triplink-home-section__intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 40px; align-items: center; margin-bottom: 44px; }
+		.triplink-home-section__copy h2 { font-family: inherit; font-size: 18px; font-weight: 700; color: #2747dd; margin-bottom: 18px; }
+		.triplink-home-section__statement {
+			font-family: 'TripLink Literata', 'AppleMyungjo', 'Noto Serif CJK KR', 'Batang', serif;
+			font-size: clamp(40px, 3.8vw, 54px); line-height: 1.18; font-weight: 600; letter-spacing: -0.025em; color: #17234d;
+		}
+		.triplink-home-section__description { color: #53607e; font-size: 15px; }
+		.triplink-home-section__link {
+			background: #2747dd; color: #fff; border-color: #2747dd; border-radius: 8px;
+			padding: 14px 24px; font-weight: 700; margin-top: 24px;
+			&:hover { background: #17234d; border-color: #17234d; }
+		}
+		a:focus-visible { outline: 3px solid #2747dd; outline-offset: 4px; border-radius: 4px; }
+		.triplink-home-grid--agents { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
+		.triplink-home-agent {
+			min-width: 0; padding: 14px; gap: 18px; border: 1px solid #cbd5fa; border-radius: 14px; background: #fff; color: #17234d;
+			transition: transform 180ms ease, border-color 180ms ease;
+		}
+		.triplink-home-agent__portrait { border-radius: 9px; background: #eef2ff; color: #2747dd; }
+		.triplink-home-agent__body { gap: 10px; min-width: 0; }
+		.triplink-home-agent h3 { font-family: inherit; font-size: 20px; font-weight: 750; line-height: 1.35; overflow-wrap: anywhere; }
+		.triplink-home-agent__country {
+			align-self: flex-start; max-width: 100%; padding: 5px 10px; border-radius: 5px;
+			background: #ffc29c; color: #17234d; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere;
+		}
+		.triplink-home-agent__stats {
+			margin-top: 4px; padding-top: 12px; border-top: 1px solid #e1e7fb; gap: 6px 12px;
+			color: #53607e; font-size: 12px; line-height: 1.6; font-variant-numeric: tabular-nums;
+		}
+		.triplink-home-agent__link { color: #2747dd; font-size: 13px; font-weight: 750; padding: 6px 0 2px; align-self: flex-start; }
+		.triplink-home-agent__link:hover, .triplink-home-agent h3 a:hover { text-decoration: underline; text-underline-offset: 4px; }
+		@media (hover: hover) and (pointer: fine) { .triplink-home-agent:hover { transform: translateY(-4px); border-color: #2747dd; } }
+		@media (max-width: 1023px) { .triplink-home-grid--agents { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+		@media (max-width: 900px) {
+			.triplink-home-section__intro { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+			.triplink-agents-atlas { width: 100%; max-width: 680px; margin: 0 auto; }
+		}
+		@media (max-width: 599px) {
+			.triplink-home-section__intro { gap: 26px; margin-bottom: 28px; }
+			.triplink-home-section__statement { font-size: clamp(30px, 8.5vw, 36px); line-height: 1.25; }
+			.triplink-home-section__copy h2 { font-size: 16px; margin-bottom: 14px; }
+			.triplink-home-section__link { margin-top: 18px; padding: 12px 20px; }
+			.triplink-home-grid--agents { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+			.triplink-home-agent { padding: 12px; gap: 16px; }
+			.triplink-home-agent__portrait { width: 94px; height: 120px; aspect-ratio: auto; }
+			.triplink-home-agent h3 { font-size: 18px; }
+			.triplink-home-agent__body { gap: 7px; }
+			.triplink-home-agent__stats { padding-top: 8px; margin-top: 2px; }
+		}
+		@media (prefers-reduced-motion: reduce) { .triplink-home-agent { transition: none; transform: none; } }
 	}
 	.triplink-home-section--top {
 		background: white;

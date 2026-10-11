@@ -8,6 +8,7 @@ import { IntroVideo } from './IntroMedia';
 import { IntroGallery } from './IntroGallery';
 import { IntroCircularCarousel } from './IntroCircularCarousel';
 import { HomeArticles } from './HomeArticles';
+import { AgentsAtlas } from './AgentsAtlas';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
@@ -57,10 +58,14 @@ function Section({
 	linkText?: string;
 	children: React.ReactNode;
 }) {
-	const { t } = useTranslation('common');
+	const { t, i18n } = useTranslation('common');
 	const introduction = introductions[id];
 	return (
-		<section className={`triplink-home-section triplink-home-section--${id}`} aria-labelledby={`home-${id}`}>
+		<section
+			className={`triplink-home-section triplink-home-section--${id}`}
+			aria-labelledby={`home-${id}`}
+			lang={id === 'agents' ? (i18n.language === 'kr' ? 'ko' : i18n.language) : undefined}
+		>
 			<div className="triplink-home-section__inner">
 				<div
 					className={`triplink-home-section__intro${introduction?.photo ? ' triplink-home-section__intro--photo' : ''}`}
@@ -82,6 +87,8 @@ function Section({
 						<IntroCircularCarousel title={title} />
 					) : id === 'top' ? (
 						<IntroVideo />
+					) : id === 'agents' ? (
+						<AgentsAtlas />
 					) : (
 						introduction?.photo && (
 							<div className="triplink-home-section__image" aria-hidden="true">
@@ -282,7 +289,7 @@ function TourSection({ variant }: { variant: TourVariant }) {
 	);
 }
 
-function TopAgents() {
+export function TopAgents() {
 	const { t } = useTranslation('common');
 	const ready = usePublicReady();
 	const query = useQuery(AGENTS, { variables: { input: agentInput }, skip: !ready, notifyOnNetworkStatusChange: true });
@@ -304,7 +311,7 @@ function TopAgents() {
 								<h3>
 									<Link href={`/agent/detail?agentId=${agent._id}`}>{agent.memberFullname || agent.memberNick}</Link>
 								</h3>
-								{agent.memberCountry && <p>{agent.memberCountry}</p>}
+								{agent.memberCountry && <p className="triplink-home-agent__country">{agent.memberCountry}</p>}
 								<div className="triplink-home-agent__stats">
 									<span>{t('Agent tour count', { count: agent.memberTours })}</span>
 									<span>{t('Agent follower count', { count: agent.memberFollowers })}</span>
