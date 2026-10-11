@@ -2676,7 +2676,7 @@
  a:hover { text-decoration: underline; text-underline-offset: 4px; }
  &__article figure { margin: 0 36px; background: #f1f5f5; border-radius: 8px; overflow: hidden; }
  &__article figure img { display: block; width: 100%; height: auto; max-height: 580px; object-fit: contain; }
- &__text { padding: 32px 36px; font-size: 16px; line-height: 1.95; color: #3d565d; white-space: pre-wrap; overflow-wrap: anywhere; }
+ &__text { padding: 32px 36px; font-size: 16px; line-height: 1.95; color: #3d565d; overflow-wrap: anywhere; }
  &__engagement { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin: 0 36px; padding: 22px 0 28px; border-top: 1px solid #e3ecec; color: #607b80; font-size: 12px; }
  &__engagement .MuiButton-root { text-transform: none; padding: 9px 18px; border-radius: 8px; gap: 8px; color: #135e57; }
  &__engagement .MuiButton-contained { background: #135e57; color: #fff; }
@@ -3165,3 +3165,77 @@
  &[data-status='COMPLETED'], &[data-status='REFUNDED'] { color: #345d81; background: #e7f0f8; }
 }
 @media(max-width:600px) { .triplink-workspace .triplink-article-form { padding: 22px 18px; } }
+
+// Article writing and the matching public reading surface.
+.triplink-plain-content { white-space: pre-wrap; }
+.triplink-rich-content {
+  line-height: 1.8; overflow-wrap: anywhere; color: #284b51;
+  > :first-child { margin-top: 0; }
+  > :last-child { margin-bottom: 0; }
+  p { margin: 0 0 1em; }
+  h1, h2, h3 { color: #1e464b; line-height: 1.3; margin: 1.25em 0 .55em; font-family: inherit; }
+  h1 { font-size: 1.9em; } h2 { font-size: 1.55em; } h3 { font-size: 1.25em; }
+  ul, ol { padding-left: 1.6em; margin: .7em 0 1em; }
+  li > p { margin: .2em 0; }
+  blockquote { margin: 1em 0; padding: .2em 1.1em; border-left: 3px solid #14655e; color: #526e74; }
+  code { padding: .15em .35em; background: #eef4f3; border-radius: 3px; font-size: .9em; }
+  pre { padding: 16px; background: #edf3f3; border: 1px solid #d4e3e2; border-radius: 6px; overflow-x: auto; white-space: pre; }
+  pre code { padding: 0; background: none; }
+  hr { border: 0; border-top: 1px solid #c6d9d7; margin: 1.5em 0; }
+  a { color: #11645d; text-decoration: underline; text-underline-offset: 3px; }
+  img { display: block; max-width: 100%; height: auto; border-radius: 6px; margin: 1em 0; }
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 1em 0; }
+  th, td { border: 1px solid #bdcfce; padding: 10px; vertical-align: top; min-width: 40px; position: relative; }
+  th { background: #edf5f4; text-align: left; font-weight: 600; }
+  td > p, th > p { margin: 0; }
+  ul[data-type='taskList'] { padding: 0; list-style: none; }
+  li[data-type='taskItem'] { display: flex; gap: 10px; align-items: flex-start; }
+  li[data-type='taskItem'] > label { flex: 0 0 auto; padding-top: 2px; }
+  li[data-type='taskItem'] > div { flex: 1; min-width: 0; }
+  input[type='checkbox'] { accent-color: #14655e; width: 16px; height: 16px; margin-top: 8px; }
+  .selectedCell { background: #dceeea; }
+  .ProseMirror-selectednode { outline: 2px solid #14655e; outline-offset: 3px; }
+}
+.triplink-editor {
+  min-width: 0;
+  &__heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
+  &__heading label { font-weight: 600; font-size: 15px; color: #1e464b; }
+  &__heading span { color: #6d858a; font-size: 12px; }
+  &__surface { border: 1px solid #c5d9d7; border-radius: 9px; overflow: hidden; background: #fff; }
+  &__surface:focus-within { border-color: #14655e; box-shadow: 0 0 0 2px rgba(20,101,94,.1); }
+  &__toolbar { display: flex; flex-wrap: wrap; gap: 4px 0; padding: 8px; background: #f1f6f5; border-bottom: 1px solid #d4e3e2; }
+  &__group { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; padding: 0 6px; border-right: 1px solid #d1dfde; }
+  &__group:last-child { border-right: 0; }
+  &__toolbar button, &__toolbar select, &__color, &__image {
+    display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0;
+    color: #34565b; border: 1px solid transparent; background: transparent; border-radius: 5px; cursor: pointer; position: relative;
+  }
+  &__toolbar select { width: 136px; border-color: #d1dfde; background: #fff; padding: 0 8px; font: inherit; font-size: 13px; }
+  &__toolbar button:hover, &__color:hover, &__image:hover { background: #e0edea; }
+  &__toolbar button[aria-pressed='true'] { color: #fff; background: #14655e; }
+  &__toolbar button:focus-visible, &__toolbar select:focus-visible, &__color:focus-within, &__image:focus-within, &__table-tools button:focus-visible { outline: 2px solid #14655e; outline-offset: 1px; }
+  &__toolbar button:disabled, &__toolbar select:disabled, &__color:has(input:disabled), &__image.is-disabled { opacity: .4; cursor: default; }
+  &__toolbar svg { width: 20px; height: 20px; pointer-events: none; }
+  &__color input, &__image input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  &__color input:disabled, &__image input:disabled { cursor: default; }
+  .tiptap { padding: 24px; min-height: 340px; max-height: 640px; overflow-y: auto; outline: none; font-size: 16px; }
+  .tiptap p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: #788f93; float: left; height: 0; pointer-events: none; }
+  .tiptap[contenteditable='false'] { background: #f9fbfb; }
+  &__footer { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 11px 16px; border-top: 1px solid #e0eae9; color: #6a8287; font-size: 12px; }
+  &__footer .is-over-limit { color: #af3434; font-weight: 600; }
+  &__hint { margin: 9px 0 0; color: #647e83; font-size: 12px; line-height: 1.5; }
+  &__loading { padding: 32px; min-height: 340px; color: #647e83; background: #f1f6f5; border-radius: 9px; }
+  &__table-tools { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px; border-bottom: 1px solid #d4e3e2; background: #fafcfc; }
+  &__table-tools button { padding: 8px 10px; min-height: 36px; color: #14655e; border: 1px solid #c5d9d7; border-radius: 5px; background: #fff; cursor: pointer; font: inherit; font-size: 12px; }
+  &__table-tools button:disabled { opacity: .4; cursor: default; }
+}
+@media(max-width:600px) {
+  .triplink-editor {
+    &__toolbar { padding: 6px; }
+    &__group { padding: 0 3px; gap: 0; border: 0; }
+    &__toolbar button, &__color, &__image { width: 44px; height: 44px; }
+    &__toolbar select { height: 44px; width: 130px; }
+    .tiptap { padding: 18px; min-height: 300px; font-size: 15px; }
+  }
+  .triplink-rich-content th, .triplink-rich-content td { padding: 6px; }
+}

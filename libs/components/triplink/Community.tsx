@@ -1,6 +1,7 @@
 import { useTranslation } from 'next-i18next';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Alert, Avatar, Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
@@ -26,12 +27,25 @@ import { memberVar } from '../../../apollo/store';
 import { Article, ArticleCategory, Comment, totalOf } from '../../types/triplink';
 import { Frame, imageUrl, Pager, QueryState, useAction, usePublicReady, validId } from './Common';
 import { uploadImages } from '../../uploads';
+import { ArticleContent } from './ArticleContent';
+import { articleContentError, articleText } from './articleFormat';
+
+const Teditor = dynamic(() => import('./Teditor'), { ssr: false, loading: EditorLoading });
+function EditorLoading() {
+	const { t } = useTranslation('common');
+	return <div className="triplink-editor__loading" role="status">{t('Loading editor…')}</div>;
+}
 const categories: ArticleCategory[] = ['FREE', 'RECOMMEND', 'NEWS', 'HUMOR'];
 export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: () => Promise<unknown> }) {
 	const { t } = useTranslation('common');
 
 	const action = useAction();
 	const [image, setImage] = useState(article?.articleImage ?? '');
+	const [content, setContent] = useState(article?.articleContent ?? '');
+	const [contentError, setContentError] = useState('');
+	const [editorReady, setEditorReady] = useState(false);
+	const [uploadBusy, setUploadBusy] = useState(false);
+	const busy = action.busy || uploadBusy;
 	const [create] = useMutation(CREATE_ARTICLE);
 	const [update] = useMutation(UPDATE_ARTICLE);
 	return (
@@ -41,12 +55,16 @@ export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: 
 			spacing={2}
 			onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
 				event.preventDefault();
+				if (busy || !editorReady) return;
+				const error = articleContentError(content);
+				if (error) { setContentError(error); return; }
+				setContentError('');
 				const data = new FormData(event.currentTarget);
 				void action.run(async () => {
 					const input = {
 						articleCategory: String(data.get('category')) as ArticleCategory,
 						articleTitle: String(data.get('title')).trim(),
-						articleContent: String(data.get('content')).trim(),
+						articleContent: content.trim(),
 						...(image ? { articleImage: image } : {}),
 					};
 					if (article) await update({ variables: { input: { ...input, _id: article._id } } });
@@ -70,20 +88,16 @@ export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: 
 				defaultValue={article?.articleTitle ?? ''}
 				inputProps={{ minLength: 3, maxLength: 50 }}
 			/>
-			<TextField
-				required
-				multiline
-				minRows={5}
-				name="content"
-				label={t('Article (plain text)')}
-				defaultValue={article?.articleContent ?? ''}
-				inputProps={{ minLength: 3, maxLength: 2000 }}
-			/>
-			<Button component="label" variant="outlined" disabled={action.busy}>
+			<Teditor key={article?._id ?? 'new'} initialContent={article?.articleContent ?? ''} disabled={action.busy}
+				onChange={(value) => { setContent(value); setContentError(''); }} onReady={setEditorReady}
+				onUploadBusy={setUploadBusy} onError={setContentError} />
+			{contentError && <Alert severity="error">{t(contentError)}</Alert>}
+			<Button component="label" variant="outlined" disabled={busy}>
 				{t('Upload article image')}
 				<input
 					type="file"
 					accept="image/jpeg,image/png"
+					disabled={busy}
 					hidden
 					onChange={(e) => {
 						const files = Array.from(e.target.files ?? []);
@@ -105,7 +119,7 @@ export function ArticleForm({ article, onSaved }: { article?: Article; onSaved: 
 					sx={{ maxWidth: '100%', maxHeight: 250, objectFit: 'contain' }}
 				/>
 			)}
-			<Button type="submit" variant="contained" disabled={action.busy}>
+			<Button type="submit" variant="contained" disabled={busy || !editorReady}>
 				{t(article ? 'Save article' : 'Publish article')}
 			</Button>
 		</Stack>
@@ -170,7 +184,7 @@ export function CommunityArticleCard({ article, onChanged }: { article: Article;
 				<h3>
 					<Link href={href}>{article.articleTitle}</Link>
 				</h3>
-				<p className="triplink-story-card__excerpt">{article.articleContent}</p>
+				<p className="triplink-story-card__excerpt">{articleText(article.articleContent)}</p>
 				<div className="triplink-story-card__author">
 					<Avatar src={author?.memberImage ? imageUrl(author.memberImage) : undefined} alt={String(authorName)}>
 						{String(authorName)[0]?.toUpperCase()}
@@ -756,7 +770,7 @@ export function CommunityDetail() {
 											/>
 										</figure>
 									)}
-									<div className="triplink-journal__text">{article.articleContent}</div>
+									<div className="triplink-journal__text"><ArticleContent content={article.articleContent} /></div>
 									<footer className="triplink-journal__engagement">
 										{member ? (
 											<Button

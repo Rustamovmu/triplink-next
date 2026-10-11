@@ -7,6 +7,7 @@ import { Avatar } from '@mui/material';
 import { ARTICLES, COMMENTS } from '../../../apollo/user/triplink';
 import { Article } from '../../types/triplink';
 import { imageUrl, QueryState, usePublicReady } from '../triplink/Common';
+import { articleText } from '../triplink/articleFormat';
 
 const articleInput = { page: 1, limit: 3, search: {}, sort: 'createdAt', direction: 'DESC' as const };
 
@@ -73,7 +74,7 @@ function HomeArticleCard({ article }: { article: Article }) {
 				<h3>
 					<Link href={href}>{article.articleTitle}</Link>
 				</h3>
-				<p className="triplink-home-article__excerpt">{article.articleContent}</p>
+				<p className="triplink-home-article__excerpt">{articleText(article.articleContent)}</p>
 				<div className="triplink-home-article__author">
 					<Avatar src={author?.memberImage ? imageUrl(author.memberImage) : undefined} alt="">
 						{name.slice(0, 1)}

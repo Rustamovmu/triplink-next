@@ -15,6 +15,10 @@ const load = (file, mocks) => {
  return exported;
 };
 
+const articleFormat = load('libs/components/triplink/articleFormat.ts', { 'sanitize-html': require('sanitize-html') });
+const articleContent = load('libs/components/triplink/ArticleContent.tsx', { react: React, './articleFormat': articleFormat });
+const editorMocks = { 'next/dynamic': { __esModule: true, default: () => () => null }, './articleFormat': articleFormat, './ArticleContent': articleContent };
+
 test('article detail preserves safe content, public author links, independent likes and anonymous discussion access', async () => {
  const saved = Object.fromEntries(['window', 'document', 'IS_REACT_ACT_ENVIRONMENT'].map(k => [k, Object.getOwnPropertyDescriptor(global, k)]));
  const dom = new JSDOM('<div id="root"></div>');
@@ -32,7 +36,7 @@ test('article detail preserves safe content, public author links, independent li
   '@apollo/client': { useReactiveVar: v => v === 'member' ? member : 'authenticated', useQuery: doc => ({ loading: false, data: { result: doc === 'article' ? article : { list: [], metaCounter: [{ total: 0 }] } }, refetch: async () => {} }),
    useMutation: doc => [options => { calls.push({ doc, variables: options.variables }); return new Promise((yes, no) => { resolve = yes; reject = no; }); }] } };
  const common = load('libs/components/triplink/Common.tsx', { ...shared, '../../triplink/errors': { errorMessage: e => e.message } });
- const { CommunityDetail } = load('libs/components/triplink/Community.tsx', { ...shared,
+ const { CommunityDetail } = load('libs/components/triplink/Community.tsx', { ...shared, ...editorMocks,
   'next/link': { __esModule: true, default: ({ children, href, className }) => React.createElement('a', { href, className }, children) },
   'next/router': { useRouter: () => ({ locale: 'en', isReady: true, query: { id } }) },
   '../../../apollo/user/triplink': { ARTICLE: 'article', COMMENTS: 'comments', ARTICLE_LIKE: 'like' }, '../../../apollo/admin/triplink': {},

@@ -9,6 +9,10 @@ const { act } = require('react-dom/test-utils');
 const load = (file, mocks) => {
  const exported={};new Function('require','exports',ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:1,jsx:2,esModuleInterop:true}}).outputText)(name=>{if(!(name in mocks))throw new Error(`Missing mock ${name}`);return mocks[name];},exported);return exported;
 };
+const articleFormat = load('libs/components/triplink/articleFormat.ts', { 'sanitize-html': require('sanitize-html') });
+const articleContent = load('libs/components/triplink/ArticleContent.tsx', { react: React, './articleFormat': articleFormat });
+const editorMocks = { 'next/dynamic': { __esModule: true, default: () => () => null }, './articleFormat': articleFormat, './ArticleContent': articleContent };
+
 test('community cards retain article/author links, safe covers, filter variables and independent likes', async()=>{
  const saved=Object.fromEntries(['window','document','IS_REACT_ACT_ENVIRONMENT'].map(k=>[k,Object.getOwnPropertyDescriptor(global,k)]));
  const dom=new JSDOM('<div id="root"></div>');global.window=dom.window;global.document=dom.window.document;global.IS_REACT_ACT_ENVIRONMENT=true;
@@ -20,7 +24,7 @@ test('community cards retain article/author links, safe covers, filter variables
  const shared={react:React,'next-i18next':{useTranslation:()=>({t})},'@mui/material':mui,'../../../apollo/store':{memberVar:'member',sessionVar:'session'},
  '@apollo/client':{useReactiveVar:v=>v==='member'?current:'authenticated',useQuery:(doc,options)=>{if(doc==='articles')input=options.variables.input;return {loading:false,data:{result:{list:[article],metaCounter:[{total:1}]}},refetch:async()=>{}};},useMutation:()=>[options=>{callCount++;request=options.variables;return new Promise((yes,no)=>{resolve=yes;reject=no;});}]}};
  const common=load('libs/components/triplink/Common.tsx',{...shared,'../../triplink/errors':{errorMessage:e=>e.message}});
- const {ArticlesList}=load('libs/components/triplink/Community.tsx',{...shared,'next/link':{__esModule:true,default:({children,href,...props})=>React.createElement('a',{href,className:props.className,'aria-label':props['aria-label']},children)},'next/router':{useRouter:()=>({locale:'en'})},'../../../apollo/user/triplink':{ARTICLES:'articles'},'../../../apollo/admin/triplink':{},'../../types/triplink':{totalOf:r=>r?.metaCounter[0]?.total??0},'./Common':common,'../../uploads':{}});
+ const {ArticlesList}=load('libs/components/triplink/Community.tsx',{...shared,...editorMocks,'next/link':{__esModule:true,default:({children,href,...props})=>React.createElement('a',{href,className:props.className,'aria-label':props['aria-label']},children)},'next/router':{useRouter:()=>({locale:'en'})},'../../../apollo/user/triplink':{ARTICLES:'articles'},'../../../apollo/admin/triplink':{},'../../types/triplink':{totalOf:r=>r?.metaCounter[0]?.total??0},'./Common':common,'../../uploads':{}});
  const root=createRoot(document.getElementById('root'));
  const render=()=>act(async()=>root.render(React.createElement(ArticlesList,{community:true})));
  const like=()=>document.querySelector('button[aria-label="Like A journey"],button[aria-label="Unlike A journey"]');

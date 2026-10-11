@@ -14,6 +14,10 @@ const load = (file, mocks) => {
  },exported);
  return exported;
 };
+const articleFormat = load('libs/components/triplink/articleFormat.ts', { 'sanitize-html': require('sanitize-html') });
+const articleContent = load('libs/components/triplink/ArticleContent.tsx', { react: React, './articleFormat': articleFormat });
+const editorMocks = { 'next/dynamic': { __esModule: true, default: () => () => null }, './articleFormat': articleFormat, './ArticleContent': articleContent };
+
 test('public connections navigate by role and toggle the visitor relationship with synchronized lists', async () => {
  const saved = Object.fromEntries(['window','document','IS_REACT_ACT_ENVIRONMENT'].map(k=>[k,Object.getOwnPropertyDescriptor(global,k)]));
  const dom = new JSDOM('<div id="root"></div>'); global.window=dom.window; global.document=dom.window.document; global.IS_REACT_ACT_ENVIRONMENT=true;
@@ -61,7 +65,7 @@ test('profile article list filters public reads by the visited author, without o
  '@apollo/client':{useReactiveVar:()=>({_id:'visitor',memberType:'AGENT'}),useMutation:()=>[()=>{}],useQuery:(doc,options)=>{if(doc==='articles')input=options.variables.input;return {data:{result:{list:[{_id:'article',memberId:'visitor',articleStatus:'ACTIVE',articleTitle:'Story',articleCategory:'FREE',articleLikes:0,articleComments:0}]}}};}},
  '@mui/material':Object.fromEntries(['Alert','Box','Button','Card','CardContent','MenuItem','Stack','TextField','Typography'].map(k=>[k,box])),
  '../../../apollo/user/triplink':{ARTICLES:'articles'},'../../../apollo/admin/triplink':{},'../../../apollo/store':{},'../../types/triplink':{totalOf:()=>0},'./Common':{usePublicReady:()=>true,useAction:()=>({}), QueryState:box, Pager:box},'../../uploads':{}};
- const {ArticlesList}=load('libs/components/triplink/Community.tsx',mocks);
+ const {ArticlesList}=load('libs/components/triplink/Community.tsx',{...mocks,...editorMocks});
  const publicTree=ArticlesList({memberId:'visited-writer'});assert.deepEqual(input.search,{memberId:'visited-writer'});assert.equal(input.page,1);assert.ok(!JSON.stringify(publicTree).includes('Edit'));
  const ownerTree=ArticlesList({mine:true});assert.deepEqual(input.search,{memberId:'visitor'});assert.ok(JSON.stringify(ownerTree).includes('Edit'));
 });
