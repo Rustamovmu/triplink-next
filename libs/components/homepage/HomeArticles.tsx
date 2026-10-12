@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Avatar } from '@mui/material';
+import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { ARTICLES, COMMENTS } from '../../../apollo/user/triplink';
 import { Article } from '../../types/triplink';
 import { imageUrl, QueryState, usePublicReady } from '../triplink/Common';
@@ -22,8 +27,8 @@ function ArticleComments({ article }: { article: Article }) {
 		notifyOnNetworkStatusChange: true,
 	});
 	return (
-		<div className="triplink-home-article__comments">
-			<h4>{t('Home article comment count', { count: article.articleComments })}</h4>
+		<details className="triplink-home-article__comments">
+			<summary>{t('Home article comment count', { count: article.articleComments })}</summary>
 			<QueryState loading={!ready || query.loading} error={query.error} retry={() => query.refetch()}>
 				{query.data?.result.list.length ? (
 					<ul>
@@ -43,7 +48,7 @@ function ArticleComments({ article }: { article: Article }) {
 			<Link href={`/community/detail?id=${article._id}`} className="triplink-home-article__link">
 				{t('Read all comments')}
 			</Link>
-		</div>
+		</details>
 	);
 }
 
@@ -55,41 +60,95 @@ function HomeArticleCard({ article }: { article: Article }) {
 	const name = author?.memberFullname || author?.memberNick || t('Community member') || 'Community member';
 	const href = `/community/detail?id=${article._id}`;
 	const date = new Date(article.createdAt);
+	const language = locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US';
+	const number = new Intl.NumberFormat(language);
+	const text = articleText(article.articleContent);
+	const cjkCharacters = (text.match(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g) || []).length;
+	const words = text.replace(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g, '').match(/\S+/g)?.length || 0;
+	const readingMinutes = Math.max(1, Math.ceil(words / 200 + cjkCharacters / 500));
+	const placeholder = '/img/tour-placeholder.svg';
+	let photo = placeholder;
+	if (!failed && article.articleImage) {
+		const source = imageUrl(article.articleImage);
+		if (source.startsWith('/') && !source.startsWith('//')) photo = source;
+		else {
+			try {
+				const url = new URL(source);
+				const origin = new URL(process.env.REACT_APP_API_URL || 'http://localhost:3007');
+				if (url.origin === origin.origin && url.pathname.startsWith('/uploads/article/')) photo = source;
+			} catch {
+				// Malformed or unsupported image paths keep the safe local fallback.
+			}
+		}
+	}
 	return (
 		<article className="triplink-home-article">
-			<Link href={href} passHref className="triplink-home-article__photo" tabIndex={-1} aria-hidden="true">
-				{/* eslint-disable-next-line @next/next/no-img-element */}
-				<img
-					src={!failed && article.articleImage ? imageUrl(article.articleImage) : '/img/tour-placeholder.svg'}
-					alt=""
-					width={640}
-					height={400}
-					loading="lazy"
-					decoding="async"
-					onError={() => setFailed(true)}
-				/>
-			</Link>
-			<div className="triplink-home-article__body">
+			<div className="triplink-home-article__visual">
+				<Link href={href} passHref className="triplink-home-article__photo" tabIndex={-1} aria-hidden="true">
+					<Image
+						src={photo}
+						alt={photo === placeholder ? '' : t('Article photo: {{title}}', { title: article.articleTitle })}
+						fill
+						sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1023px) calc((100vw - 80px) / 2), (max-width: 1320px) calc((100vw - 160px) / 3), 400px"
+						loading="lazy"
+						onError={() => setFailed(true)}
+					/>
+				</Link>
 				<span className="triplink-home-article__category">{t(article.articleCategory)}</span>
+				<span className="triplink-home-article__reading-time">
+					<ScheduleRoundedIcon aria-hidden="true" />
+					{t('Estimated {{count}} min read', { count: readingMinutes })}
+				</span>
+			</div>
+			<div className="triplink-home-article__body">
 				<h3>
 					<Link href={href}>{article.articleTitle}</Link>
 				</h3>
-				<p className="triplink-home-article__excerpt">{articleText(article.articleContent)}</p>
-				<div className="triplink-home-article__author">
-					<Avatar src={author?.memberImage ? imageUrl(author.memberImage) : undefined} alt="">
-						{name.slice(0, 1)}
-					</Avatar>
-					<div>
-						<p>{t('Written by {{name}}', { name })}</p>
-						{!Number.isNaN(date.getTime()) && (
-							<time dateTime={article.createdAt}>
-								{date.toLocaleDateString(locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US', {
-									year: 'numeric',
-									month: 'short',
-									day: 'numeric',
+				<p className="triplink-home-article__excerpt">{text}</p>
+				<div className="triplink-home-article__footnote">
+					<div className="triplink-home-article__author">
+						<Avatar src={author?.memberImage ? imageUrl(author.memberImage) : undefined} alt="">
+							{name.slice(0, 1)}
+						</Avatar>
+						<div>
+							<p>{t('Written by {{name}}', { name })}</p>
+							{!Number.isNaN(date.getTime()) && (
+								<time dateTime={article.createdAt}>
+									{date.toLocaleDateString(language, {
+										year: 'numeric',
+										month: 'short',
+										day: 'numeric',
+									})}
+								</time>
+							)}
+						</div>
+					</div>
+					<div className="triplink-home-article__stats">
+						<div>
+							<span
+								role="img"
+								aria-label={t('{{count}} views', {
+									count: article.articleViews,
+									displayCount: number.format(article.articleViews),
 								})}
-							</time>
-						)}
+							>
+								<VisibilityOutlinedIcon aria-hidden="true" />
+								<span aria-hidden="true">{number.format(article.articleViews)}</span>
+							</span>
+							<span role="img" aria-label={t('{{count}} comments', { count: article.articleComments })}>
+								<ChatBubbleOutlineRoundedIcon aria-hidden="true" />
+								<span aria-hidden="true">{number.format(article.articleComments)}</span>
+							</span>
+						</div>
+						<Link
+							href={href}
+							passHref
+							className="triplink-home-article__story"
+							aria-label={t('Read story: {{title}}', { title: article.articleTitle })}
+						>
+							{t('Read story')}
+							<ArrowForwardRoundedIcon aria-hidden="true" />
+						</Link>
 					</div>
 				</div>
 				<ArticleComments article={article} />

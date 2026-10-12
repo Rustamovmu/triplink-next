@@ -381,6 +381,11 @@ test('featured tour query, one/two/six result layouts, links, translations, pric
 		tourPrice: 1200,
 		tourDiscountPrice: index === 0 ? 900 : null,
 		tourFavoriteCount: 7,
+		tourAverageRating: index === 0 ? 4.8 : 0,
+		tourReviewCount: index === 0 ? 19 : 0,
+		tourViewCount: index === 0 ? 3142 : 0,
+		tourDescription: index === 0 ? 'A real itinerary across Patagonia.' : '',
+		agentData: index === 0 ? { memberFullname: 'Patagonia Guide', memberNick: 'guide' } : null,
 	}));
 	let query = {
 		data: { result: { list: tours } },
@@ -477,6 +482,17 @@ test('featured tour query, one/two/six result layouts, links, translations, pric
 		assert.equal(document.querySelector('.triplink-home-price s').textContent, '$1,200');
 		assert.equal(document.querySelector('.triplink-home-price strong').textContent, '$900');
 		assert.equal(document.querySelector('.triplink-home-tour__sold-out').textContent, t('Sold out'));
+		const first = document.querySelector('article');
+		assert.equal(first.querySelector('.triplink-home-tour__rating strong').textContent, '4.8');
+		assert.match(first.querySelector('.triplink-home-tour__rating').textContent, /19 reviews/);
+		assert.match(first.querySelector('.triplink-home-tour__metadata').textContent, /4 days.*Adventure.*3.1K views/);
+		assert.ok(first.querySelector('[aria-label="3,142 views"]'));
+		assert.equal(first.querySelector('.triplink-home-tour__description').textContent, tours[0].tourDescription);
+		assert.match(first.querySelector('.triplink-home-tour__agent').textContent, /Patagonia Guide/);
+		assert.equal(
+			document.querySelectorAll('article')[1].querySelector('.triplink-home-tour__rating').textContent,
+			t('No reviews yet'),
+		);
 		assert.equal(document.querySelectorAll('article img')[1].getAttribute('src'), '/img/tour-placeholder.svg');
 		await act(async () => Simulate.error(document.querySelector('article img')));
 		assert.equal(document.querySelector('article img').getAttribute('src'), '/img/tour-placeholder.svg');
