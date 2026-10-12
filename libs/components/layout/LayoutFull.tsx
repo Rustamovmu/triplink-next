@@ -5,7 +5,7 @@ import Head from 'next/head';
 import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
-import Chat from '../Chat';
+import ChatTools from '../ChatTools';
 import { useReactiveVar } from '@apollo/client';
 // @ts-ignore
 import 'swiper/css';
@@ -15,7 +15,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
 const withLayoutFull = (Component: any) => {
-	return (props: any) => {
+	return function FullLayout(props: any) {
 		const router = useRouter();
 		const device = useDeviceDetect();
 
@@ -42,7 +42,7 @@ const withLayoutFull = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
-						<Chat />
+						<ChatTools />
 						<Stack id={'footer'}>
 							<Footer />
 						</Stack>
@@ -65,7 +65,7 @@ const withLayoutFull = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
-						<Chat />
+						<ChatTools />
 
 						<Stack id={'footer'}>
 							<Footer />

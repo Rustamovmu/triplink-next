@@ -14,7 +14,7 @@ const { parse, validate, coerceInputValue } = require(root + '/node_modules/grap
 (async () => {
 	const app = await NestFactory.createApplicationContext(GraphQLSchemaBuilderModule, { logger: false });
 	try {
-		const names = ['member', 'tour', 'booking', 'review', 'follow', 'board-article', 'comment', 'help-center'];
+		const names = ['member', 'tour', 'booking', 'review', 'follow', 'board-article', 'comment', 'help-center', 'ai'];
 		const resolvers = names.map(
 			(n) => Object.values(require(root + '/apps/trip-link/src/components/' + n + '/' + n + '.resolver.ts'))[0],
 		);
@@ -22,7 +22,7 @@ const { parse, validate, coerceInputValue } = require(root + '/node_modules/grap
 
 		let count = 0;
 		let errors = 0;
-		for (const file of ['apollo/user/triplink.ts', 'apollo/admin/triplink.ts']) {
+		for (const file of ['apollo/user/triplink.ts', 'apollo/user/ai.ts', 'apollo/admin/triplink.ts']) {
 			const source = fs.readFileSync(frontend + '/' + file, 'utf8');
 			for (const match of source.matchAll(/gql`([^`]+)`/g)) {
 				count++;

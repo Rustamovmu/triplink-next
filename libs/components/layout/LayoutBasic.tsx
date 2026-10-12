@@ -5,7 +5,7 @@ import Head from 'next/head';
 import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
-import Chat from '../Chat';
+import ChatTools from '../ChatTools';
 import { useTranslation } from 'next-i18next';
 // @ts-ignore
 import 'swiper/css';
@@ -112,7 +112,7 @@ const withLayoutBasic = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
-						<Chat />
+						<ChatTools />
 						<Stack id={'footer'}>
 							<Footer />
 						</Stack>
@@ -169,7 +169,7 @@ const withLayoutBasic = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
-						<Chat />
+						<ChatTools />
 
 						<Stack id={'footer'}>
 							<Footer />

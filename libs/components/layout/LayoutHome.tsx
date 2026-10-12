@@ -5,7 +5,7 @@ import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
 import HeaderFilter from '../homepage/HeaderFilter';
-import Chat from '../Chat';
+import ChatTools from '../ChatTools';
 // @ts-ignore
 import 'swiper/css';
 // @ts-ignore
@@ -36,7 +36,7 @@ const withLayoutMain = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
-						<Chat />
+						<ChatTools />
 						<Stack id={'footer'}>
 							<Footer />
 						</Stack>
@@ -63,7 +63,7 @@ const withLayoutMain = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
-						<Chat />
+						<ChatTools />
 
 						<Stack id={'footer'}>
 							<Footer />
