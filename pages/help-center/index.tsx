@@ -15,7 +15,7 @@ function HelpCenter() {
 	const tab = router.query.tab === 'notice' ? 'notice' : 'faq';
 	return (
 		<div className="triplink-support">
-			<section className="triplink-support__hero">
+			<section data-triplink-nav-hero className="triplink-support__hero">
 				<div>
 					<h1>{t('How can we help?')}</h1>
 					<p>{t('Answers and updates for your TripLink journey')}</p>

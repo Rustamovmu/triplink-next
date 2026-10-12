@@ -35,7 +35,7 @@ export function AgentDirectory() {
 	const total = totalOf(query.data?.result);
 	return (
 		<div className="triplink-agents">
-			<section className="triplink-agents__hero" aria-labelledby="agents-title">
+			<section data-triplink-nav-hero className="triplink-agents__hero" aria-labelledby="agents-title">
 				<div className="triplink-agents__hero-inner">
 					<div className="triplink-agents__intro">
 						<h1 id="agents-title">{t('Good journeys begin with good people.')}</h1>
@@ -232,7 +232,7 @@ function PublicMemberProfile() {
 		const name = member?.memberFullname || member?.memberNick || String(t('Travel agent'));
 		return (
 			<div className="triplink-profile">
-				<section className="triplink-profile__hero">
+				<section data-triplink-nav-hero className="triplink-profile__hero">
 					<div className="triplink-profile__hero-inner">
 						<Link href="/agent" className="triplink-profile__back">
 							{t('All travel agents')}

@@ -14,7 +14,7 @@ function About() {
 	const { t } = useTranslation('common');
 	return (
 		<div className="triplink-about">
-			<section className="triplink-about__hero">
+			<section data-triplink-nav-hero className="triplink-about__hero">
 				<div>
 					<h1>{t('A journey starts with a connection.')}</h1>
 					<p>{t('Discover tours, follow travel agents, and share your journeys.')}</p>

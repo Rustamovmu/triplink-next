@@ -79,7 +79,7 @@ const withLayoutBasic = (Component: any) => {
 			return { title, desc, bgImage };
 		}, [router.pathname]);
 		const toursBanner = router.pathname === '/tour' && (
-			<section className="triplink-tours-banner" aria-labelledby="tours-banner-title">
+			<section data-triplink-nav-hero className="triplink-tours-banner" aria-labelledby="tours-banner-title">
 				<div>
 					<h1 id="tours-banner-title">{t('Tours')}</h1>
 					<p>{t('Find your next journey.')}</p>
@@ -150,6 +150,7 @@ const withLayoutBasic = (Component: any) => {
 							router.pathname !== '/help-center' &&
 							router.pathname !== '/mypage' && (
 								<Stack
+									data-triplink-nav-hero
 									className="header-basic"
 									style={{
 										backgroundImage: `url(${memoizedValues.bgImage})`,

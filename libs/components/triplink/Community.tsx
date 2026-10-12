@@ -664,7 +664,7 @@ export function CommunityPage() {
 	const member = useReactiveVar(memberVar);
 	return (
 		<div className="triplink-community">
-			<section className="triplink-community__hero">
+			<section data-triplink-nav-hero className="triplink-community__hero">
 				<div className="triplink-community__hero-inner">
 					<p className="triplink-community__eyebrow">{t('TripLink community')}</p>
 					<h1>{t('Every journey has a story.')}</h1>
@@ -723,7 +723,7 @@ export function CommunityDetail() {
 			: null;
 	return (
 		<div className="triplink-journal">
-			<section className="triplink-journal__hero">
+			<section data-triplink-nav-hero className="triplink-journal__hero">
 				<div>
 					<Link href="/community">← {t('Back to community')}</Link>
 					<p>{t('Stories that take you places.')}</p>

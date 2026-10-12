@@ -8,6 +8,7 @@ import { logOut } from '../auth';
 import { imageUrl } from './triplink/Common';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
+import useNavbarSurface from '../hooks/useNavbarSurface';
 
 export default function Top() {
 	const member = useReactiveVar(memberVar),
@@ -19,13 +20,7 @@ export default function Top() {
 		drawerId = `triplink-navigation-${id}`;
 	const [open, setOpen] = useState(false);
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-	const [scrolled, setScrolled] = useState(false);
-	useEffect(() => {
-		const update = () => setScrolled(window.scrollY > 24);
-		update();
-		window.addEventListener('scroll', update, { passive: true });
-		return () => window.removeEventListener('scroll', update);
-	}, []);
+	const surface = useNavbarSurface(router.asPath);
 	const close = () => {
 		setOpen(false);
 		setAnchor(null);
@@ -136,7 +131,7 @@ export default function Top() {
 			</Link>
 		);
 	return (
-		<header className={`triplink-top${!scrolled ? ' triplink-top--clear' : ''}`}>
+		<header ref={surface.ref} className="triplink-top" data-nav-surface={surface.mode}>
 			<a
 				className="triplink-top__skip"
 				href="#main"

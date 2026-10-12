@@ -56,7 +56,7 @@ function WorkspaceContent() {
 	];
 	return (
 		<div className="triplink-workspace">
-			<section className="triplink-workspace__hero">
+			<section data-triplink-nav-hero className="triplink-workspace__hero">
 				<div>
 					<h1>{t('My workspace')}</h1>
 					<p>{t('Your trips, connections, and profile in one place.')}</p>

@@ -54,6 +54,7 @@ export default function HeaderFilter() {
 	return (
 		<div className="triplink-home-intro">
 			<section
+				data-triplink-nav-hero
 				className={`triplink-hero${!playing || reduced || hovered || focused || hidden ? ' is-paused' : ''}`}
 				aria-label={t('Destination inspiration')}
 				aria-roledescription={t('Carousel')}
