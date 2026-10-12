@@ -64,7 +64,7 @@ function Section({
 		<section
 			className={`triplink-home-section triplink-home-section--${id}`}
 			aria-labelledby={`home-${id}`}
-			lang={id === 'agents' ? (i18n.language === 'kr' ? 'ko' : i18n.language) : undefined}
+			lang={id === 'agents' || id === 'featured' ? (i18n.language === 'kr' ? 'ko' : i18n.language) : undefined}
 		>
 			<div className="triplink-home-section__inner">
 				<div
@@ -258,7 +258,7 @@ function HomeTourCard({ tour, variant, rank }: { tour: Tour; variant: TourVarian
 	);
 }
 
-function TourSection({ variant }: { variant: TourVariant }) {
+export function TourSection({ variant }: { variant: TourVariant }) {
 	const ready = usePublicReady();
 	const query = useQuery(TOURS, {
 		variables: { input: inputs[variant] },
@@ -279,7 +279,10 @@ function TourSection({ variant }: { variant: TourVariant }) {
 				empty={!query.data?.result.list.length}
 				retry={() => query.refetch()}
 			>
-				<div className={`triplink-home-grid triplink-home-grid--${variant}`}>
+				<div
+					className={`triplink-home-grid triplink-home-grid--${variant}`}
+					data-count={variant === 'featured' ? query.data?.result.list.length : undefined}
+				>
 					{query.data?.result.list.map((tour, index) => (
 						<HomeTourCard key={tour._id} tour={tour} variant={variant} rank={index + 1} />
 					))}

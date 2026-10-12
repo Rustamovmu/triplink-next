@@ -174,6 +174,13 @@
 	font-display: swap;
 }
 @font-face {
+	font-family: 'TripLink Roboto Condensed';
+	src: url('/fonts/featured-expedition/RobotoCondensed-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
 	font-family: 'TripLink Manrope';
 	src: url('/fonts/agents-atlas/Manrope.woff2') format('woff2');
 	font-weight: 200 800;
@@ -2184,9 +2191,234 @@
 	.triplink-home-section__link { display: inline-block; margin-top: 18px; padding: 12px 18px; border: 1px solid currentColor; border-radius: 6px; font-size: 14px; }
 	.triplink-home-section__image { min-width: 0; overflow: hidden; border-radius: 16px; aspect-ratio: 1.55; background: #d9eae7; }
 	.triplink-home-section__image img { display: block; width: 100%; height: 100%; object-fit: cover; }
-	.triplink-home-section--featured { background: #edf6f3; }
-	.triplink-home-section--featured .triplink-home-section__intro { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
-	.triplink-home-section--featured .triplink-home-tour { background: white; }
+	.triplink-home-section--featured {
+		background: #faf7f0;
+		color: #30251d;
+		font-family: 'TripLink Manrope', 'Apple SD Gothic Neo', 'Malgun Gothic',
+			sans-serif;
+		.MuiCircularProgress-root {
+			color: #93491b;
+		}
+		.triplink-home-section__intro {
+			position: relative;
+			isolation: isolate;
+			grid-template-columns: minmax(0, 1fr);
+			gap: 28px;
+			&::before {
+				content: '';
+				position: absolute;
+				z-index: -1;
+				top: -48px;
+				right: -24px;
+				width: min(48%, 520px);
+				height: 250px;
+				background: url('/img/homepage/featured/expedition-lines.svg') center /
+					contain no-repeat;
+				pointer-events: none;
+			}
+		}
+		.triplink-home-section__copy {
+			max-width: none;
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			column-gap: 36px;
+		}
+		.triplink-home-section__copy > h2,
+		.triplink-home-section__copy > p {
+			grid-column: 1;
+		}
+		.triplink-home-section__copy h2 {
+			font: 700 14px/1.4 'TripLink Manrope', 'Apple SD Gothic Neo',
+				'Malgun Gothic', sans-serif;
+			color: #93491b;
+			margin-bottom: 18px;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+		}
+		.triplink-home-section__statement {
+			max-width: 24ch;
+			font: 700 clamp(40px, 4vw, 56px) / 1.08 'TripLink Roboto Condensed',
+				'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+			letter-spacing: -0.02em;
+			color: #30251d;
+		}
+		.triplink-home-section__description {
+			color: #6e5e48;
+			font-size: 15px;
+			line-height: 1.65;
+		}
+		.triplink-home-section__description + .triplink-home-section__description {
+			margin-top: 8px;
+		}
+		.triplink-home-section__link {
+			grid-column: 2;
+			grid-row: 2 / 5;
+			align-self: end;
+			justify-self: start;
+			margin: 0 0 4px;
+			padding: 14px 24px;
+			background: #93491b;
+			color: #fffdf5;
+			border-color: #93491b;
+			font-weight: 700;
+			border-radius: 7px;
+		}
+		a:focus-visible,
+		button:focus-visible {
+			outline: 3px solid #93491b;
+			outline-offset: 4px;
+		}
+		.triplink-home-grid--featured {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 24px;
+		}
+		.triplink-home-grid--featured[data-count='2'] {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.triplink-home-grid--featured[data-count='1'] {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.triplink-home-tour--featured {
+			background: #fffdf9;
+			border-color: #e4dccf;
+			border-radius: 10px;
+		}
+		.triplink-home-tour--featured .triplink-home-tour__visual {
+			aspect-ratio: 1.5;
+		}
+		.triplink-home-tour--featured .triplink-home-tour__body {
+			padding: 22px;
+			gap: 12px;
+		}
+		.triplink-home-tour h3 {
+			font: 750 21px/1.35 'TripLink Manrope', 'Apple SD Gothic Neo',
+				'Malgun Gothic', sans-serif;
+			color: #30251d;
+			overflow-wrap: anywhere;
+		}
+		.triplink-home-tour__category {
+			align-self: flex-start;
+			background: #f3eadb;
+			color: #7b512f;
+			padding: 5px 9px;
+			border-radius: 4px;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: 0.06em;
+			line-height: 1.5;
+			text-transform: uppercase;
+		}
+		.triplink-home-tour__destination,
+		.triplink-home-price > span,
+		.triplink-home-price s {
+			color: #6e5e48;
+		}
+		.triplink-home-tour__bottom {
+			border-top: 1px solid #e9e1d5;
+			margin-top: auto;
+			padding-top: 18px;
+		}
+		.triplink-home-price strong {
+			font-family: inherit;
+			font-weight: 800;
+			font-size: 24px;
+		}
+		.triplink-home-tour__cta {
+			display: inline-flex;
+			align-items: center;
+			min-height: 44px;
+			background: transparent;
+			color: #93491b;
+			padding: 11px 0;
+			border-radius: 0;
+			text-decoration: underline;
+			text-underline-offset: 5px;
+		}
+		.triplink-home-section__link:hover {
+			background: #30251d;
+			border-color: #30251d;
+		}
+		.triplink-home-tour__cta:hover {
+			color: #30251d;
+		}
+		.triplink-home-save {
+			background: #fffdf9;
+			color: #93491b;
+			border-color: #e4dccf;
+		}
+		.triplink-home-save[aria-pressed='true'] {
+			background: #f3eadb;
+			color: #93491b;
+		}
+		.triplink-home-tour__sold-out {
+			color: #30251d;
+			background: #f3eadb;
+		}
+		.triplink-home-tour__error {
+			background: #fffdf5;
+		}
+		.triplink-home-grid--featured[data-count='1'] .triplink-home-tour--featured {
+			display: grid;
+			grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+			.triplink-home-tour__visual {
+				aspect-ratio: auto;
+				min-height: 300px;
+			}
+			.triplink-home-tour__body {
+				padding: 32px;
+			}
+		}
+		@media (max-width: 1023px) {
+			.triplink-home-grid--featured {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
+		}
+		@media (max-width: 599px) {
+			.triplink-home-section__intro {
+				gap: 22px;
+				&::before {
+					width: 220px;
+					height: 160px;
+					top: -30px;
+					right: -24px;
+					opacity: 0.55;
+				}
+			}
+			.triplink-home-section__copy {
+				grid-template-columns: minmax(0, 1fr);
+			}
+			.triplink-home-section__copy h2 {
+				font-size: 12px;
+			}
+			.triplink-home-section__statement {
+				font-size: clamp(32px, 9vw, 38px);
+				line-height: 1.15;
+			}
+			.triplink-home-section__link {
+				grid-column: 1;
+				grid-row: auto;
+				margin: 20px 0 0;
+				padding: 12px 20px;
+			}
+			.triplink-home-grid--featured,
+			.triplink-home-grid--featured[data-count] {
+				grid-template-columns: minmax(0, 1fr);
+				gap: 18px;
+			}
+			.triplink-home-grid--featured[data-count='1']
+				.triplink-home-tour--featured {
+				display: flex;
+				.triplink-home-tour__visual {
+					aspect-ratio: 1.5;
+					min-height: 0;
+				}
+			}
+			.triplink-home-tour--featured .triplink-home-tour__body,
+			.triplink-home-grid--featured[data-count='1'] .triplink-home-tour__body {
+				padding: 20px;
+			}
+		}
+	}
 	.triplink-home-section--rated { background: #f5f8fa; }
 	.triplink-home-section--rated .triplink-home-section__intro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	.triplink-home-section--rated .triplink-home-section__image { aspect-ratio: 1.6; border-radius: 12px; }
@@ -2344,41 +2576,98 @@
 	@media (prefers-reduced-motion: reduce) { &__ring { transition: none; } }
 }
 
-.triplink-home-sections .triplink-intro-gallery {
+// Centered expedition photo strip inspired by Aceternity's carousel composition.
+.triplink-home-sections
+	.triplink-home-section--featured
+	.triplink-intro-gallery {
 	min-width: 0;
-	&__panels { display: flex; gap: 10px; height: clamp(300px, 32vw, 390px); }
-	&__panel {
-		position: relative; display: block; flex: 1 1 0; min-width: 0; padding: 0;
-		border: 0; border-radius: 14px; overflow: hidden; background: #00343b; cursor: pointer;
-		transition: flex-grow 650ms cubic-bezier(0.22, 1, 0.36, 1);
-		img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) brightness(0.72); transition: filter 500ms ease; }
-		&:nth-child(3) img { object-position: 50% 65%; }
-		&::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0, 32, 38, 0.88)); }
-		&.is-active { flex-grow: 4; img { filter: none; } }
-		&:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+	&:focus-visible {
+		outline: 3px solid #93491b;
+		outline-offset: 4px;
+		border-radius: 10px;
 	}
-	&__caption {
-		position: absolute; z-index: 1; bottom: 22px; left: 20px; right: 16px;
-		border-left: 3px solid #f2a289; padding-left: 12px; color: white;
-		font-family: 'TripLink Outfit', Arial, sans-serif; font-size: clamp(18px, 2vw, 24px); line-height: 1.2;
-		opacity: 0; transform: translateX(-8px); transition: opacity 250ms ease, transform 400ms ease;
+	.swiper {
+		padding: 14px 0;
+		cursor: grab;
 	}
-	&__panel.is-active .triplink-intro-gallery__caption { opacity: 1; transform: none; }
-	&__navigation { display: flex; gap: 8px; }
-	&__footer {
-		display: flex; align-items: center; justify-content: space-between; height: 52px; color: #00343b;
-		span { font-size: 12px; letter-spacing: 0.12em; }
-		button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #93b4ae; border-radius: 50%; color: #00343b; background: transparent; cursor: pointer; }
-		button:hover { background: #d9eae7; }
-		button:focus-visible { outline: 3px solid #0f766e; outline-offset: 2px; }
+	.swiper:active {
+		cursor: grabbing;
+	}
+	.swiper-wrapper {
+		align-items: center;
+	}
+	.swiper-slide {
+		width: 58%;
+		height: auto;
+	}
+	&__frame {
+		margin: 0;
+		padding: 0;
+		transform: scale(0.92);
+		transform-origin: center;
+		transition: transform 650ms ease;
+		img {
+			display: block;
+			width: 100%;
+			height: 340px;
+			object-fit: cover;
+			border: 1px solid #e4dccf;
+			padding: 5px;
+			background: #fffdf9;
+			border-radius: 8px;
+			user-select: none;
+		}
+		figcaption {
+			padding: 12px 2px 0;
+			color: #6e5e48;
+			font-size: 13px;
+			line-height: 1.5;
+			font-weight: 600;
+			overflow-wrap: anywhere;
+		}
+	}
+	.swiper-slide-active .triplink-intro-gallery__frame,
+	.swiper-slide-duplicate-active .triplink-intro-gallery__frame {
+		transform: none;
+	}
+	&__announcement {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	@media (max-width: 1023px) {
+		.swiper-slide {
+			width: 72%;
+		}
+		&__frame img {
+			height: 290px;
+		}
 	}
 	@media (max-width: 599px) {
-		&__panels { flex-direction: column; height: 390px; gap: 8px; }
-		&__panel { min-height: 60px; }
-		&__caption { bottom: 18px; }
+		.swiper-slide {
+			width: 86%;
+		}
+		&__frame {
+			img {
+				height: 230px;
+				padding: 4px;
+			}
+			figcaption {
+				font-size: 12px;
+				padding: 10px 2px 0;
+			}
+		}
 	}
 	@media (prefers-reduced-motion: reduce) {
-		&__panel, &__panel img, &__caption { transition: none; }
+		&__frame {
+			transition: none;
+		}
 	}
 }
 
