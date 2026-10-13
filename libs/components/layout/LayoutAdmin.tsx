@@ -20,8 +20,11 @@ export default function withAdminLayout(Component: ComponentType) {
 		const member = useReactiveVar(memberVar);
 		const logout = () => {
 			setOpen(false);
-			logOut();
-			void router.push('/');
+			void logOut()
+				.then(() => router.push('/'))
+				.catch(() => {
+					window.alert(String(t('Unable to sign out. Please retry.')));
+				});
 		};
 		return (
 			<Access roles={['ADMIN']}>

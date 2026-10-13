@@ -24,7 +24,8 @@ import ContentCopyRounded from '@mui/icons-material/ContentCopyRounded';
 import CheckRounded from '@mui/icons-material/CheckRounded';
 import KeyboardArrowDownRounded from '@mui/icons-material/KeyboardArrowDownRounded';
 import { memberVar } from '../../apollo/store';
-import { getJwtToken } from '../auth/token';
+import { tokenIdentity } from '../auth/token';
+import { accessTokenVar } from '../../apollo/store';
 import { ChatMember } from '../types/triplink';
 import { CHAT_MESSAGE_LIMIT, chatImageUrl, chatInitials, chatProfile, chatRole } from '../triplink/chat';
 import { useChat } from '../triplink/useChat';
@@ -95,7 +96,8 @@ const emojis = [
 export default function Chat() {
 	const { t, i18n } = useTranslation('common');
 	const member = useReactiveVar(memberVar);
-	const token = getJwtToken();
+	const token = useReactiveVar(accessTokenVar);
+	const sessionIdentity = tokenIdentity(token);
 	const chat = useChat(member?._id, token);
 	const { stopTyping } = chat;
 	const mobile = useMediaQuery('(max-width:599px)');
@@ -129,7 +131,7 @@ export default function Chat() {
 		setEmojiAnchor(null);
 		setNotice('');
 		setCopied('');
-	}, [member?._id, token]);
+	}, [member?._id, sessionIdentity]);
 	useEffect(() => {
 		if (!notice && !copied) return;
 		const timer = setTimeout(() => {
@@ -190,12 +192,20 @@ export default function Chat() {
 		setText(next);
 		chat.notifyTyping(next);
 	};
-	const submit = () => {
-		if (chat.send(text)) {
-			setText('');
-			nearBottom.current = true;
-			setJump(false);
-			input.current?.focus();
+	const sending = useRef(false);
+	const submit = async () => {
+		if (sending.current) return;
+		sending.current = true;
+		const draft = text;
+		try {
+			if (await chat.send(draft)) {
+				setText((previous) => (previous === draft ? '' : previous));
+				nearBottom.current = true;
+				setJump(false);
+				input.current?.focus();
+			}
+		} finally {
+			sending.current = false;
 		}
 	};
 	const avatarSource = (person: ChatMember) => {

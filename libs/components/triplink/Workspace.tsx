@@ -11,6 +11,7 @@ import { ArticlesList, ArticleForm } from './Community';
 import { BookingsPanel } from './Bookings';
 import { ReviewsPanel } from './Reviews';
 import { TourForm, OwnedTours } from './TourManagement';
+import { ActiveSessions } from './ActiveSessions';
 import { ProfileForm, SavedTours, Follows } from './Members';
 function WorkspaceContent() {
 	const { t } = useTranslation('common');
@@ -112,7 +113,10 @@ function WorkspaceContent() {
 							}}
 						/>
 					) : category === 'myProfile' ? (
-						<ProfileForm member={member} />
+						<>
+							<ProfileForm member={member} />
+							<ActiveSessions />
+						</>
 					) : member.memberType !== 'ADMIN' && category === 'myFavorites' ? (
 						<SavedTours />
 					) : member.memberType !== 'ADMIN' && category === 'recentlyVisited' ? (

@@ -84,8 +84,11 @@ export default function Top() {
 		));
 	const logout = () => {
 		close();
-		logOut();
-		void router.push('/');
+		void logOut()
+			.then(() => router.push('/'))
+			.catch(() => {
+				window.alert(String(t('Unable to sign out. Please retry.')));
+			});
 	};
 	const language = () => (
 		<label className="triplink-top__language">

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useApolloClient } from '@apollo/client';
 import { AI_CHAT } from '../../apollo/user/ai';
-import { getJwtToken } from '../auth/token';
+import { tokenIdentity } from '../auth/token';
 import { AiChatInput, AiTurn, AI_MESSAGE_LIMIT } from '../types/triplink/ai';
 
 export type AiError = 'rate' | 'unavailable' | 'network' | 'session';
@@ -12,6 +12,7 @@ let session: { memberId?: string; token?: string; turns: AiTurn[] } | null = nul
 /** Local session state; generation numbers discard responses after clear/logout. */
 export function useAiAssistant(memberId?: string, token?: string) {
 	const client = useApolloClient();
+	const sessionKey = tokenIdentity(token ?? '');
 	const [turns, setTurns] = useState<AiTurn[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<AiError | null>(null);
@@ -36,7 +37,7 @@ export function useAiAssistant(memberId?: string, token?: string) {
 		setError(null);
 	}, []);
 	useEffect(() => {
-		if (session && session.memberId === memberId && session.token === token) {
+		if (session && session.memberId === memberId && tokenIdentity(session.token ?? '') === sessionKey) {
 			history.current = session.turns;
 			counter.current = Math.max(0, ...session.turns.map((turn) => turn.id));
 			setTurns(session.turns);
@@ -46,7 +47,7 @@ export function useAiAssistant(memberId?: string, token?: string) {
 			abort.current?.abort();
 		};
 		return cancel;
-	}, [memberId, token, clear]);
+	}, [memberId, sessionKey, clear]);
 	const run = async (request: Pending) => {
 		if (busy.current || !memberId || !token) return false;
 		busy.current = true;
@@ -60,8 +61,7 @@ export function useAiAssistant(memberId?: string, token?: string) {
 		const current = () =>
 			generation === epoch.current &&
 			identity.current.memberId === memberId &&
-			identity.current.token === token &&
-			getJwtToken() === token;
+			tokenIdentity(identity.current.token ?? '') === sessionKey;
 		try {
 			const response = await client.mutate({
 				mutation: AI_CHAT,

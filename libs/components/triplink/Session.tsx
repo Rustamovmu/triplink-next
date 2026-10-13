@@ -3,7 +3,7 @@ import React, { useEffect, ReactNode } from 'react';
 import { Alert, Button, CircularProgress, Stack } from '@mui/material';
 import { useReactiveVar } from '@apollo/client';
 import { memberVar, sessionVar, sessionErrorVar } from '../../../apollo/store';
-import { restoreSession, logOut } from '../../auth';
+import { restoreSession, clearLocalSession, synchronizeSession } from '../../auth';
 import { Role } from '../../types/triplink';
 import Link from 'next/link';
 export function SessionBootstrap() {
@@ -13,19 +13,19 @@ export function SessionBootstrap() {
 	const error = useReactiveVar(sessionErrorVar);
 	useEffect(() => {
 		void restoreSession();
-		const invalidate = () => logOut();
-		const sync = (event: StorageEvent) => {
-			if (['accessToken', 'login', 'logout'].includes(event.key ?? '')) void restoreSession();
+		const invalidate = () => clearLocalSession();
+		const sync = () => {
+			void synchronizeSession();
 		};
 		window.addEventListener('triplink:session-invalid', invalidate);
-		window.addEventListener('storage', sync);
+		window.addEventListener('triplink:auth-change', sync);
 		return () => {
 			window.removeEventListener('triplink:session-invalid', invalidate);
-			window.removeEventListener('storage', sync);
+			window.removeEventListener('triplink:auth-change', sync);
 		};
 	}, []);
 	return status === 'error' ? (
-		<Alert severity="error" action={<Button onClick={() => void restoreSession()}>{t('Retry')}</Button>}>
+		<Alert severity="error" action={<Button onClick={() => void restoreSession(true)}>{t('Retry')}</Button>}>
 			{t(error)}
 		</Alert>
 	) : null;
@@ -44,7 +44,7 @@ export function Access({ roles, children }: { roles?: Role[]; children: ReactNod
 		);
 	if (session === 'error')
 		return (
-			<Alert severity="error" action={<Button onClick={() => void restoreSession()}>{t('Retry')}</Button>}>
+			<Alert severity="error" action={<Button onClick={() => void restoreSession(true)}>{t('Retry')}</Button>}>
 				{t(error)}
 			</Alert>
 		);

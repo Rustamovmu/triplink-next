@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
+import { ensureAccessToken, refreshAccessToken, AuthRequestError, clearAuthentication } from '../auth/runtime';
+import { tokenIdentity } from '../auth/token';
 import { socketVar } from '../../apollo/store';
 import { ChatMember, ChatMessage, ChatPresence } from '../types/triplink';
 import { CHAT_MESSAGE_LIMIT, isChatMember, isChatMessage, isChatPresence, mergeMessages } from './chat';
 
 const emptyPresence: ChatPresence = { list: [], totalMembers: 0, totalClients: 0 };
 export function useChat(memberId: string | undefined, token: string | null) {
+	const sessionKey = tokenIdentity(token ?? '');
+	const tokenRef = useRef(token);
+	tokenRef.current = token;
+	const sentToken = useRef('');
+	const renewing = useRef<Promise<void> | null>(null);
 	const [attempt, setAttempt] = useState(0);
 	const [status, setStatus] = useState<'connecting' | 'authenticated' | 'closed'>('closed');
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -18,6 +25,36 @@ export function useChat(memberId: string | undefined, token: string | null) {
 	const typingSent = useRef(false);
 	const authenticated = useRef(false);
 	const remoteTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+	const reauthenticate = (next: string) => {
+		if (
+			connection.current?.readyState === WebSocket.OPEN &&
+			authenticated.current &&
+			next !== sentToken.current &&
+			tokenIdentity(next) === sessionKey
+		) {
+			connection.current.send(JSON.stringify({ event: 'reauthenticate', data: { token: next } }));
+			sentToken.current = next;
+		}
+	};
+	const renew = () => {
+		if (!renewing.current)
+			renewing.current = refreshAccessToken(true)
+				.then(reauthenticate)
+				.catch((error: unknown) => {
+					setError('Unable to restore your session. Please retry.');
+					if (error instanceof AuthRequestError && error.definitive) {
+						setDenied(true);
+						connection.current?.close();
+					}
+				})
+				.finally(() => {
+					renewing.current = null;
+				});
+		return renewing.current;
+	};
+	useEffect(() => {
+		if (token) reauthenticate(token);
+	}, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 	const stopTyping = () => {
 		clearTimeout(idle.current);
 		if (typingSent.current && authenticated.current && connection.current?.readyState === WebSocket.OPEN) {
@@ -88,12 +125,18 @@ export function useChat(memberId: string | undefined, token: string | null) {
 			}
 		}, 12000);
 		socket.onopen = () => {
-			try {
-				socket.send(JSON.stringify({ event: 'authenticate', data: { token } }));
-			} catch {
-				setError('Chat connection failed');
-				socket.close();
-			}
+			void ensureAccessToken()
+				.then((next) => {
+					if (!active || tokenIdentity(next) !== sessionKey) return;
+					sentToken.current = next;
+					socket.send(JSON.stringify({ event: 'authenticate', data: { token: next } }));
+				})
+				.catch(() => {
+					if (active) {
+						setError('Chat connection failed');
+						socket.close();
+					}
+				});
 		};
 		socket.onmessage = (event) => {
 			if (!active) return;
@@ -151,9 +194,14 @@ export function useChat(memberId: string | undefined, token: string | null) {
 						break;
 					}
 					case 'error':
+						if (data?.code === 'ACCESS_TOKEN_EXPIRED') {
+							void renew();
+							break;
+						}
 						setError(typeof data?.message === 'string' ? data.message : 'Chat error');
 						if (['UNAUTHENTICATED', 'FORBIDDEN'].includes(data?.code)) {
 							setDenied(true);
+							if (tokenIdentity(tokenRef.current ?? '') === sessionKey) clearAuthentication();
 							socket.close();
 						}
 				}
@@ -191,9 +239,16 @@ export function useChat(memberId: string | undefined, token: string | null) {
 		};
 		// Connection ownership depends only on the account, token and explicit reconnect.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [memberId, token, attempt]);
-	const send = (text: string): boolean => {
+	}, [memberId, sessionKey, attempt]);
+	const send = async (text: string): Promise<boolean> => {
 		const trimmed = text.trim();
+		try {
+			const next = await ensureAccessToken();
+			reauthenticate(next);
+		} catch {
+			setError('Unable to restore your session. Please retry.');
+			return false;
+		}
 		if (
 			!authenticated.current ||
 			connection.current?.readyState !== WebSocket.OPEN ||

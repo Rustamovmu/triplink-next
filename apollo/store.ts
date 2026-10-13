@@ -1,5 +1,6 @@
 import { makeVar } from '@apollo/client';
 import { Member } from '../libs/types/triplink';
+export const accessTokenVar = makeVar('');
 export const themeVar = makeVar({});
 export const sessionVar = makeVar<'loading' | 'authenticated' | 'anonymous' | 'error'>('loading');
 export const sessionErrorVar = makeVar('');

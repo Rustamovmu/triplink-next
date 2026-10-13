@@ -22,7 +22,8 @@ import RestartAltRounded from '@mui/icons-material/RestartAltRounded';
 import SendRounded from '@mui/icons-material/SendRounded';
 import ArrowOutwardRounded from '@mui/icons-material/ArrowOutwardRounded';
 import { memberVar } from '../../apollo/store';
-import { getJwtToken } from '../auth/token';
+import { tokenIdentity } from '../auth/token';
+import { accessTokenVar } from '../../apollo/store';
 import { useAiAssistant } from '../triplink/useAiAssistant';
 import { parseTourSearchQuery } from '../triplink/tourSearchUrl';
 import { AiChatInput, AiIntent, AI_MESSAGE_LIMIT } from '../types/triplink/ai';
@@ -44,7 +45,8 @@ export default function AiAssistant() {
 	const { t, i18n } = useTranslation('common');
 	const router = useRouter();
 	const member = useReactiveVar(memberVar);
-	const token = getJwtToken();
+	const token = useReactiveVar(accessTokenVar);
+	const sessionIdentity = tokenIdentity(token);
 	const ai = useAiAssistant(member?._id, token);
 	const mobile = useMediaQuery('(max-width:599px)');
 	const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
@@ -69,7 +71,7 @@ export default function AiAssistant() {
 		setOpen(false);
 		setText('');
 		setDetailed(false);
-	}, [member?._id, token]);
+	}, [member?._id, sessionIdentity]);
 	const close = () => {
 		setOpen(false);
 		launcher.current?.focus();

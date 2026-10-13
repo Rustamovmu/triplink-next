@@ -14,6 +14,7 @@ for (const extension of ['.ts', '.tsx'])
 const { bookingActions, bookingCapacity } = require('../libs/triplink/rules.ts');
 const { safeReturnUrl } = require('../libs/auth/returnUrl.ts');
 const { mergeMessages } = require('../libs/triplink/chat.ts');
+const { setJwtToken } = require('../libs/auth/token.ts');
 const { uploadImages } = require('../libs/uploads/index.ts');
 const now = Date.parse('2026-10-09T00:00:00Z');
 const tour = {
@@ -111,10 +112,15 @@ test('multipart uploads map exactly the selected file count without a boundary o
 	const originals = { window: global.window, localStorage: global.localStorage, fetch: global.fetch };
 	let calls = 0;
 	global.window = { dispatchEvent() {} };
-	global.localStorage = { getItem: () => 'test-token' };
+	global.localStorage = { getItem: () => null };
+	setJwtToken(
+		'test.' +
+			Buffer.from(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 900 })).toString('base64url') +
+			'.token',
+	);
 	global.fetch = async (_url, options) => {
 		calls++;
-		assert.equal(options.headers.Authorization, 'Bearer test-token');
+		assert.match(options.headers.Authorization, /^Bearer test\./);
 		assert.equal(options.headers['Apollo-Require-Preflight'], 'true');
 		assert.equal(options.headers['Content-Type'], undefined);
 		assert.deepEqual(JSON.parse(options.body.get('map')), { 0: ['variables.files.0'], 1: ['variables.files.1'] });
@@ -178,6 +184,20 @@ test('session restoration clears private state and ignores late account response
 		loaded: true,
 		exports: { initializeApollo: () => fakeClient },
 	};
+	const runtimePath = require.resolve('../libs/auth/runtime.ts');
+	const previousRuntime = require.cache[runtimePath];
+	require.cache[runtimePath] = {
+		id: runtimePath,
+		filename: runtimePath,
+		loaded: true,
+		exports: {
+			startAuthRuntime() {},
+			setAuthPayloadHandler() {},
+			authVersion: () => 'fixture',
+			refreshAccessToken: async () => 'synthetic-token',
+			AuthRequestError: Error,
+		},
+	};
 	const originalStorage = global.localStorage;
 	const values = new Map([['accessToken', 'synthetic-token']]);
 	global.localStorage = {
@@ -190,21 +210,24 @@ test('session restoration clears private state and ignores late account response
 	const authPath = require.resolve('../libs/auth/index.ts');
 	delete require.cache[authPath];
 	try {
-		const { restoreSession, logOut } = require(authPath);
+		const { restoreSession, clearLocalSession } = require(authPath);
+		setJwtToken('synthetic-token');
 		const { memberVar, sessionVar } = require('../apollo/store.ts');
 		memberVar({ _id: 'previous-account' });
 		const pending = restoreSession();
 		await new Promise((resolve) => setImmediate(resolve));
 		assert.equal(memberVar(), null);
 		assert.equal(sessionVar(), 'loading');
-		logOut();
+		clearLocalSession();
 		resolveQuery({ data: { result: { _id: 'stale-account' } } });
 		await pending;
 		assert.equal(memberVar(), null);
 		assert.equal(sessionVar(), 'anonymous');
-		assert.equal(values.has('accessToken'), false);
+		assert.equal(require('../libs/auth/token.ts').getJwtToken(), '');
 	} finally {
 		delete require.cache[authPath];
+		if (previousRuntime) require.cache[runtimePath] = previousRuntime;
+		else delete require.cache[runtimePath];
 		if (previous) require.cache[clientPath] = previous;
 		else delete require.cache[clientPath];
 		global.localStorage = originalStorage;

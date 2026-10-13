@@ -138,6 +138,7 @@ function environment() {
 	const t = (key, v = {}) => key.replace(/{{(\w+)}}/g, (_, name) => v[name] ?? '');
 	const store = {
 		memberVar: 'member',
+		accessTokenVar: 'token',
 		socketVar: (socket) => {
 			if (socket !== undefined) ctx.socket = socket;
 			else ctx.socket = undefined;
@@ -148,7 +149,25 @@ function environment() {
 		if (arguments.length) ctx.socket = value;
 		return ctx.socket;
 	};
-	const hook = load('libs/triplink/useChat.ts', { '../../apollo/store': store, './chat': helpers });
+	const hook = load('libs/triplink/useChat.ts', {
+		'../../apollo/store': store,
+		'./chat': helpers,
+		'../auth/token': {
+			tokenIdentity: (token) => {
+				try {
+					return JSON.parse(Buffer.from(token.split('.')[1], 'base64url')).sid || token;
+				} catch {
+					return token;
+				}
+			},
+		},
+		'../auth/runtime': {
+			ensureAccessToken: async () => ctx.token,
+			refreshAccessToken: async () => ctx.token,
+			AuthRequestError: Error,
+			clearAuthentication() {},
+		},
+	});
 	const button = React.forwardRef(function TestButton(
 		{ children, onClick, disabled, className, type = 'button', ...props },
 		ref,
@@ -224,10 +243,19 @@ function environment() {
 			default: ({ href, children, onClick }) => React.createElement('a', { href, onClick }, children),
 		},
 		'next-i18next': { useTranslation: () => ({ t, i18n: { language: 'en' } }) },
-		'@apollo/client': { useReactiveVar: () => ctx.member },
+		'@apollo/client': { useReactiveVar: (variable) => (variable === 'token' ? ctx.token : ctx.member) },
 		'@mui/material': mui,
 		'../../apollo/store': store,
-		'../auth/token': { getJwtToken: () => ctx.token },
+		'../auth/token': {
+			getJwtToken: () => ctx.token,
+			tokenIdentity: (token) => {
+				try {
+					return JSON.parse(Buffer.from(token.split('.')[1], 'base64url')).sid || token;
+				} catch {
+					return token;
+				}
+			},
+		},
 		'../triplink/chat': helpers,
 		'../triplink/useChat': hook,
 		...icons,
@@ -544,6 +572,32 @@ test('mobile chat follows the visual viewport when the keyboard opens and retain
 		await ctx.click('Close chat');
 		assert.equal(document.querySelector('[role="dialog"]'), null);
 		assert.equal(document.activeElement.textContent, 'Shared chat');
+	} finally {
+		await ctx.cleanup();
+	}
+});
+
+test('access renewal in the same session reauthenticates one socket and preserves the draft', async () => {
+	const ctx = environment();
+	const credential = (n) =>
+		'x.' + Buffer.from(JSON.stringify({ sid: 'same-session', exp: n })).toString('base64url') + '.x';
+	try {
+		ctx.token = credential(1);
+		await ctx.render();
+		await act(async () => {
+			ctx.sockets[0].open();
+		});
+		await act(async () => {
+			ctx.sockets[0].frame('authenticated', { memberData: traveler });
+		});
+		await ctx.click('Shared chat');
+		await ctx.change('Keep this draft');
+		ctx.token = credential(2);
+		await ctx.render();
+		assert.equal(ctx.sockets.length, 1);
+		assert.equal(ctx.sockets[0].closed, false);
+		assert.equal(document.querySelector('textarea').value, 'Keep this draft');
+		assert.equal(ctx.sockets[0].sent.at(-1).event, 'reauthenticate');
 	} finally {
 		await ctx.cleanup();
 	}
