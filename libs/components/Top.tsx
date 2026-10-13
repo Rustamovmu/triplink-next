@@ -135,19 +135,6 @@ export default function Top() {
 		);
 	return (
 		<header ref={surface.ref} className="triplink-top" data-nav-surface={surface.mode}>
-			<a
-				className="triplink-top__skip"
-				href="#main"
-				onClick={() => {
-					const main = document.getElementById('main');
-					if (main) {
-						main.tabIndex = -1;
-						main.focus();
-					}
-				}}
-			>
-				{t('Skip to content')}
-			</a>
 			<div className="triplink-top__inner">
 				<Link href="/" passHref className="triplink-brand-link" translate="no">
 					<BrandLogo inverse />
