@@ -36,7 +36,8 @@ test('public connections navigate by role and toggle the visitor relationship wi
  const common=load('libs/components/triplink/Common.tsx',{...shared,'../../triplink/errors':{errorMessage:e=>e.message}});
  const mocks={...shared,'next/link':{__esModule:true,default:({href,children,className})=>React.createElement('a',{href,className},children)},
  '../../../apollo/user/triplink':{FOLLOWERS:'followers',FOLLOWINGS:'followings',MEMBER:'memberQuery',FOLLOW_TOGGLE:'toggle'},
- '../../auth':{refreshCurrentMember:async()=>{refreshes++;}},'../../types/triplink':{totalOf:r=>r?.metaCounter[0]?.total??0},'./Common':common,'./Tours':{},'../../uploads':{}};
+ '../../auth':{refreshCurrentMember:async()=>{refreshes++;}},'../../types/triplink':{totalOf:r=>r?.metaCounter[0]?.total??0},'./Common':common,'./Tours':{},'../../auth/security': { validNewPassword: value => value.length >= 12 && value.length <= 1024 },
+'../../uploads':{}};
  const {Follows}=load('libs/components/triplink/Members.tsx',mocks);
  const root=createRoot(document.getElementById('root'));
  const render=(following=false)=>act(async()=>root.render(React.createElement(Follows,{memberId:'profile-owner',following})));
@@ -64,7 +65,8 @@ test('profile article list filters public reads by the visited author, without o
  const mocks={react:{...React,useState:initial=>[initial,()=>{}]},'next-i18next':{useTranslation:()=>({t:k=>k})},'next/link':{__esModule:true,default:box},'next/router':{},
  '@apollo/client':{useReactiveVar:()=>({_id:'visitor',memberType:'AGENT'}),useMutation:()=>[()=>{}],useQuery:(doc,options)=>{if(doc==='articles')input=options.variables.input;return {data:{result:{list:[{_id:'article',memberId:'visitor',articleStatus:'ACTIVE',articleTitle:'Story',articleCategory:'FREE',articleLikes:0,articleComments:0}]}}};}},
  '@mui/material':Object.fromEntries(['Alert','Box','Button','Card','CardContent','MenuItem','Stack','TextField','Typography'].map(k=>[k,box])),
- '../../../apollo/user/triplink':{ARTICLES:'articles'},'../../../apollo/admin/triplink':{},'../../../apollo/store':{},'../../types/triplink':{totalOf:()=>0},'./Common':{usePublicReady:()=>true,useAction:()=>({}), QueryState:box, Pager:box},'../../uploads':{}};
+ '../../../apollo/user/triplink':{ARTICLES:'articles'},'../../../apollo/admin/triplink':{},'../../../apollo/store':{},'../../types/triplink':{totalOf:()=>0},'./Common':{usePublicReady:()=>true,useAction:()=>({}), QueryState:box, Pager:box},'../../auth/security': { validNewPassword: value => value.length >= 12 && value.length <= 1024 },
+'../../uploads':{}};
  const {ArticlesList}=load('libs/components/triplink/Community.tsx',{...mocks,...editorMocks});
  const publicTree=ArticlesList({memberId:'visited-writer'});assert.deepEqual(input.search,{memberId:'visited-writer'});assert.equal(input.page,1);assert.ok(!JSON.stringify(publicTree).includes('Edit'));
  const ownerTree=ArticlesList({mine:true});assert.deepEqual(input.search,{memberId:'visitor'});assert.ok(JSON.stringify(ownerTree).includes('Edit'));

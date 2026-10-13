@@ -3,9 +3,10 @@ import React, { useEffect, ReactNode } from 'react';
 import { Alert, Button, CircularProgress, Stack } from '@mui/material';
 import { useReactiveVar } from '@apollo/client';
 import { memberVar, sessionVar, sessionErrorVar } from '../../../apollo/store';
-import { restoreSession, clearLocalSession, synchronizeSession } from '../../auth';
+import { restoreSession, clearLocalSession, synchronizeSession, safeReturnUrl } from '../../auth';
 import { Role } from '../../types/triplink';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 export function SessionBootstrap() {
 	const { t } = useTranslation('common');
 
@@ -32,6 +33,7 @@ export function SessionBootstrap() {
 }
 export function Access({ roles, children }: { roles?: Role[]; children: ReactNode }) {
 	const { t } = useTranslation('common');
+	const router = useRouter();
 
 	const session = useReactiveVar(sessionVar);
 	const member = useReactiveVar(memberVar);
@@ -51,7 +53,9 @@ export function Access({ roles, children }: { roles?: Role[]; children: ReactNod
 	if (!member)
 		return (
 			<Alert severity="info">
-				<Link href="/account/join">{t('Login to continue')}</Link>
+				<Link href={{ pathname: '/account/join', query: { referrer: safeReturnUrl(router.asPath) } }}>
+					{t('Login to continue')}
+				</Link>
 			</Alert>
 		);
 	if (roles && !roles.includes(member.memberType))

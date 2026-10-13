@@ -4558,3 +4558,42 @@
  time { font-variant-numeric: tabular-nums; }
  @media (max-width: 480px) { &__list li { align-items: flex-start; flex-direction: column; gap: 8px; } }
 }
+
+.triplink-join__requirements { margin: 0; color: #506d75; font-size: 13px; line-height: 1.7; }
+.triplink-join__forgot { align-self: flex-end; color: #0c5060; font-size: 13px; text-underline-offset: 3px; }
+.triplink-providers { margin-top: 24px; }
+.triplink-providers__divider { text-align: center; color: #506d75; font-size: 13px; }
+.triplink-provider.MuiButton-root { min-height: 48px; border-radius: 10px; font-family: inherit; text-transform: none; }
+.triplink-provider--google.MuiButton-root { color: #1f1f1f; background: #fff; border-color: #747775; }
+.triplink-provider--telegram.MuiButton-root { color: #fff; background: #1685b5; border-color: #1685b5; }
+.triplink-provider--kakao.MuiButton-root { color: #191919; background: #fee500; border-color: #fee500; }
+.triplink-provider.MuiButton-root:hover { filter: brightness(.96); }
+.triplink-provider.Mui-disabled { filter: grayscale(1); }
+.triplink-auth-task { margin: 56px auto; padding: 32px; max-width: 580px; color: #123e48; background: #fff; border-radius: 16px; font-family: 'TripLink Jakarta', sans-serif; }
+.triplink-auth-task h1 { font-family: 'TripLink Outfit', sans-serif; font-size: 32px; line-height: 1.2; }
+.triplink-auth-task > p { margin: 20px 0; color: #506d75; line-height: 1.7; }
+.triplink-auth-task a { color: #0c5060; text-decoration: underline; text-underline-offset: 3px; }
+.triplink-auth-task .MuiAlert-root { margin: 20px 0; }
+.triplink-security { color: #123e48; }
+.triplink-security > section { padding: 28px 0; border-bottom: 1px solid #dce7e7; }
+.triplink-security h3 { font-family: 'TripLink Outfit', sans-serif; font-size: 23px; margin: 0 0 12px; }
+.triplink-security p { color: #506d75; font-size: 14px; line-height: 1.7; margin: 12px 0 20px; }
+.triplink-security .MuiStack-root { max-width: 560px; }
+.triplink-security__providers, .triplink-security__events { list-style: none; margin: 20px 0; padding: 0; }
+.triplink-security__providers > li, .triplink-security__events > li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid #e4ecee; }
+.triplink-security__providers > li > div { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.triplink-security__providers svg { width: 24px; height: 24px; }
+.triplink-security__providers span, .triplink-security time { font-size: 13px; color: #506d75; }
+.triplink-security__codes { margin-top: 20px; }
+.triplink-security__codes ul { padding: 20px; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.triplink-security__codes code { overflow-wrap: anywhere; user-select: all; }
+.triplink-security .MuiButton-root, .triplink-auth-task .MuiButton-root { min-height: 44px; font-family: inherit; text-transform: none; }
+.triplink-security .MuiButton-outlinedPrimary, .triplink-auth-task .MuiButton-outlinedPrimary { color: #14655e; border-color: #5b8c86; }
+.triplink-security .MuiButton-containedPrimary, .triplink-auth-task .MuiButton-containedPrimary { background: #14655e; color: #fff; }
+.triplink-security .MuiButton-containedPrimary:hover, .triplink-auth-task .MuiButton-containedPrimary:hover { background: #0e504a; }
+.triplink-security button:focus-visible, .triplink-auth-task button:focus-visible { outline: 3px solid #277d8e; outline-offset: 3px; }
+@media (max-width: 600px) {
+ .triplink-auth-task { margin: 24px 16px; padding: 24px; }
+ .triplink-security__providers > li, .triplink-security__events > li { align-items: flex-start; flex-wrap: wrap; }
+ .triplink-security__codes ul { grid-template-columns: 1fr; }
+}

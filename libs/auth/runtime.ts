@@ -18,7 +18,7 @@ async function commitCredentialResponse(response: Response, kind: string, expect
 	if (!response.ok) return;
 	if (kind === 'login') {
 		const result = await response.clone().json();
-		const payload = result.data?.result;
+		const payload = result.data?.result ?? result;
 		if (payload?.accessToken && !result.errors?.length) {
 			if (authVersion() !== expectedVersion)
 				throw new AuthRequestError('STALE', 'Authentication changed while signing in. Please retry.');
@@ -223,7 +223,14 @@ export async function authResponse(response: Response) {
 		throw new AuthRequestError(
 			code,
 			typeof result.message === 'string' ? result.message : 'Authentication request failed.',
-			response.status === 401 || (response.status === 403 && code !== '403'),
+			[
+				'UNAUTHORIZED',
+				'SESSION_REVOKED',
+				'REFRESH_TOKEN_EXPIRED',
+				'SESSION_ABSOLUTE_EXPIRATION',
+				'REFRESH_TOKEN_REUSED',
+				'ACCOUNT_UNAVAILABLE',
+			].includes(code),
 		);
 	}
 	return result;
@@ -316,7 +323,7 @@ export function newAuthVersion(kind: 'login' | 'logout' = 'login') {
 	storage.set(versionKey, kind + ':' + uuid());
 	storage.remove(pendingKey);
 }
-export async function sessionRequest(path: string, method = 'GET') {
+export async function sessionRequest(path: string, method = 'GET', body?: unknown) {
 	const token = await ensureAccessToken();
 	const kind =
 		path === 'logout-all' || (method === 'DELETE' && path === `sessions/${tokenClaims(token).sid}`)
@@ -326,7 +333,11 @@ export async function sessionRequest(path: string, method = 'GET') {
 		`${apiOrigin}/auth/${path}`,
 		{
 			method,
-			headers: { Authorization: `Bearer ${token}` },
+			headers: {
+				Authorization: `Bearer ${token}`,
+				...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+			},
+			...(body !== undefined ? { body: JSON.stringify(body) } : {}),
 		},
 		kind,
 	);
@@ -343,12 +354,18 @@ export async function sessionRequest(path: string, method = 'GET') {
 				`${apiOrigin}/auth/${path}`,
 				{
 					method,
-					headers: { Authorization: `Bearer ${renewed}` },
+					headers: {
+						Authorization: `Bearer ${renewed}`,
+						...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+					},
+					...(body !== undefined ? { body: JSON.stringify(body) } : {}),
 				},
 				kind,
 			);
 		}
 	}
+	if (tokenIdentity(token) !== tokenIdentity(getJwtToken()))
+		throw new AuthRequestError('STALE', 'Authentication changed. Please retry.');
 	try {
 		return await authResponse(response);
 	} catch (error) {

@@ -48,9 +48,11 @@ export interface AuthPayload {
 export interface MemberInput {
 	memberNick: string;
 	memberPassword: string;
-	memberPhone: string;
+	memberPhone?: string;
 	memberType: 'USER' | 'AGENT';
-	memberAuthType: 'PHONE';
+	memberAuthType?: 'EMAIL' | 'PHONE';
+	memberEmail?: string;
+	memberFullname?: string;
 }
 export interface MemberUpdate {
 	memberNick?: string;

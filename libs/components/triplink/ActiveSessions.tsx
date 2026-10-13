@@ -21,7 +21,7 @@ interface DeviceSession {
 	createdAt: string;
 	isCurrentSession: boolean;
 }
-export function ActiveSessions() {
+export function ActiveSessions({ refreshKey = 0 }: { refreshKey?: number }) {
 	const { t, i18n } = useTranslation('common');
 	const member = useReactiveVar(memberVar);
 	const [sessions, setSessions] = useState<DeviceSession[]>([]);
@@ -55,7 +55,7 @@ export function ActiveSessions() {
 	useEffect(() => {
 		void load();
 		return invalidate;
-	}, [member?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [member?._id, refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 	const confirm = async () => {
 		if (!selection || lock.current) return;
 		lock.current = true;

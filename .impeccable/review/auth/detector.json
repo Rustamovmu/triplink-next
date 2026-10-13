@@ -1,0 +1,31 @@
+{
+  "engine": "0.1.14",
+  "exitCode": 2,
+  "findings": [
+    {
+      "antipattern": "side-tab",
+      "file": "scss/triplink.scss",
+      "line": 3558,
+      "severity": "warning",
+      "preExistingInHEAD": true,
+      "scope": "article blockquote"
+    },
+    {
+      "antipattern": "overused-font",
+      "file": "scss/triplink.scss",
+      "line": 2383,
+      "severity": "warning",
+      "preExistingInHEAD": true,
+      "scope": "homepage typography"
+    },
+    {
+      "antipattern": "gradient-text",
+      "file": "scss/triplink.scss",
+      "line": 2386,
+      "severity": "warning",
+      "preExistingInHEAD": true,
+      "scope": "homepage accent"
+    }
+  ],
+  "newAuthenticationFindings": []
+}

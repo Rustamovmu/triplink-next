@@ -91,7 +91,8 @@ test('workspace preserves role destinations and grouped profile forms retain upd
 		'../../types/triplink': {},
 		'./Common': common,
 		'./Tours': {},
-		'../../uploads': {},
+		'../../auth/security': { validNewPassword: value => value.length >= 12 && value.length <= 1024 },
+'../../uploads': {},
 	});
 	const stub = () => React.createElement('div', null, 'Panel');
 	const { default: Workspace } = load('libs/components/triplink/Workspace.tsx', {
@@ -115,7 +116,8 @@ test('workspace preserves role destinations and grouped profile forms retain upd
 		'./Bookings': { BookingsPanel: stub },
 		'./Reviews': { ReviewsPanel: stub },
 		'./TourManagement': { OwnedTours: stub, TourForm: stub },
-		'./ActiveSessions': { ActiveSessions: stub },
+		'./SecuritySettings': { SecuritySettings: stub },
+'./ActiveSessions': { ActiveSessions: stub },
 		'./Members': { ProfileForm: stub, SavedTours: stub, Follows: stub },
 	});
 	const root = createRoot(document.getElementById('root'));
@@ -161,7 +163,7 @@ test('workspace preserves role destinations and grouped profile forms retain upd
 		document.querySelector('[name="newPassword"]').value = '12345678';
 		await submit();
 		assert.equal(requests.length, 1);
-		assert.match(document.querySelector('[role="alert"]').textContent, /Both passwords/);
+		assert.match(document.querySelector('[role="alert"]').textContent, /at least 12/);
 		document.querySelector('[name="currentPassword"]').value = 'current-pass';
 		document.querySelector('[name="newPassword"]').value = 'new-password';
 		await submit();

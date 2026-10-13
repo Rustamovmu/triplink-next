@@ -11,6 +11,7 @@ import { ArticlesList, ArticleForm } from './Community';
 import { BookingsPanel } from './Bookings';
 import { ReviewsPanel } from './Reviews';
 import { TourForm, OwnedTours } from './TourManagement';
+import { SecuritySettings } from './SecuritySettings';
 import { ActiveSessions } from './ActiveSessions';
 import { ProfileForm, SavedTours, Follows } from './Members';
 function WorkspaceContent() {
@@ -46,6 +47,7 @@ function WorkspaceContent() {
 			  ]
 			: []),
 		['myProfile', 'Profile'],
+		['security', 'Security'],
 		...(member.memberType !== 'ADMIN'
 			? [
 					['myFavorites', 'Favorites'],
@@ -112,6 +114,8 @@ function WorkspaceContent() {
 								await router.push('/mypage?category=myTours');
 							}}
 						/>
+					) : category === 'security' ? (
+						<SecuritySettings />
 					) : category === 'myProfile' ? (
 						<>
 							<ProfileForm member={member} />

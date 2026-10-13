@@ -18,6 +18,7 @@ import { acceptAuth, refreshCurrentMember } from '../../auth';
 import { Member, MemberUpdate, totalOf } from '../../types/triplink';
 import { imageUrl, Pager, QueryState, useAction, usePublicReady } from './Common';
 import { TourGrid } from './Tours';
+import { validNewPassword } from '../../auth/security';
 import { uploadImages } from '../../uploads';
 export function ProfileForm({ member }: { member: Member }) {
 	const { t } = useTranslation('common');
@@ -46,8 +47,8 @@ export function ProfileForm({ member }: { member: Member }) {
 			};
 			if (value('memberFullname')) input.memberFullname = value('memberFullname');
 			if (passwords.currentPassword || passwords.newPassword) {
-				if (passwords.currentPassword.length < 8 || passwords.newPassword.length < 8)
-					throw new Error('Both passwords must have at least eight characters.');
+				if (!passwords.currentPassword || !validNewPassword(passwords.newPassword))
+					throw new Error('Use your current password and a new password with at least 12 characters.');
 				input.passwordChange = passwords;
 			}
 			const response = await update({ variables: { input } });
@@ -99,7 +100,8 @@ export function ProfileForm({ member }: { member: Member }) {
 						minRows={key === 'memberDesc' ? 5 : undefined}
 						inputProps={{
 							minLength: key === 'memberNick' ? 3 : key === 'memberFullname' ? 2 : undefined,
-							maxLength: key === 'memberDesc' ? 1000 : key === 'memberNick' ? 20 : 100,
+							maxLength:
+								key === 'memberDesc' ? 1000 : key === 'memberNick' ? Math.max(30, member.memberNick.length) : 100,
 						}}
 					/>
 				))}
@@ -117,14 +119,14 @@ export function ProfileForm({ member }: { member: Member }) {
 						name="currentPassword"
 						label={t('Current password')}
 						type="password"
-						inputProps={{ maxLength: 72 }}
+						inputProps={{ maxLength: 1024 }}
 						autoComplete="current-password"
 					/>
 					<TextField
 						name="newPassword"
 						label={t('New password')}
 						type="password"
-						inputProps={{ maxLength: 72 }}
+						inputProps={{ maxLength: 1024 }}
 						autoComplete="new-password"
 					/>
 				</div>

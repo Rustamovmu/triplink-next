@@ -54,18 +54,17 @@ export const logIn = async (nick: string, password: string) => {
 	if (!response.data?.result) throw new Error('Login failed');
 	// The transport commits the new account while it still owns the cookie lock.
 };
-export const signUp = async (nick: string, password: string, phone: string, type: string) => {
+export const signUp = async (nick: string, password: string, email = '', fullname = '') => {
 	setAuthPayloadHandler(acceptAuth);
-	if (type !== 'USER' && type !== 'AGENT') throw new Error('Choose USER or AGENT');
 	const response = await initializeApollo().mutate({
 		mutation: SIGNUP,
 		variables: {
 			input: {
 				memberNick: nick.trim(),
 				memberPassword: password,
-				memberPhone: phone.trim(),
-				memberType: type,
-				memberAuthType: 'PHONE',
+				...(email.trim() ? { memberEmail: email.trim() } : {}),
+				...(fullname.trim() ? { memberFullname: fullname.trim() } : {}),
+				memberType: 'USER',
 			},
 		},
 	});
