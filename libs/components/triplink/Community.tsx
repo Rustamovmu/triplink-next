@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { BrowsingBackLink, useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Alert, Avatar, Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import {
@@ -149,7 +150,7 @@ export function CommunityArticleCard({ article, onChanged }: { article: Article;
 			: null;
 	const date = new Date(article.createdAt);
 	return (
-		<article className="triplink-story-card">
+		<article data-browse-item={`community:article:${article._id}`} className="triplink-story-card">
 			<Link
 				href={href}
 				passHref
@@ -238,8 +239,8 @@ export function ArticlesList({
 
 	const member = useReactiveVar(memberVar);
 	const ready = usePublicReady();
-	const [page, setPage] = useState(1);
-	const [category, setCategory] = useState<ArticleCategory | ''>('');
+	const [page, setPage] = useRememberedState('community:page', 1, community);
+	const [category, setCategory] = useRememberedState<ArticleCategory | ''>('community:category', '', community);
 	const [status, setStatus] = useState<Article['articleStatus']>('ACTIVE');
 	const [editing, setEditing] = useState<Article | null>(null);
 	const [commentsFor, setCommentsFor] = useState('');
@@ -259,7 +260,7 @@ export function ArticlesList({
 			},
 		},
 		skip: !ready || admin || (mine && !member),
-		fetchPolicy: 'network-only',
+		fetchPolicy: community ? 'cache-and-network' : 'network-only',
 	});
 	const adminQuery = useQuery(ADMIN_ARTICLES, {
 		variables: { input: { page, limit: 12, search: { articleStatus: status } } },
@@ -269,7 +270,12 @@ export function ArticlesList({
 	const query = admin ? adminQuery : publicQuery;
 	if (community)
 		return (
-			<section className="triplink-community__feed" aria-labelledby="community-feed-title">
+			<section
+				data-browse-section="community:feed"
+				data-browse-pending={!ready || (query.loading && !query.data) ? 'true' : undefined}
+				className="triplink-community__feed"
+				aria-labelledby="community-feed-title"
+			>
 				<div className="triplink-community__feed-heading">
 					<div>
 						<h2 id="community-feed-title">{t('Stories from the community')}</h2>
@@ -291,7 +297,11 @@ export function ArticlesList({
 						</button>
 					))}
 				</div>
-				<QueryState loading={!ready || query.loading} error={query.error} retry={() => query.refetch()}>
+				<QueryState
+					loading={!ready || (query.loading && !query.data)}
+					error={query.error}
+					retry={() => query.refetch()}
+				>
 					{query.data?.result.list.length ? (
 						<div className="triplink-community__grid">
 							{query.data.result.list.map((article) => (
@@ -725,7 +735,7 @@ export function CommunityDetail() {
 		<div className="triplink-journal">
 			<section data-triplink-nav-hero className="triplink-journal__hero">
 				<div>
-					<Link href="/community">← {t('Back to community')}</Link>
+					<BrowsingBackLink fallback="/community">← {t('Back to community')}</BrowsingBackLink>
 					<p>{t('Stories that take you places.')}</p>
 					<span>{t('Travel experiences, shared by our community.')}</span>
 				</div>

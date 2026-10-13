@@ -14,7 +14,7 @@ const load = (file, mocks) => {
 		ts.transpileModule(fs.readFileSync(file, 'utf8'), {
 			compilerOptions: { module: 1, jsx: 2, esModuleInterop: true },
 		}).outputText,
-	)((name) => (name in mocks ? mocks[name] : require(name)), exported);
+	)((name) => (name === '../../triplink/BrowsingMemoryProvider' ? require('./helpers/browsing-memory.cjs')(mocks) : name in mocks ? mocks[name] : require(name)), exported);
 	return exported;
 };
 const format = load('libs/components/triplink/articleFormat.ts', {});

@@ -31,6 +31,7 @@ test('tour card photo strips track swipes, arrows and reduced motion with safe i
 	};
 	const exported = {};
 	new Function('require', 'exports', ts.transpileModule(fs.readFileSync('libs/components/triplink/Tours.tsx', 'utf8'), { compilerOptions: { module: 1, jsx: 2, esModuleInterop: true } }).outputText)((name) => {
+		if (name === '../../triplink/BrowsingMemoryProvider') return require('./helpers/browsing-memory.cjs')(mocks);
 		if (!(name in mocks)) throw new Error(`Missing mock: ${name}`);
 		return mocks[name];
 	}, exported);

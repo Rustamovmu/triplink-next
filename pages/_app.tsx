@@ -9,6 +9,7 @@ import { appWithTranslation } from 'next-i18next';
 import nextI18nextConfig from '../next-i18next.config';
 import { SessionBootstrap } from '../libs/components/triplink/Session';
 import { TourFavoritesProvider } from '../libs/components/triplink/TourFavorites';
+import { NavigationMemoryProvider } from '../libs/triplink/BrowsingMemoryProvider';
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';
@@ -25,7 +26,9 @@ const App = ({ Component, pageProps }: AppProps) => {
 				<CssBaseline />
 				<SessionBootstrap />
 				<TourFavoritesProvider>
-					<Component {...pageProps} />
+					<NavigationMemoryProvider>
+						<Component {...pageProps} />
+					</NavigationMemoryProvider>
 				</TourFavoritesProvider>
 			</ThemeProvider>
 		</ApolloProvider>

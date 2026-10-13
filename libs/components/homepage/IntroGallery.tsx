@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Swiper as SwiperInstance } from 'swiper';
 import { useTranslation } from 'next-i18next';
+import { useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 
 const photos = [
 	{ destination: 'Iceland', file: 'iceland' },
@@ -40,13 +41,17 @@ export function IntroGallery({ title }: { title: string }) {
 	const { t } = useTranslation('common');
 	const gallery = useRef<HTMLDivElement>(null);
 	const [swiper, setSwiper] = useState<SwiperInstance | null>(null);
-	const [active, setActive] = useState(0);
+	const [active, setActive] = useRememberedState('home:featured-slide', 0);
+	const initialSlide = useRef(active);
 	const [reduced, setReduced] = useState(true);
 	const [hidden, setHidden] = useState(true);
 	const [visible, setVisible] = useState(false);
 	const [hovered, setHovered] = useState(false);
 	const [focused, setFocused] = useState(false);
 	const [dragging, setDragging] = useState(false);
+	useEffect(() => {
+		if (swiper && !swiper.destroyed && swiper.realIndex !== active) swiper.slideToLoop(active, 0);
+	}, [swiper, active]);
 
 	useEffect(() => {
 		const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -114,6 +119,7 @@ export function IntroGallery({ title }: { title: string }) {
 			}}
 		>
 			<Swiper
+				initialSlide={initialSlide.current}
 				modules={[Autoplay]}
 				slidesPerView="auto"
 				centeredSlides

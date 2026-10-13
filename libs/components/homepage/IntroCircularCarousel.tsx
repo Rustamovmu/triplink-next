@@ -4,6 +4,7 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
+import { useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 
 const photos = [
 	['kyoto', 'Kyoto'], ['seoul', 'Seoul'], ['samarkand', 'Samarkand'],
@@ -15,8 +16,8 @@ const photos = [
 // A CSS cylinder interpretation of React Bits' Circular Carousel, using local travel photography.
 export function IntroCircularCarousel({ title }: { title: string }) {
 	const { t } = useTranslation('common');
-	const [position, setPosition] = useState(0);
-	const [playing, setPlaying] = useState(true);
+	const [position, setPosition] = useRememberedState('home:rated-position', 0);
+	const [playing, setPlaying] = useRememberedState('home:rated-playing', true);
 	const [reduced, setReduced] = useState(true);
 	const [hidden, setHidden] = useState(false);
 	const [hovered, setHovered] = useState(false);
@@ -41,7 +42,7 @@ export function IntroCircularCarousel({ title }: { title: string }) {
 		if (!playing || reduced || hidden || hovered || focused || dragging) return;
 		const timer = window.setInterval(() => setPosition((value) => value + 1), 5000);
 		return () => window.clearInterval(timer);
-	}, [playing, reduced, hidden, hovered, focused, dragging]);
+	}, [playing, reduced, hidden, hovered, focused, dragging, setPosition]);
 	return (
 		<div
 			className="triplink-circular-carousel"

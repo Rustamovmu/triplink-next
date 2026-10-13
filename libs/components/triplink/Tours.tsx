@@ -14,14 +14,29 @@ import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { useTourFavorites } from './TourFavorites';
+import { useBrowserLayoutEffect, useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 const tourPlaceholder = '/img/tour-placeholder.svg';
 
 function TourPhotos({ images, href, title }: { images: string[]; href: string; title: string }) {
 	const { t } = useTranslation('common');
-	const [index, setIndex] = useState(0);
+	const [selected, setSelected] = useRememberedState(`gallery:${href.match(/[a-f\d]{24}/i)?.[0] ?? 'tour'}:photo`, '');
+	const index = Math.max(0, images.indexOf(selected));
 	const [failed, setFailed] = useState<string[]>([]);
 	const track = useRef<HTMLDivElement>(null);
 	const slides = images.length ? images : [''];
+	const currentIndex = useRef(index);
+	currentIndex.current = index;
+	useBrowserLayoutEffect(() => {
+		const element = track.current;
+		if (!element) return;
+		const position = () => {
+			element.scrollLeft = currentIndex.current * element.clientWidth;
+		};
+		position();
+		const resize = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(position) : undefined;
+		resize?.observe(element);
+		return () => resize?.disconnect();
+	}, [images]);
 	const goTo = (next: number) => {
 		const target = (next + slides.length) % slides.length;
 		track.current?.scrollTo({
@@ -36,7 +51,8 @@ function TourPhotos({ images, href, title }: { images: string[]; href: string; t
 				className="triplink-tour-card__slides"
 				onScroll={(event) => {
 					const { scrollLeft, clientWidth } = event.currentTarget;
-					if (clientWidth) setIndex(Math.max(0, Math.min(slides.length - 1, Math.round(scrollLeft / clientWidth))));
+					if (clientWidth)
+						setSelected(slides[Math.max(0, Math.min(slides.length - 1, Math.round(scrollLeft / clientWidth)))]);
 				}}
 			>
 				{slides.map((path, photoIndex) => {
@@ -114,7 +130,12 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 	const href = `/tour/detail?id=${tour._id}`;
 	const discounted = tour.tourDiscountPrice !== null && tour.tourDiscountPrice < tour.tourPrice;
 	return (
-		<Card component="article" className="triplink-tour-card" elevation={0}>
+		<Card
+			component="article"
+			data-browse-item={`catalog:tour:${tour._id}`}
+			className="triplink-tour-card"
+			elevation={0}
+		>
 			<div className="triplink-tour-card__visual">
 				<TourPhotos
 					key={JSON.stringify([tour._id, tour.tourImages])}
@@ -258,7 +279,7 @@ export function TourList({
 	const ready = usePublicReady();
 	const query = useQuery(TOURS, { variables: { input }, skip: !ready, notifyOnNetworkStatusChange: true });
 	return (
-		<Stack spacing={3}>
+		<Stack data-browse-section="tours:list" spacing={3}>
 			<QueryState
 				loading={!ready || query.loading}
 				error={query.error}
@@ -287,12 +308,10 @@ export function PublicReviews({ tourId, agentId }: { tourId?: string; agentId?: 
 	const query = agentId ? agent : tour;
 	return (
 		<Stack spacing={2}>
-			<Typography variant="h5" component="h2">{t('Reviews')}</Typography>
-			<QueryState
-				loading={!ready || query.loading}
-				error={query.error}
-				retry={() => query.refetch()}
-			>
+			<Typography variant="h5" component="h2">
+				{t('Reviews')}
+			</Typography>
+			<QueryState loading={!ready || query.loading} error={query.error} retry={() => query.refetch()}>
 				{!query.data?.result.list.length && <Typography color="text.secondary">{t('No reviews yet')}</Typography>}
 				{query.data?.result.list.map((review) => (
 					<Card variant="outlined" key={review._id}>

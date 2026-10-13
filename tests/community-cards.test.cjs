@@ -7,7 +7,7 @@ const { JSDOM } = require('jsdom');
 const { createRoot } = require('react-dom/client');
 const { act } = require('react-dom/test-utils');
 const load = (file, mocks) => {
- const exported={};new Function('require','exports',ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:1,jsx:2,esModuleInterop:true}}).outputText)(name=>{if(!(name in mocks))throw new Error(`Missing mock ${name}`);return mocks[name];},exported);return exported;
+ const exported={};new Function('require','exports',ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:1,jsx:2,esModuleInterop:true}}).outputText)(name=>{if(name === '../../triplink/BrowsingMemoryProvider')return require('./helpers/browsing-memory.cjs')(mocks);if(!(name in mocks))throw new Error(`Missing mock ${name}`);return mocks[name];},exported);return exported;
 };
 const articleFormat = load('libs/components/triplink/articleFormat.ts', { 'sanitize-html': require('sanitize-html') });
 const articleContent = load('libs/components/triplink/ArticleContent.tsx', { react: React, './articleFormat': articleFormat });

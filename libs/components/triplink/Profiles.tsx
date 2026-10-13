@@ -12,6 +12,7 @@ import { Follows } from './Members';
 import { ArticlesList } from './Community';
 import { refreshCurrentMember } from '../../auth';
 import { useRouter } from 'next/router';
+import { BrowsingBackLink, useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -22,8 +23,8 @@ import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded
 export function AgentDirectory() {
 	const { t } = useTranslation('common');
 
-	const [page, setPage] = useState(1);
-	const [text, setText] = useState('');
+	const [page, setPage] = useRememberedState('agents:page', 1);
+	const [text, setText] = useRememberedState('agents:text', '');
 	const ready = usePublicReady();
 	const query = useQuery(AGENTS, {
 		variables: { input: { page, limit: 12, search: { text }, sort: 'memberFollowers', direction: 'DESC' } },
@@ -50,7 +51,12 @@ export function AgentDirectory() {
 					</div>
 				</div>
 			</section>
-			<section id="agent-directory" className="triplink-agents__directory" aria-labelledby="agent-directory-title">
+			<section
+				data-browse-section="agents:directory"
+				id="agent-directory"
+				className="triplink-agents__directory"
+				aria-labelledby="agent-directory-title"
+			>
 				<div className="triplink-agents__toolbar">
 					<div>
 						<h2 id="agent-directory-title">{t('Travel agents')}</h2>
@@ -120,7 +126,11 @@ export function AgentDirectory() {
 									.join('')
 									.toUpperCase();
 								return (
-									<article className="triplink-agents__card" key={member._id}>
+									<article
+										data-browse-item={`agents:member:${member._id}`}
+										className="triplink-agents__card"
+										key={member._id}
+									>
 										<div className="triplink-agents__identity">
 											<Avatar
 												src={member.memberImage ? imageUrl(member.memberImage) : undefined}
@@ -234,9 +244,9 @@ function PublicMemberProfile() {
 			<div className="triplink-profile">
 				<section data-triplink-nav-hero className="triplink-profile__hero">
 					<div className="triplink-profile__hero-inner">
-						<Link href="/agent" className="triplink-profile__back">
+						<BrowsingBackLink fallback="/agent" className="triplink-profile__back">
 							{t('All travel agents')}
-						</Link>
+						</BrowsingBackLink>
 						<p>{t('A local perspective. A memorable journey.')}</p>
 					</div>
 				</section>

@@ -113,7 +113,9 @@ export default function TourSearchPage() {
 	if (!queryReady)
 		return (
 			<Frame title={t('Tours')}>
-				<p role="status">{t('Loading…')}</p>
+				<p role="status" data-browse-pending="true">
+					{t('Loading…')}
+				</p>
 			</Frame>
 		);
 	if (!input)

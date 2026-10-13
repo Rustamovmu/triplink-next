@@ -11,6 +11,7 @@ import { Frame, imageUrl, QueryState, usePublicReady, validId } from './Common';
 import { BookingForm } from './Bookings';
 import { FavoriteButton } from './Members';
 import { PublicReviews } from './Tours';
+import { BrowsingBackLink } from '../../triplink/BrowsingMemoryProvider';
 
 function DetailPhoto({ path, title, eager = false }: { path?: string; title: string; eager?: boolean }) {
 	const [failed, setFailed] = useState(false);
@@ -112,9 +113,9 @@ export default function TourDetail() {
 	const discounted = tour && tour.tourDiscountPrice !== null && tour.tourDiscountPrice < tour.tourPrice;
 	return (
 		<Container maxWidth="lg" className="triplink-tour-detail">
-			<Link href="/tour" className="triplink-detail-back">
+			<BrowsingBackLink fallback="/tour" className="triplink-detail-back">
 				{t('Back to tours')}
-			</Link>
+			</BrowsingBackLink>
 			<QueryState
 				loading={!ready || !router.isReady || query.loading}
 				error={query.error}

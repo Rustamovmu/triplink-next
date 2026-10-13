@@ -19,6 +19,7 @@ import {
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { buildHomeSearch } from '../../triplink/homeSearch';
+import { useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 
 function calendarValue(date: Date | null): string {
 	if (!date) return '';
@@ -34,10 +35,17 @@ export default function HomeSearchForm() {
 	const router = useRouter(),
 		{ t } = useTranslation('common');
 	const id = useId().replace(/:/g, '');
-	const [start, setStart] = useState<Date | null>(null),
-		[end, setEnd] = useState<Date | null>(null);
-	const [seats, setSeats] = useState('1'),
-		[anchor, setAnchor] = useState<HTMLElement | null>(null);
+	const [text, setText] = useRememberedState('home:search-text', '');
+	const [startValue, setStartValue] = useRememberedState('home:search-start', ''),
+		[endValue, setEndValue] = useRememberedState('home:search-end', '');
+	const start = startValue ? new Date(startValue) : null,
+		end = endValue ? new Date(endValue) : null;
+	const setStart = (value: Date | null) =>
+		setStartValue(value ? (Number.isFinite(value.getTime()) ? value.toISOString() : 'invalid') : '');
+	const setEnd = (value: Date | null) =>
+		setEndValue(value ? (Number.isFinite(value.getTime()) ? value.toISOString() : 'invalid') : '');
+	const [seats, setSeats] = useRememberedState('home:search-seats', '1');
+	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
 	const [error, setError] = useState(''),
 		[searching, setSearching] = useState(false);
 	const pending = useRef(false),
@@ -77,13 +85,15 @@ export default function HomeSearchForm() {
 		}
 	};
 	return (
-		<div className="triplink-search-wrap">
+		<div data-browse-section="home:search" className="triplink-search-wrap">
 			<form className="triplink-search" onSubmit={submit} aria-label={t('Search tours')} aria-busy={searching}>
 				<label className="triplink-search__field triplink-search__destination">
 					<span className="triplink-search__label">{t('Destination or tour')}</span>
 					<span className="triplink-search__value">
 						<PlaceOutlined aria-hidden="true" />
 						<input
+							value={text}
+							onChange={(event) => setText(event.target.value)}
 							name="text"
 							type="text"
 							autoComplete="off"

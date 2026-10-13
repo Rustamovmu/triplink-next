@@ -15,7 +15,7 @@ const load = (file, mocks) => {
 		ts.transpileModule(fs.readFileSync(file, 'utf8'), {
 			compilerOptions: { module: 1, jsx: 2, esModuleInterop: true },
 		}).outputText,
-	)((name) => (name in mocks ? mocks[name] : require(name)), exports);
+	)((name) => (name === '../../triplink/BrowsingMemoryProvider' ? require('./helpers/browsing-memory.cjs')(mocks) : name in mocks ? mocks[name] : require(name)), exports);
 	return exports;
 };
 

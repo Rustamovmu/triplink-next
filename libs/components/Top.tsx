@@ -9,11 +9,13 @@ import { imageUrl } from './triplink/Common';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import useNavbarSurface from '../hooks/useNavbarSurface';
+import { useHomeNavigation } from '../triplink/BrowsingMemoryProvider';
 
 export default function Top() {
 	const member = useReactiveVar(memberVar),
 		session = useReactiveVar(sessionVar);
 	const router = useRouter();
+	const goHome = useHomeNavigation();
 	const { t } = useTranslation('common');
 	const id = useId().replace(/:/g, '');
 	const menuId = `triplink-account-${id}`,
@@ -78,7 +80,15 @@ export default function Top() {
 	};
 	const navigation = () =>
 		routes.map(([url, title]) => (
-			<Link key={url} href={url} onClick={close} aria-current={current(url) ? 'page' : undefined}>
+			<Link
+				key={url}
+				href={url}
+				onClick={(event) => {
+					close();
+					if (url === '/') goHome(event);
+				}}
+				aria-current={current(url) ? 'page' : undefined}
+			>
 				{t(title)}
 			</Link>
 		));
@@ -136,7 +146,7 @@ export default function Top() {
 	return (
 		<header ref={surface.ref} className="triplink-top" data-nav-surface={surface.mode}>
 			<div className="triplink-top__inner">
-				<Link href="/" passHref className="triplink-brand-link" translate="no">
+				<Link href="/" passHref className="triplink-brand-link" translate="no" onClick={goHome}>
 					<BrandLogo inverse />
 				</Link>
 				<nav className="triplink-top__desktop-nav" aria-label={t('Main navigation')}>

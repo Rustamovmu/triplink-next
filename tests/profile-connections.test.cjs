@@ -9,7 +9,8 @@ const { act } = require('react-dom/test-utils');
 const load = (file, mocks) => {
  const exported = {};
  new Function('require','exports',ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:1,jsx:2,esModuleInterop:true}}).outputText)((name) => {
-  if (!(name in mocks)) throw new Error(`Missing mock: ${name}`);
+  if (name === '../../triplink/BrowsingMemoryProvider') return require('./helpers/browsing-memory.cjs')(mocks);
+		if (!(name in mocks)) throw new Error(`Missing mock: ${name}`);
   return mocks[name];
  },exported);
  return exported;
@@ -61,15 +62,16 @@ test('public connections navigate by role and toggle the visitor relationship wi
 
 test('profile article list filters public reads by the visited author, without owner controls', () => {
  let input;
- const box=()=>null;
- const mocks={react:{...React,useState:initial=>[initial,()=>{}]},'next-i18next':{useTranslation:()=>({t:k=>k})},'next/link':{__esModule:true,default:box},'next/router':{},
+ const box=({children})=>React.createElement('div',null,children);
+ const mocks={react:React,'next-i18next':{useTranslation:()=>({t:k=>k})},'next/link':{__esModule:true,default:box},'next/router':{},
  '@apollo/client':{useReactiveVar:()=>({_id:'visitor',memberType:'AGENT'}),useMutation:()=>[()=>{}],useQuery:(doc,options)=>{if(doc==='articles')input=options.variables.input;return {data:{result:{list:[{_id:'article',memberId:'visitor',articleStatus:'ACTIVE',articleTitle:'Story',articleCategory:'FREE',articleLikes:0,articleComments:0}]}}};}},
  '@mui/material':Object.fromEntries(['Alert','Box','Button','Card','CardContent','MenuItem','Stack','TextField','Typography'].map(k=>[k,box])),
  '../../../apollo/user/triplink':{ARTICLES:'articles'},'../../../apollo/admin/triplink':{},'../../../apollo/store':{},'../../types/triplink':{totalOf:()=>0},'./Common':{usePublicReady:()=>true,useAction:()=>({}), QueryState:box, Pager:box},'../../auth/security': { validNewPassword: value => value.length >= 12 && value.length <= 1024 },
 '../../uploads':{}};
  const {ArticlesList}=load('libs/components/triplink/Community.tsx',{...mocks,...editorMocks});
- const publicTree=ArticlesList({memberId:'visited-writer'});assert.deepEqual(input.search,{memberId:'visited-writer'});assert.equal(input.page,1);assert.ok(!JSON.stringify(publicTree).includes('Edit'));
- const ownerTree=ArticlesList({mine:true});assert.deepEqual(input.search,{memberId:'visitor'});assert.ok(JSON.stringify(ownerTree).includes('Edit'));
+ const render = require('react-dom/server').renderToStaticMarkup;
+ const publicTree=render(React.createElement(ArticlesList,{memberId:'visited-writer'}));assert.deepEqual(input.search,{memberId:'visited-writer'});assert.equal(input.page,1);assert.ok(!publicTree.includes('Edit'));
+ const ownerTree=render(React.createElement(ArticlesList,{mine:true}));assert.deepEqual(input.search,{memberId:'visitor'});assert.ok(ownerTree.includes('Edit'));
 });
 
 test('profile like and follow actions have independent locks and send only their own mutation', async () => {

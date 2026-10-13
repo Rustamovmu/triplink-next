@@ -34,7 +34,7 @@ export function QueryState({
 	const { t } = useTranslation('common');
 	if (loading)
 		return (
-			<div role="status" style={{ padding: 32, textAlign: 'center' }}>
+			<div role="status" data-browse-pending="true" style={{ padding: 32, textAlign: 'center' }}>
 				<CircularProgress aria-label={t('Loading')} />
 			</div>
 		);

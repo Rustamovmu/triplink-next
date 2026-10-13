@@ -73,13 +73,26 @@ export const signUp = async (nick: string, password: string, email = '', fullnam
 };
 export function clearLocalSession() {
 	generation++;
+	const current = generation;
 	setJwtToken('');
 	memberVar(null);
-	sessionVar('anonymous');
+	// Public queries must start after clearStore, which cancels active observers.
+	sessionVar('loading');
 	sessionErrorVar('');
 	socketVar()?.close();
 	socketVar(undefined);
-	void initializeApollo().clearStore();
+	void initializeApollo()
+		.clearStore()
+		.then(
+			() => {
+				if (current === generation) sessionVar('anonymous');
+			},
+			() => {
+				if (current !== generation) return;
+				sessionVar('error');
+				sessionErrorVar('Unable to restore your session. Please retry.');
+			},
+		);
 }
 export async function logOut() {
 	const response = await credentialFetch(

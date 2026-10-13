@@ -6,6 +6,7 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
+import { useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 
 export const introductionPhotos = {
 	rated: [
@@ -115,7 +116,9 @@ export function IntroSlider({ photos, title }: { photos: string[]; title: string
 export function IntroVideo() {
 	const { t } = useTranslation('common');
 	const video = React.useRef<HTMLVideoElement>(null);
-	const pausedByUser = React.useRef(false);
+	const [paused, setPaused] = useRememberedState('home:video-paused', false);
+	const pausedByUser = React.useRef(paused);
+	pausedByUser.current = paused;
 	const [playing, setPlaying] = useState(false);
 	const [failed, setFailed] = useState(false);
 	useEffect(() => {
@@ -174,9 +177,11 @@ export function IntroVideo() {
 							if (!element) return;
 							if (playing) {
 								pausedByUser.current = true;
+								setPaused(true);
 								element.pause();
 							} else {
 								pausedByUser.current = false;
+								setPaused(false);
 								void element.play().catch(() => setPlaying(false));
 							}
 						}}

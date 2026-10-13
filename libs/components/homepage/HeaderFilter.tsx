@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslation } from 'next-i18next';
@@ -13,11 +13,12 @@ import {
 	PlayArrowRounded,
 } from '@mui/icons-material';
 import { homeDestinations } from './homeContent';
+import { useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 
 export default function HeaderFilter() {
 	const { t } = useTranslation('common');
-	const [index, setIndex] = useState(0),
-		[playing, setPlaying] = useState(true);
+	const [index, setIndex] = useRememberedState('home:hero-slide', 0),
+		[playing, setPlaying] = useRememberedState('home:hero-playing', true);
 	const [reduced, setReduced] = useState(true),
 		[hovered, setHovered] = useState(false);
 	const [focused, setFocused] = useState(false),
@@ -31,8 +32,10 @@ export default function HeaderFilter() {
 		});
 	}, [index]);
 	const touch = useRef<{ x: number; y: number } | null>(null);
-	const change = (offset: number) =>
-		setIndex((current) => (current + offset + homeDestinations.length) % homeDestinations.length);
+	const change = useCallback(
+		(offset: number) => setIndex((current) => (current + offset + homeDestinations.length) % homeDestinations.length),
+		[setIndex],
+	);
 	useEffect(() => {
 		const media = window.matchMedia('(prefers-reduced-motion: reduce)');
 		const update = () => setReduced(media.matches),
@@ -50,10 +53,11 @@ export default function HeaderFilter() {
 		if (!playing || reduced || hovered || focused || hidden) return;
 		const timer = window.setInterval(() => change(1), 6000);
 		return () => window.clearInterval(timer);
-	}, [playing, reduced, hovered, focused, hidden, index]);
+	}, [playing, reduced, hovered, focused, hidden, index, change]);
 	return (
 		<div className="triplink-home-intro">
 			<section
+				data-browse-section="home:hero"
 				data-triplink-nav-hero
 				className={`triplink-hero${!playing || reduced || hovered || focused || hidden ? ' is-paused' : ''}`}
 				aria-label={t('Destination inspiration')}

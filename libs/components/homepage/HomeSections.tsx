@@ -21,6 +21,7 @@ import { TOURS, AGENTS } from '../../../apollo/user/triplink';
 import { Inquiry, Tour, TourSearch } from '../../types/triplink';
 import { imageUrl, QueryState, usePublicReady } from '../triplink/Common';
 import { useTourFavorites } from '../triplink/TourFavorites';
+import { useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 
 type TourVariant = 'featured' | 'rated' | 'top';
 const inputs: Record<TourVariant, Inquiry<TourSearch>> = {
@@ -245,6 +246,7 @@ function Section({
 	const introduction = introductions[id];
 	return (
 		<section
+			data-browse-section={`home:${id}`}
 			className={`triplink-home-section triplink-home-section--${id}${
 				id !== 'agents' ? ' triplink-home-section--stitch' : ''
 			}`}
@@ -451,7 +453,7 @@ function RatedTourCard({ tour }: { tour: Tour }) {
 		}
 	}
 	return (
-		<article className="triplink-home-tour triplink-home-tour--rated">
+		<article data-browse-item={`rated:tour:${tour._id}`} className="triplink-home-tour triplink-home-tour--rated">
 			<div className="triplink-home-tour__visual">
 				<div className="triplink-home-tour__photo">
 					<Image
@@ -550,7 +552,10 @@ function HomeTourCard({ tour, variant, rank }: { tour: Tour; variant: Exclude<To
 	const compact = new Intl.NumberFormat(language, { notation: 'compact', maximumFractionDigits: 1 });
 	const agentName = tour.agentData?.memberFullname || tour.agentData?.memberNick;
 	return (
-		<article className={`triplink-home-tour triplink-home-tour--${variant}`}>
+		<article
+			data-browse-item={`${variant}:tour:${tour._id}`}
+			className={`triplink-home-tour triplink-home-tour--${variant}`}
+		>
 			{variant === 'top' && (
 				<span className="triplink-home-tour__rank" aria-label={t('Rank {{rank}}', { rank })}>
 					{String(rank).padStart(2, '0')}
@@ -685,7 +690,7 @@ export function TopAgents() {
 			>
 				<div className="triplink-home-grid triplink-home-grid--agents">
 					{query.data?.result.list.map((agent) => (
-						<article key={agent._id} className="triplink-home-agent">
+						<article data-browse-item={`home:agent:${agent._id}`} key={agent._id} className="triplink-home-agent">
 							<Avatar src={imageUrl(agent.memberImage)} alt="" className="triplink-home-agent__portrait">
 								{(agent.memberFullname || agent.memberNick).slice(0, 1)}
 							</Avatar>
@@ -751,7 +756,7 @@ const events = [
 ];
 function Events() {
 	const { t } = useTranslation('common');
-	const [season, setSeason] = useState('All seasons');
+	const [season, setSeason] = useRememberedState('home:season', 'All seasons');
 	const visibleEvents = season === 'All seasons' ? events : events.filter((event) => event.season === season);
 	return (
 		<Section id="events" title="Events" description="Seasonal inspiration around the world">

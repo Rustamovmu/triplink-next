@@ -82,7 +82,7 @@ function HomeArticleCard({ article }: { article: Article }) {
 		}
 	}
 	return (
-		<article className="triplink-home-article">
+		<article data-browse-item={`home:article:${article._id}`} className="triplink-home-article">
 			<div className="triplink-home-article__visual">
 				<Link href={href} passHref className="triplink-home-article__photo" tabIndex={-1} aria-hidden="true">
 					<Image
