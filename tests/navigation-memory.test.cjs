@@ -283,7 +283,7 @@ test('restoration waits for earlier content, follows layout changes and releases
 		ctx.close();
 	}
 });
-test('missing items fall back to section then scroll coordinates, and shortened pages clamp safely', async () => {
+test('missing items prefer valid pixels, then their section; shortened pages clamp safely', async () => {
 	const ctx = environment();
 	try {
 		const root = document.getElementById('root');
@@ -291,8 +291,13 @@ test('missing items fall back to section then scroll coordinates, and shortened 
 		const entry = sample(new NavigationMemory('/'));
 		entry.section.offset = 200;
 		let cancel = restorePosition(entry, root, () => {});
+		assert.equal(ctx.top(), 2450);
+		cancel();
+		entry.y = NaN;
+		cancel = restorePosition(entry, root, () => {});
 		assert.equal(ctx.top(), 2800);
 		cancel();
+		entry.y = 2450;
 		root.innerHTML = '';
 		ctx.setHeight(1500);
 		cancel = restorePosition(entry, root, () => {});
@@ -376,7 +381,7 @@ function application(ctx, { strict = false, persisted, navigationType } = {}) {
 		beforePopState(cb) {
 			beforePop = cb;
 		},
-		push: (url, _, options = {}) => navigate(url, options),
+		push: (url, _, options = {}) => (ctx.push ? ctx.push(url, options) : navigate(url, options)),
 		back: () => {
 			backCalls++;
 		},
@@ -745,6 +750,227 @@ test('a return interrupted before the destination commits never starts a later c
 		assert.equal(document.querySelector('[data-browse-root]'), originalRoot);
 		assert.equal(ctx.top(), 77);
 		assert.equal(ctx.timers.size, 0);
+	} finally {
+		await app.close();
+		ctx.close();
+	}
+});
+
+test('a section link captures Agents even when a previously restored rated card remains visible', () => {
+	const ctx = environment();
+	try {
+		const root = document.getElementById('root');
+		root.innerHTML =
+			'<header class="triplink-top"></header><section data-browse-section="home:rated"><article data-browse-item="rated:tour:one" data-top="3000"></article></section><section data-browse-section="home:agents" data-top="3300"><a id="chosen" href="/agent">All agents</a></section>';
+		ctx.setTop(2800);
+		const entry = sample(new NavigationMemory('/'));
+		capturePosition(entry, root, document.getElementById('chosen'));
+		assert.equal(entry.section.key, 'home:agents');
+		assert.equal(entry.item, undefined);
+		assert.equal(entry.y, 2800);
+	} finally {
+		ctx.close();
+	}
+});
+
+test('the deadline keeps the originating agent offset instead of jumping to older pixels', () => {
+	const ctx = environment();
+	try {
+		const root = document.getElementById('root');
+		root.innerHTML =
+			'<div data-browse-pending="true"></div><section data-browse-section="home:agents"><article data-browse-item="home:agent:one" data-top="4000"></article></section>';
+		const entry = sample(new NavigationMemory('/'), 2800);
+		entry.item = { key: 'home:agent:one', offset: 200 };
+		entry.section = { key: 'home:agents', offset: -300 };
+		let complete = 0;
+		restorePosition(entry, root, () => complete++);
+		assert.equal(ctx.top(), 0, 'no intermediate jump while earlier content is loading');
+		Array.from(ctx.timers.values())
+			.find((timer) => timer.delay === 5000)
+			.callback();
+		assert.equal(ctx.top(), 3800);
+		assert.equal(complete, 1);
+		assert.equal(ctx.timers.size, 0);
+		assert.equal(ctx.observers[0].disconnected, true);
+	} finally {
+		ctx.close();
+	}
+});
+
+test('delayed Agents waits for its own content rather than using an already rendered rated card', async () => {
+	const ctx = environment();
+	try {
+		const root = document.getElementById('root');
+		root.innerHTML =
+			'<section data-browse-section="home:rated"><article data-browse-item="rated:tour:one" data-top="3000"></article></section><section data-browse-section="home:agents"><div data-browse-pending="true"></div></section>';
+		const entry = sample(new NavigationMemory('/'), 3800);
+		entry.item = { key: 'home:agent:one', offset: 200 };
+		entry.section = { key: 'home:agents', offset: -300 };
+		restorePosition(entry, root, () => {});
+		assert.equal(ctx.top(), 0);
+		root.querySelector('[data-browse-section="home:agents"]').innerHTML =
+			'<article data-browse-item="home:agent:one" data-top="4200"></article>';
+		await ctx.flush();
+		assert.equal(ctx.top(), 4000);
+		await ctx.settle();
+		assert.equal(ctx.timers.size, 0);
+	} finally {
+		ctx.close();
+	}
+});
+
+test('an item in another section is ignored and invalid pixels allow normal navigation', () => {
+	const ctx = environment();
+	try {
+		const root = document.getElementById('root');
+		root.innerHTML =
+			'<section data-browse-section="home:rated"><article data-browse-item="home:agent:one" data-top="3000"></article></section>';
+		const entry = sample(new NavigationMemory('/'), 3800);
+		entry.item = { key: 'home:agent:one', offset: 200 };
+		entry.section = { key: 'home:agents', offset: -300 };
+		const cancel = restorePosition(entry, root, () => {});
+		assert.equal(ctx.top(), 3800);
+		cancel();
+		entry.y = NaN;
+		ctx.setTop(77);
+		let complete = 0;
+		restorePosition(entry, root, () => complete++);
+		assert.equal(ctx.top(), 77);
+		assert.equal(complete, 1);
+		assert.equal(ctx.timers.size, 0);
+	} finally {
+		ctx.close();
+	}
+});
+
+function multiSectionPage(router, memory) {
+	const home = memory.useHomeNavigation();
+	const header = React.createElement(
+		'header',
+		{ className: 'triplink-top' },
+		React.createElement('a', { href: '/', id: 'home', onClick: home }, 'Home'),
+		React.createElement('a', { href: '/', id: 'logo', onClick: home }, 'TripLink'),
+	);
+	if (router.pathname !== '/')
+		return React.createElement(
+			React.Fragment,
+			null,
+			header,
+			React.createElement(memory.BrowsingBackLink, { fallback: '/agent', className: 'back' }, 'Back'),
+		);
+	return React.createElement(
+		React.Fragment,
+		null,
+		header,
+		...[
+			['featured', 'featured:tour:one', '/tour/detail?id=one', 2000],
+			['rated', 'rated:tour:one', '/tour/detail?id=one', 3000],
+			['agents', 'home:agent:one', '/agent/detail?agentId=one', 4000],
+			['top', 'top:tour:one', '/tour/detail?id=one', 5000],
+			['articles', 'home:article:one', '/community/detail?id=one', 6000],
+		].map(([section, item, href, top]) =>
+			React.createElement(
+				'section',
+				{
+					key: section,
+					'data-browse-section': `home:${section}`,
+					'data-top': top - 300,
+				},
+				React.createElement(
+					'article',
+					{ 'data-browse-item': item, 'data-top': top },
+					React.createElement('a', { href, id: section }, section),
+				),
+			),
+		),
+	);
+}
+
+test('each homepage section captures at click time and the latest context wins on Home and logo', async () => {
+	const ctx = environment(),
+		app = application(ctx);
+	ctx.body = multiSectionPage;
+	try {
+		await app.mount();
+		for (const [section, destination, top] of [
+			['featured', '/tour/detail?id=one', 1800],
+			['rated', '/tour/detail?id=one', 2800],
+			['agents', '/agent/detail?agentId=one', 3800],
+			['top', '/tour/detail?id=one', 4800],
+			['articles', '/community/detail?id=one', 5800],
+			['agents', '/agent/detail?agentId=one', 3800],
+		]) {
+			ctx.setTop(top);
+			const origin = window.history.state[ENTRY_KEY];
+			await app.click(`#${section}`);
+			ctx.setTop(100, 'layout/scroll changes while the route is loading');
+			await app.navigate(destination);
+			const saved = JSON.parse(window.sessionStorage.getItem(MEMORY_KEY)).entries.find((entry) => entry.id === origin);
+			assert.equal(saved.section.key, `home:${section}`);
+			assert.equal(saved.y, top);
+			assert.equal(saved.item.offset, 200);
+			await app.click(section === 'agents' ? '#logo' : '#home');
+			await ctx.flush();
+			await ctx.settle();
+			assert.equal(ctx.top(), top, section);
+		}
+	} finally {
+		await app.close();
+		ctx.close();
+	}
+});
+
+test('Agent Back, Forward and explicit return use the matching history entry', async () => {
+	const ctx = environment(),
+		app = application(ctx);
+	ctx.body = multiSectionPage;
+	try {
+		await app.mount();
+		const home = { ...window.history.state };
+		ctx.setTop(3800);
+		await app.click('#agents');
+		await app.navigate('/agent/detail?agentId=one');
+		const detail = { ...window.history.state };
+		ctx.setTop(500);
+		await app.click('.back');
+		assert.equal(app.backCalls(), 1);
+		await app.navigate('/', {}, home);
+		await ctx.flush();
+		await ctx.settle();
+		assert.equal(ctx.top(), 3800);
+		await app.navigate('/agent/detail?agentId=one', {}, detail);
+		await ctx.flush();
+		await ctx.settle();
+		assert.equal(ctx.top(), 500);
+		await app.navigate('/', {}, home);
+		await ctx.flush();
+		await ctx.settle();
+		assert.equal(ctx.top(), 3800);
+	} finally {
+		await app.close();
+		ctx.close();
+	}
+});
+
+test('an older rejected Home request cannot clear a newer Logo request to the same saved homepage', async () => {
+	const ctx = environment(),
+		app = application(ctx);
+	ctx.body = multiSectionPage;
+	try {
+		await app.mount();
+		ctx.setTop(3800);
+		await app.click('#agents');
+		await app.navigate('/agent/detail?agentId=one');
+		const rejects = [];
+		ctx.push = () => new Promise((_resolve, reject) => rejects.push(reject));
+		await app.click('#home');
+		await app.click('#logo');
+		await act(async () => rejects[0](Error('superseded request')));
+		ctx.push = undefined;
+		await app.navigate('/');
+		await ctx.flush();
+		await ctx.settle();
+		assert.equal(ctx.top(), 3800);
 	} finally {
 		await app.close();
 		ctx.close();

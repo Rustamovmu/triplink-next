@@ -10,9 +10,13 @@ import nextI18nextConfig from '../next-i18next.config';
 import { SessionBootstrap } from '../libs/components/triplink/Session';
 import { TourFavoritesProvider } from '../libs/components/triplink/TourFavorites';
 import { NavigationMemoryProvider } from '../libs/triplink/BrowsingMemoryProvider';
+// @ts-ignore
 import '../scss/app.scss';
+// @ts-ignore
 import '../scss/pc/main.scss';
+// @ts-ignore
 import '../scss/mobile/main.scss';
+// @ts-ignore
 import '../scss/triplink.scss';
 
 const App = ({ Component, pageProps }: AppProps) => {

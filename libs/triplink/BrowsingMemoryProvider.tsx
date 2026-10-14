@@ -37,10 +37,11 @@ export function NavigationMemoryProvider({ children }: { children: React.ReactNo
 	const [memory] = useState(() => new NavigationMemory(router.asPath, router.locale));
 	const root = useRef<HTMLDivElement>(null);
 	const correction = useRef<(() => void) | undefined>();
-	const intent = useRef<BrowsingEntry>();
+	const intent = useRef<{ entry: BrowsingEntry }>();
 	const pop = useRef<{ entry?: BrowsingEntry; id?: string; locale?: string }>();
 	const restore = useRef<BrowsingEntry>();
-	const clicked = useRef<Element | null>(null);
+	const clicked = useRef<{ entry: BrowsingEntry; destination: string; locale: string }>();
+	const generation = useRef(0);
 	const savedMode = useRef<ScrollRestoration>();
 	const interruption = useRef<() => void>();
 	const interruptionKey = useRef<(event: KeyboardEvent) => void>();
@@ -55,9 +56,12 @@ export function NavigationMemoryProvider({ children }: { children: React.ReactNo
 		savedMode.current = undefined;
 	};
 	const cancel = () => {
-		correction.current?.();
+		generation.current++;
+		const stop = correction.current;
 		correction.current = undefined;
 		restore.current = undefined;
+		clicked.current = undefined;
+		stop?.();
 		release();
 	};
 	const ownScroll = () => {
@@ -79,9 +83,16 @@ export function NavigationMemoryProvider({ children }: { children: React.ReactNo
 		if (window.history.state)
 			window.history.replaceState({ ...window.history.state, [ENTRY_KEY]: memory.active.id }, '');
 	};
-	const save = () => {
+	const save = (interaction = clicked.current, url?: string) => {
 		if (!memory.pending && !restore.current && browsingRoute(memory.active.route).supported) {
-			capturePosition(memory.active, root.current, clicked.current);
+			const destination = url ? browsingRoute(url, routerRef.current.locale) : undefined;
+			if (
+				interaction?.entry.id === memory.active.id &&
+				(!destination || (destination.route === interaction.destination && destination.locale === interaction.locale))
+			) {
+				const { time, x, y, width, height, item, section } = interaction.entry;
+				Object.assign(memory.active, { time, x, y, width, height, item, section });
+			} else capturePosition(memory.active, root.current);
 			memory.entries.set(memory.active.id, memory.active);
 		}
 		try {
@@ -114,9 +125,10 @@ export function NavigationMemoryProvider({ children }: { children: React.ReactNo
 		stamp();
 		memory.entries.set(memory.active.id, memory.active);
 		const start = (url: string) => {
-			const returning = intent.current ?? pop.current?.entry;
+			const returning = intent.current?.entry ?? pop.current?.entry;
+			const interaction = clicked.current;
 			cancel();
-			save();
+			save(interaction, url);
 			const destination = browsingRoute(url, pop.current?.locale ?? routerRef.current.locale);
 			const eligible =
 				returning && returning.route === destination.route && returning.locale === destination.locale
@@ -128,7 +140,6 @@ export function NavigationMemoryProvider({ children }: { children: React.ReactNo
 			if (eligible) ownScroll();
 			intent.current = undefined;
 			pop.current = undefined;
-			clicked.current = null;
 		};
 		const complete = (url: string) => {
 			if (memory.pending && memory.pending.route !== browsingRoute(url, routerRef.current.locale).route) return;
@@ -208,23 +219,28 @@ export function NavigationMemoryProvider({ children }: { children: React.ReactNo
 	useBrowserLayoutEffect(() => {
 		if (!restore.current || !root.current) return;
 		const entry = restore.current;
-		correction.current = restorePosition(entry, root.current, () => {
+		const request = generation.current;
+		const stop = restorePosition(entry, root.current, () => {
+			if (generation.current !== request || restore.current !== entry) return;
 			restore.current = undefined;
 			correction.current = undefined;
 			release();
 		});
+		correction.current = stop;
 		return () => {
-			correction.current?.();
-			correction.current = undefined;
+			stop();
+			if (correction.current === stop) correction.current = undefined;
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [router.asPath, router.locale]);
 	const returnTo = (entry: BrowsingEntry, back: boolean) => {
-		intent.current = entry;
+		const request = { entry };
+		intent.current = request;
 		if (back) router.back();
 		else
 			void router.push(entry.route, undefined, { locale: entry.locale, scroll: false }).catch(() => {
-				if (intent.current !== entry && restore.current !== entry) return;
+				// Two Home clicks can refer to the same entry but are different requests.
+				if (intent.current !== request) return;
 				intent.current = undefined;
 				cancel();
 			});
@@ -249,10 +265,15 @@ export function NavigationMemoryProvider({ children }: { children: React.ReactNo
 						!anchor ||
 						!ordinaryClick(event) ||
 						anchor.target === '_blank' ||
+						anchor.hasAttribute('download') ||
 						anchor.origin !== window.location.origin
 					)
 						return;
-					clicked.current = anchor;
+					// Capture now: route loading may change the DOM or scroll before routeChangeStart.
+					const entry = { ...memory.active, ui: { ...memory.active.ui } };
+					capturePosition(entry, root.current, anchor);
+					const destination = browsingRoute(anchor.href, memory.active.locale);
+					clicked.current = { entry, destination: destination.route, locale: destination.locale };
 				}}
 			>
 				{children}

@@ -166,8 +166,14 @@ export function capturePosition(entry: BrowsingEntry, root: HTMLElement | null, 
 	const items = Array.from(root?.querySelectorAll('[data-browse-item]') ?? []);
 	const previousItem = items.find((node) => node.getAttribute('data-browse-item') === entry.item?.key && visible(node));
 	const fullyVisible = items.find((node) => visible(node) && node.getBoundingClientRect().top >= top);
-	const item = source?.closest('[data-browse-item]') ?? previousItem ?? fullyVisible ?? items.find(visible);
+	const interaction = source && root?.contains(source) ? source : undefined;
+	const sourceSection = interaction?.closest('[data-browse-section]');
+	// A section's own link must not inherit a card from the preceding section.
+	const item =
+		interaction?.closest('[data-browse-item]') ??
+		(sourceSection ? undefined : previousItem ?? fullyVisible ?? items.find(visible));
 	const section =
+		sourceSection ??
 		item?.closest('[data-browse-section]') ??
 		Array.from(root?.querySelectorAll('[data-browse-section]') ?? []).find(visible);
 	const anchor = (node: Element | undefined | null, attribute: string): Anchor | undefined =>
@@ -212,12 +218,13 @@ export function restorePosition(entry: BrowsingEntry, root: HTMLElement, done: (
 		if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Escape', 'Tab'].includes(event.key))
 			cleanup();
 	};
-	const attempt = () => {
+	const attempt = (final = false) => {
 		frame = 0;
 		if (stopped || !root.isConnected) return;
 		window.clearTimeout(settle);
-		const item = find('data-browse-item', entry.item),
-			section = find('data-browse-section', entry.section);
+		const section = find('data-browse-section', entry.section);
+		const candidate = find('data-browse-item', entry.item);
+		const item = candidate && (!entry.section || section?.contains(candidate)) ? candidate : undefined;
 		const target = item ?? section;
 		const pending = Array.from(root.querySelectorAll('[data-browse-pending="true"]')).some(
 			(node) =>
@@ -234,20 +241,32 @@ export function restorePosition(entry: BrowsingEntry, root: HTMLElement, done: (
 			(!item && entry.item) || resized
 				? Math.max(navbarHeight + 12, Math.min(offset, window.innerHeight - 80))
 				: offset;
-		const requested = target ? window.scrollY + target.getBoundingClientRect().top - safeOffset : entry.y;
+		const validPixels = Number.isFinite(entry.y) && entry.y >= 0 && !resized;
+		// Use the same priority for readiness corrections and the bounded deadline.
+		const requested = item
+			? window.scrollY + item.getBoundingClientRect().top - safeOffset
+			: validPixels
+			? entry.y
+			: section
+			? window.scrollY + section.getBoundingClientRect().top - safeOffset
+			: undefined;
 		const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-		// Do not scroll to a temporary loading marker above the requested item.
-		if (pending && !item) return;
+		// Wait for the originating section and all loading content above it.
+		if (pending && !final) return;
+		if (requested === undefined) {
+			cleanup();
+			return;
+		}
 		window.scrollTo({
 			left: Math.min(entry.x, Math.max(0, html.scrollWidth - window.innerWidth)),
 			top: Math.max(0, Math.min(requested, max)),
 			behavior: 'auto',
 		});
-		if (!pending && document.fonts?.status !== 'loading' && (target || requested <= max))
+		if (!final && !pending && document.fonts?.status !== 'loading' && (item || section || requested <= max))
 			settle = window.setTimeout(cleanup, 150);
 	};
 	function schedule() {
-		if (!stopped && !frame) frame = window.requestAnimationFrame(attempt);
+		if (!stopped && !frame) frame = window.requestAnimationFrame(() => attempt());
 	}
 	const mutations = new MutationObserver(schedule);
 	mutations.observe(root, {
@@ -266,10 +285,7 @@ export function restorePosition(entry: BrowsingEntry, root: HTMLElement, done: (
 	void document.fonts?.ready.then(schedule);
 	const timeout = window.setTimeout(() => {
 		if (!stopped) {
-			window.scrollTo({
-				top: Math.max(0, Math.min(entry.y, html.scrollHeight - window.innerHeight)),
-				behavior: 'auto',
-			});
+			attempt(true);
 			cleanup();
 		}
 	}, 5000);
