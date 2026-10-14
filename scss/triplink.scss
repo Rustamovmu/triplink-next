@@ -1,3 +1,5 @@
+@import 'flex-carousel';
+
 #pc-wrap,
 #mobile-wrap {
 	.container {
@@ -2575,99 +2577,12 @@ html[lang='uz'] .triplink-search__date .MuiInput-root { margin-top: 8px; }
 	@media (prefers-reduced-motion: reduce) { &__ring { transition: none; } }
 }
 
-// Centered expedition photo strip inspired by Aceternity's carousel composition.
-.triplink-home-sections
-	.triplink-home-section--featured
-	.triplink-intro-gallery {
-	min-width: 0;
-	&:focus-visible {
-		outline: 3px solid #1e6962;
-		outline-offset: 4px;
-		border-radius: 10px;
-	}
-	.swiper {
-		padding: 14px 0;
-		cursor: grab;
-	}
-	.swiper:active {
-		cursor: grabbing;
-	}
-	.swiper-wrapper {
-		align-items: center;
-	}
-	.swiper-slide {
-		width: 58%;
-		height: auto;
-	}
-	&__frame {
-		margin: 0;
-		padding: 0;
-		transform: scale(0.92);
-		transform-origin: center;
-		transition: transform 650ms ease;
-		img {
-			display: block;
-			width: 100%;
-			height: 340px;
-			object-fit: cover;
-			border: 0;
-			padding: 0;
-			background: #fff;
-			border-radius: 16px;
-			user-select: none;
-		}
-		figcaption {
-			padding: 12px 2px 0;
-			color: #40484a;
-			font-size: 13px;
-			line-height: 1.5;
-			font-weight: 600;
-			overflow-wrap: anywhere;
-		}
-	}
-	.swiper-slide-active .triplink-intro-gallery__frame,
-	.swiper-slide-duplicate-active .triplink-intro-gallery__frame {
-		transform: none;
-	}
-	&__announcement {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
-	}
-	@media (max-width: 1023px) {
-		.swiper-slide {
-			width: 72%;
-		}
-		&__frame img {
-			height: 290px;
-		}
-	}
-	@media (max-width: 599px) {
-		.swiper-slide {
-			width: 86%;
-		}
-		&__frame {
-			img {
-				height: 230px;
-				padding: 0;
-			}
-			figcaption {
-				font-size: 12px;
-				padding: 10px 2px 0;
-			}
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		&__frame {
-			transition: none;
-		}
-	}
+// React Bits FlexCarousel photo inspiration; tour-card layout is unchanged.
+.triplink-home-sections .triplink-home-section--featured .triplink-intro-gallery {
+  min-width: 0;
+  height: 560px;
+  @media (max-width: 1023px) { height: 480px; }
+  @media (max-width: 599px) { height: 360px; }
 }
 
 .triplink-home-sections {

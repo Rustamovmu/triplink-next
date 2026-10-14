@@ -15,13 +15,13 @@ const load = (file, mocks) => {
 		ts.transpileModule(fs.readFileSync(file, 'utf8'), {
 			compilerOptions: { module: 1, jsx: 2, esModuleInterop: true },
 		}).outputText,
-	)((name) => (name === '../../triplink/BrowsingMemoryProvider' ? require('./helpers/browsing-memory.cjs')(mocks) : name in mocks ? mocks[name] : require(name)), exports);
+	)((name) => (name in mocks ? mocks[name] : name === '../../triplink/BrowsingMemoryProvider' ? require('./helpers/browsing-memory.cjs')(mocks) : name in mocks ? mocks[name] : require(name)), exports);
 	return exports;
 };
 
 function environment({ reduced = false, observerAvailable = true } = {}) {
 	const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost', pretendToBeVisual: true });
-	const keys = ['window', 'document', 'HTMLElement', 'getComputedStyle', 'IS_REACT_ACT_ENVIRONMENT'];
+	const keys = ['window', 'document', 'HTMLElement', 'getComputedStyle', 'IS_REACT_ACT_ENVIRONMENT', 'Image', 'IntersectionObserver', 'ResizeObserver', 'requestAnimationFrame', 'cancelAnimationFrame'];
 	const saved = Object.fromEntries(keys.map((key) => [key, Object.getOwnPropertyDescriptor(global, key)]));
 	Object.assign(global, {
 		window: dom.window,
@@ -81,286 +81,137 @@ function environment({ reduced = false, observerAvailable = true } = {}) {
 	};
 }
 
-function galleryHarness(ctx) {
-	let props, refresh;
-	const engine = {
-		realIndex: 0,
-		destroyed: false,
-		autoplay: {
-			running: false,
-			starts: 0,
-			stops: 0,
-			start() {
-				this.running = true;
-				this.starts++;
-			},
-			stop() {
-				this.running = false;
-				this.stops++;
-			},
-		},
-		slideToLoop(index) {
-			this.realIndex = (index + 10) % 10;
-			props.onSlideChange(this);
-			refresh();
-		},
-		slideNext() {
-			this.slideToLoop(this.realIndex + 1);
-		},
-		slidePrev() {
-			this.slideToLoop(this.realIndex - 1);
-		},
-	};
-	function Swiper(input) {
-		props = input;
-		const initialize = React.useRef(input.onSwiper);
-		const [, update] = React.useState(0);
-		refresh = () => update((value) => value + 1);
-		React.useEffect(() => {
-			initialize.current(engine);
-		}, []);
-		return React.createElement(
-			'div',
-			{ className: 'swiper' },
-			React.Children.map(input.children, (child, index) =>
-				React.cloneElement(child, { active: index === engine.realIndex }),
-			),
-		);
-	}
+const destinations = ['Iceland', 'Sossusvlei', 'Petra', 'Patagonia', 'Swiss Alps', 'Santorini', 'Cappadocia', 'Dolomites', 'Lofoten', 'Bali'];
+const carousel = ogl => load('libs/components/homepage/FlexCarousel.jsx', { react: React, ogl }).default;
+const unavailable = { Renderer: class { constructor() { throw new Error('WebGL unavailable'); } } };
+async function key(node, value, options = {}) {
+	const event = new window.KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true, ...options });
+	await act(async () => node.dispatchEvent(event));
+	return event.defaultPrevented;
+}
+
+test('FlexCarousel fallback preserves translated local photos, restored index, keyboard looping and image fallback', async () => {
+	const ctx = environment();
+	let saved = 4;
 	const { IntroGallery } = load('libs/components/homepage/IntroGallery.tsx', {
 		react: React,
-		swiper: { Autoplay: {} },
-		'swiper/react': {
-			Swiper,
-			SwiperSlide: ({ children, active }) =>
-				React.createElement('div', { className: 'swiper-slide' }, children({ isActive: active })),
-		},
-		'next-i18next': {
-			useTranslation: () => ({ t: (key, values) => (values ? key.replace('{{section}}', values.section) : key) }),
-		},
+		'./FlexCarousel': { default: carousel(unavailable), __esModule: true },
+		'../../triplink/BrowsingMemoryProvider': { useRememberedState: () => {
+			const [index, update] = React.useState(saved);
+			return [index, value => { saved = value; update(value); }];
+		} },
+		'next-i18next': { useTranslation: () => ({ t: (value, options) => options ? value.replace('{{section}}', options.section) : `translated ${value}` }) },
 	});
+	try {
+		await ctx.render(React.createElement(IntroGallery, { title: 'Featured tours' }));
+		const node = document.querySelector('[role="region"]');
+		assert.equal(node.getAttribute('aria-label'), 'Photo inspiration for translated Featured tours');
+		assert.deepEqual([...node.querySelectorAll('button')].map(n => n.getAttribute('aria-label')), destinations.map(d => `translated ${d}`));
+		assert.equal(node.querySelectorAll('img').length, 10);
+		assert.equal(node.querySelector('[role="status"]').textContent, 'translated Swiss Alps, 5/10');
+		assert.ok(node.classList.contains('is-fallback'));
+		assert.equal(node.querySelector('canvas'), null);
+		await act(async () => node.focus());
+		assert.equal(node.querySelector('[role="status"]').getAttribute('aria-live'), 'polite');
+		assert.equal(await key(node, 'End'), true);
+		assert.equal(saved, 9);
+		await key(node, 'ArrowRight');
+		assert.equal(saved, 0);
+		await key(node, 'ArrowLeft');
+		assert.equal(saved, 9);
+		await key(node, 'Home');
+		assert.equal(saved, 0);
+		assert.equal(await key(node, 'ArrowRight', { ctrlKey: true }), false);
+		assert.equal(await key(node, 'Tab'), false);
+		await act(async () => Simulate.click(node.querySelectorAll('button')[7]));
+		assert.equal(saved, 7);
+		assert.equal(node.querySelector('[aria-pressed="true"]').getAttribute('aria-label'), 'translated Dolomites');
+		const image = node.querySelector('img');
+		assert.equal(image.getAttribute('src'), '/img/homepage/featured/iceland.jpg');
+		await act(async () => Simulate.error(image));
+		assert.equal(image.getAttribute('src'), '/img/tour-placeholder.svg');
+		await act(async () => Simulate.error(image));
+		assert.equal(image.getAttribute('src'), '/img/tour-placeholder.svg');
+		await ctx.render(null);
+		await ctx.render(React.createElement(IntroGallery, { title: 'Featured tours' }));
+		assert.equal(document.querySelector('[role="status"]').textContent, 'translated Dolomites, 8/10');
+	} finally { await ctx.cleanup(); }
+});
+
+function gpuHarness(ctx) {
+	const frames = new Map(), images = [], programs = [], meshes = [], deleted = [];
+	let frameId = 0, now = performance.now();
+	global.requestAnimationFrame = fn => { frames.set(++frameId, fn); return frameId; };
+	global.cancelAnimationFrame = id => frames.delete(id);
+	global.IntersectionObserver = window.IntersectionObserver;
+	global.Image = class { constructor() { images.push(this); this.naturalWidth = 800; this.naturalHeight = 600; } };
+	ctx.dom.window.HTMLCanvasElement.prototype.getContext = () => null;
+	Object.defineProperties(ctx.dom.window.HTMLElement.prototype, {
+		clientWidth: { configurable: true, get: () => 1000 },
+		clientHeight: { configurable: true, get: () => 560 },
+	});
+	const gl = {
+		canvas: document.createElement('canvas'), clearColor() {}, viewport() {}, clear() {}, generateMipmap() {},
+		getExtension: () => ({ loseContext() { deleted.push('context'); } }),
+		deleteTexture: () => deleted.push('texture'), deleteFramebuffer: () => deleted.push('framebuffer'),
+	};
+	class Texture { constructor() { this.texture = {}; } update() {} bind() {} }
+	class Geometry { remove() { deleted.push('geometry'); } }
+	class Program { constructor(_, options) { this.uniforms = options.uniforms; programs.push(this); } setBlendFunc() {} remove() { deleted.push('program'); } }
+	class Mesh { constructor(_, options) { Object.assign(this, options); meshes.push(this); } }
+	class RenderTarget { constructor() { this.texture = new Texture(); this.buffer = {}; } setSize(w,h) { this.width=w; this.height=h; } }
+	class Renderer { constructor() { this.gl=gl; this.isWebgl2=true; this.dpr=1; } getExtension() { return null; } setSize() {} bindFramebuffer() {} render() {} }
 	return {
-		engine,
-		props: () => props,
-		render: () => ctx.render(React.createElement(IntroGallery, { title: 'Featured tours' })),
+		Component: carousel({Renderer, Program, Mesh, Triangle: Geometry, Plane: Geometry, Texture, RenderTarget}),
+		frames, images, gl, programs, deleted,
+		advance: async (count=1) => act(async () => {
+			for (let i=0; i<count; i++) { now += 50; const pending=[...frames.values()]; frames.clear(); pending.forEach(fn => fn(now)); }
+		}),
+		load: async () => act(async () => images.forEach(image => image.onload())),
 	};
 }
 
-test('photo strip preserves ten destinations, loop settings, accessible focus, fallback, and no visible controls', async () => {
-	const ctx = environment(),
-		gallery = galleryHarness(ctx);
+test('FlexCarousel engine restores selection, honors reduced motion, pauses offscreen/hidden, preserves page wheel and falls back after context loss', async () => {
+	const ctx = environment({ reduced: true }), gpu = gpuHarness(ctx), changes = [];
+	const items = destinations.map(title => ({ title, src: `/${title}.jpg`, fallbackSrc: '/fallback.svg' }));
 	try {
-		await gallery.render();
-		assert.deepEqual(
-			[...document.querySelectorAll('figcaption')].map((node) => node.textContent),
-			[
-				'Iceland',
-				'Sossusvlei',
-				'Petra',
-				'Patagonia',
-				'Swiss Alps',
-				'Santorini',
-				'Cappadocia',
-				'Dolomites',
-				'Lofoten',
-				'Bali',
-			],
-		);
-		const props = gallery.props();
-		assert.equal(props.loop, true);
-		assert.equal(props.centeredSlides, true);
-		assert.equal(props.loopedSlides, 3);
-		assert.equal(props.slidesPerView, 'auto');
-		assert.equal(props.speed, 650);
-		assert.deepEqual(props.autoplay, { enabled: false, delay: 5000, disableOnInteraction: true });
-		assert.equal(document.querySelector('[role="region"]').tabIndex, 0);
-		assert.equal(document.querySelectorAll('button, a, [role="button"], .swiper-pagination').length, 0);
-		assert.equal(document.querySelectorAll('figure[aria-hidden="false"]').length, 1);
-		assert.equal(gallery.engine.autoplay.running, false);
+		await ctx.render(React.createElement(gpu.Component, { items, activeIndex: 4, captureWheel: false, onChange: index => changes.push(index) }));
+		assert.equal(gpu.frames.size, 0);
+		await gpu.load();
 		await ctx.visible(true);
-		assert.equal(gallery.engine.autoplay.running, true);
-		await act(async () => Simulate.error(document.querySelector('img')));
-		assert.equal(document.querySelector('img').getAttribute('src'), '/img/tour-placeholder.svg');
-	} finally {
-		await ctx.cleanup();
-	}
-});
-
-test('autoplay pauses for overlapping hover, focus, drag, hidden and offscreen states and resumes only after all clear', async () => {
-	const ctx = environment(),
-		gallery = galleryHarness(ctx);
-	try {
-		await gallery.render();
-		await ctx.visible(true);
-		const node = document.querySelector('[role="region"]'),
-			autoplay = gallery.engine.autoplay;
-		await act(async () => Simulate.pointerEnter(node, { pointerType: 'touch' }));
-		assert.equal(autoplay.running, true);
-		await act(async () => Simulate.pointerEnter(node, { pointerType: 'mouse' }));
-		assert.equal(autoplay.running, false);
-		await act(async () => node.focus());
-		await act(async () => Simulate.pointerLeave(node));
-		assert.equal(autoplay.running, false);
-		assert.equal(document.querySelector('[role="status"]').getAttribute('aria-live'), 'polite');
-		await act(async () => node.blur());
-		assert.equal(autoplay.running, true);
-		await act(async () => gallery.props().onTouchStart(gallery.engine));
-		assert.equal(autoplay.running, false);
-		await ctx.hidden(true);
-		await act(async () => gallery.props().onTouchEnd());
-		assert.equal(autoplay.running, false);
-		await ctx.hidden(false);
-		assert.equal(autoplay.running, true);
-		await ctx.visible(false);
-		assert.equal(autoplay.running, false);
-		await ctx.visible(true);
-		assert.equal(autoplay.running, true);
-		await ctx.motion(true);
-		assert.equal(autoplay.running, false);
-		assert.equal(gallery.props().speed, 0);
-		await ctx.motion(false);
-		assert.equal(autoplay.running, true);
-	} finally {
-		await ctx.cleanup();
-	}
-	assert.equal(gallery.engine.autoplay.running, false);
+		await gpu.advance();
+		const node = document.querySelector('[role="region"]');
+		assert.ok(node.classList.contains('is-ready'));
+		assert.equal(node.querySelector('[role="status"]').textContent, 'Swiss Alps, 5/10');
+		assert.equal(node.querySelector('.flex-carousel__fallback').getAttribute('aria-hidden'), 'true');
+		await key(node, 'End'); await gpu.advance();
+		assert.equal(changes.at(-1), 9);
+		await key(node, 'ArrowRight'); await gpu.advance();
+		assert.equal(changes.at(-1), 0);
+		await key(node, 'Enter'); await gpu.advance();
+		assert.equal(node.querySelector('.flex-carousel__count').hasAttribute('data-hidden'), true);
+		assert.equal(await key(node, 'Escape'), true); await gpu.advance();
+		assert.equal(node.querySelector('.flex-carousel__count').hasAttribute('data-hidden'), false);
+		const wheel = new window.WheelEvent('wheel', { deltaY: 100, bubbles: true, cancelable: true });
+		await act(async () => node.dispatchEvent(wheel));
+		assert.equal(wheel.defaultPrevented, false);
+		await ctx.visible(false); assert.equal(gpu.frames.size, 0);
+		await ctx.visible(true); assert.equal(gpu.frames.size, 1);
+		await ctx.hidden(true); assert.equal(gpu.frames.size, 0);
+		await ctx.hidden(false); assert.equal(gpu.frames.size, 1);
+		await act(async () => gpu.gl.canvas.dispatchEvent(new window.Event('webglcontextlost', { cancelable: true })));
+		assert.ok(node.classList.contains('is-fallback'));
+		assert.equal(gpu.frames.size, 0);
+		await key(node, 'End');
+		assert.equal(node.querySelector('[role="status"]').textContent, 'Bali, 10/10');
+	} finally { await ctx.cleanup(); }
 	assert.equal(ctx.listeners.size, 0);
 	assert.equal(ctx.observers[0].disconnected, true);
-	assert.doesNotThrow(() => ctx.observers[0].callback([{ isIntersecting: true }]));
-});
-
-test('focused keyboard navigation supports loop boundaries and Home/End without taking other keys', async () => {
-	const ctx = environment({ reduced: true }),
-		gallery = galleryHarness(ctx);
-	try {
-		await gallery.render();
-		await ctx.visible(true);
-		const node = document.querySelector('[role="region"]');
-		await act(async () => node.focus());
-		async function key(value, options = {}) {
-			const event = new window.KeyboardEvent('keydown', { key: value, bubbles: true, cancelable: true, ...options });
-			await act(async () => node.dispatchEvent(event));
-			return event.defaultPrevented;
-		}
-		assert.equal(await key('ArrowLeft'), true);
-		assert.equal(gallery.engine.realIndex, 9);
-		await key('ArrowRight');
-		assert.equal(gallery.engine.realIndex, 0);
-		await key('End');
-		assert.equal(gallery.engine.realIndex, 9);
-		await key('Home');
-		assert.equal(gallery.engine.realIndex, 0);
-		assert.equal(await key('ArrowRight', { ctrlKey: true }), false);
-		assert.equal(await key('Tab'), false);
-		assert.equal(document.activeElement, node);
-		assert.equal(gallery.engine.autoplay.running, false);
-		assert.equal(gallery.props().speed, 0);
-	} finally {
-		await ctx.cleanup();
-	}
-});
-
-test('unavailable visibility observer still permits autoplay and visibility listener is removed on unmount', async () => {
-	const ctx = environment({ observerAvailable: false }),
-		gallery = galleryHarness(ctx);
-	const removals = [],
-		originalRemove = document.removeEventListener.bind(document);
-	document.removeEventListener = (name, callback) => {
-		removals.push(name);
-		originalRemove(name, callback);
-	};
-	await gallery.render();
-	assert.equal(gallery.engine.autoplay.running, true);
-	await ctx.cleanup();
-	assert.ok(removals.includes('visibilitychange'));
-	assert.equal(gallery.engine.autoplay.running, false);
-});
-
-test('installed Swiper advances after five seconds, loops in both directions and cleans its timers after interaction pauses', async (t) => {
-	const ctx = environment();
-	t.mock.timers.enable({ apis: ['setTimeout'] });
-	let engine;
-	const actual = require('swiper/react');
-	// JSDOM retains translate3d strings instead of browser-computed transform matrices.
-	ctx.dom.window.WebKitCSSMatrix = class {
-		constructor(transform) {
-			const values = transform.match(/translate3d\(([-\d.]+)px, ([-\d.]+)px/);
-			this.m41 = values ? Number(values[1]) : 0;
-			this.m42 = values ? Number(values[2]) : 0;
-		}
-	};
-	const { IntroGallery } = load('libs/components/homepage/IntroGallery.tsx', {
-		react: React,
-		'swiper/react': {
-			...actual,
-			Swiper: (props) =>
-				React.createElement(actual.Swiper, {
-					...props,
-					width: 1000,
-					onSwiper: (instance) => {
-						engine = instance;
-						props.onSwiper(instance);
-					},
-				}),
-		},
-		'next-i18next': { useTranslation: () => ({ t: (key) => key }) },
-	});
-	const style = document.createElement('style');
-	style.textContent = '.swiper-slide { width:580px; box-sizing:border-box; padding:0; margin:0; border:0; }';
-	document.head.appendChild(style);
-	const advance = (milliseconds) => act(async () => t.mock.timers.tick(milliseconds));
-	const finish = () =>
-		act(async () =>
-			document.querySelector('.swiper-wrapper').dispatchEvent(new window.Event('transitionend', { bubbles: true })),
-		);
-	try {
-		await ctx.render(React.createElement(IntroGallery, { title: 'Featured tours' }));
-		await ctx.visible(true);
-		assert.equal(engine.realIndex, 0);
-		assert.equal(engine.autoplay.running, true);
-		await advance(4999);
-		assert.equal(engine.realIndex, 0);
-		await advance(1);
-		assert.equal(engine.realIndex, 1);
-		assert.equal(engine.params.speed, 650);
-		// Hide while a transition is paused: showing the tab must start a fresh cycle.
-		await ctx.hidden(true);
-		await finish();
-		await advance(10000);
-		assert.equal(engine.realIndex, 1);
-		await ctx.hidden(false);
-		await advance(5000);
-		assert.equal(engine.realIndex, 2);
-		await finish();
-		const node = document.querySelector('[role="region"]');
-		await act(async () => node.focus());
-		await advance(10000);
-		assert.equal(engine.realIndex, 2);
-		await act(async () => node.blur());
-		for (let next = 3; next <= 10; next++) {
-			await advance(5000);
-			assert.equal(engine.realIndex, next % 10);
-			await finish();
-		}
-		await ctx.motion(true);
-		await act(async () => engine.slidePrev());
-		assert.equal(engine.realIndex, 9);
-		await act(async () => engine.slideNext());
-		assert.equal(engine.realIndex, 0);
-		await act(async () => engine.slideToLoop(9));
-		assert.equal(engine.realIndex, 9);
-		await act(async () => engine.slideToLoop(0));
-		assert.equal(engine.realIndex, 0);
-		await advance(10000);
-		assert.equal(engine.realIndex, 0);
-	} finally {
-		await ctx.cleanup();
-		t.mock.timers.tick(10000);
-		t.mock.timers.reset();
-	}
-	assert.equal(engine.destroyed, true);
-	assert.equal(ctx.listeners.size, 0);
-	assert.equal(ctx.observers[0].disconnected, true);
+	assert.equal(gpu.frames.size, 0);
+	assert.equal(gpu.deleted.filter(x => x === 'geometry').length, 2);
+	assert.equal(gpu.deleted.filter(x => x === 'program').length, 2);
+	assert.equal(gpu.deleted.filter(x => x === 'texture').length, 12);
+	assert.ok(gpu.images.every(i => i.onload === null && i.onerror === null));
 });
 
 test('featured tour query, one/two/six result layouts, links, translations, prices and image failures remain intact', async () => {
