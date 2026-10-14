@@ -108,12 +108,23 @@ export default function Top() {
 				value={router.locale ?? 'en'}
 				onChange={(event) => {
 					close();
-					void router.push(router.asPath, router.asPath, { locale: event.target.value });
+					const locale = event.target.value;
+					const previous = router.locale || 'en';
+					document.cookie = `NEXT_LOCALE=${locale}; Path=/; Max-Age=31536000; SameSite=Lax`;
+					void router
+						.push({ pathname: router.pathname, query: router.query }, router.asPath, { locale, scroll: false })
+						.then((changed) => {
+							if (!changed) document.cookie = `NEXT_LOCALE=${previous}; Path=/; Max-Age=31536000; SameSite=Lax`;
+						})
+						.catch(() => {
+							document.cookie = `NEXT_LOCALE=${previous}; Path=/; Max-Age=31536000; SameSite=Lax`;
+						});
 				}}
 			>
 				<option value="en">English</option>
 				<option value="kr">한국어</option>
 				<option value="ru">Русский</option>
+				<option value="uz">O‘zbekcha</option>
 			</select>
 		</label>
 	);
@@ -121,7 +132,9 @@ export default function Top() {
 	const initials = Array.from(nickname)
 		.slice(0, 2)
 		.join('')
-		.toLocaleUpperCase(router.locale === 'kr' ? 'ko' : router.locale ?? 'en');
+		.toLocaleUpperCase(
+			router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : router.locale === 'uz' ? 'uz-UZ' : 'en-US',
+		);
 	const avatar = () => (
 		<Avatar
 			className="triplink-top__avatar"

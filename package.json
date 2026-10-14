@@ -10,6 +10,7 @@
 		"lint": "next lint",
 		"changelog": "standard-version --skip.tag",
 		"typecheck": "tsc --noEmit --incremental false",
+		"audit:i18n": "node scripts/audit-translations.cjs",
 		"test": "node --test tests/*.test.cjs",
 		"validate:contracts": "node scripts/validate-contracts.cjs",
 		"test:integration": "node scripts/runtime-smoke.cjs"

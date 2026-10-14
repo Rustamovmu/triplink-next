@@ -89,7 +89,7 @@ export function ActiveSessions({ refreshKey = 0 }: { refreshKey?: number }) {
 			? 'Safari'
 			: t('Browser information unavailable');
 	const date = (value: string) =>
-		new Intl.DateTimeFormat(i18n.language === 'kr' ? 'ko' : i18n.language, {
+		new Intl.DateTimeFormat((i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US'), {
 			dateStyle: 'medium',
 			timeStyle: 'short',
 		}).format(new Date(value));
@@ -104,7 +104,7 @@ export function ActiveSessions({ refreshKey = 0 }: { refreshKey?: number }) {
 					{t('Refresh')}
 				</Button>
 			</div>
-			{error && !selection && <Alert severity="error">{t(error)}</Alert>}
+			{error && !selection && <Alert severity="error">{t(error, { defaultValue: t('Something went wrong!') })}</Alert>}
 			{loading ? (
 				<div role="status">
 					<CircularProgress size={24} aria-label={t('Loading sessions')} />
@@ -161,7 +161,7 @@ export function ActiveSessions({ refreshKey = 0 }: { refreshKey?: number }) {
 					{t(selection === 'all' ? 'Log out from all devices?' : 'Sign out of this session?')}
 				</DialogTitle>
 				<DialogContent>
-					{error && <Alert severity="error">{t(error)}</Alert>}
+					{error && <Alert severity="error">{t(error, { defaultValue: t('Something went wrong!') })}</Alert>}
 					<DialogContentText id="session-confirm-description">
 						{selection === 'all' ? (
 							t('Every signed-in browser will need to sign in again.')

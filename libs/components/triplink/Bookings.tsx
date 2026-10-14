@@ -20,8 +20,9 @@ import { memberVar } from '../../../apollo/store';
 import { Booking, BookingStatus, PaymentStatus, Tour, totalOf } from '../../types/triplink';
 import { bookingActions, bookingCapacity } from '../../triplink/rules';
 import { displayDate, Pager, QueryState, useAction } from './Common';
+import { formatCurrency } from '../../triplink/locale';
 export function BookingForm({ tour, onChanged }: { tour: Tour; onChanged: () => Promise<unknown> }) {
-	const { t } = useTranslation('common');
+	const { t, i18n } = useTranslation('common');
 
 	const member = useReactiveVar(memberVar);
 	const [dateId, setDateId] = useState('');
@@ -62,7 +63,7 @@ export function BookingForm({ tour, onChanged }: { tour: Tour; onChanged: () => 
 			{action.feedback}
 			{created && (
 				<Alert severity="success">
-					{created.bookingCode}: {created.bookingStatus} / {created.paymentStatus}
+					{created.bookingCode}: {t(created.bookingStatus)} / {t(created.paymentStatus)}
 					{t('. Seats are reserved after confirmation.')}{' '}
 					<Link href="/mypage?category=myBookings">{t('My bookings')}</Link>
 				</Alert>
@@ -82,7 +83,7 @@ export function BookingForm({ tour, onChanged }: { tour: Tour; onChanged: () => 
 					.filter((date) => bookingCapacity(tour, date._id) > 0)
 					.map((date) => (
 						<MenuItem key={date._id} value={date._id}>
-							{displayDate(date.startDate)} · {date.availableSeats} {t('seats')}
+							{displayDate(date.startDate, i18n.language)} · {date.availableSeats} {t('seats')}
 						</MenuItem>
 					))}
 			</TextField>
@@ -95,7 +96,8 @@ export function BookingForm({ tour, onChanged }: { tour: Tour; onChanged: () => 
 				onChange={(e) => setPeople(Number(e.target.value))}
 			/>
 			<Typography>
-				{t('Estimated total:')} {(tour.tourDiscountPrice ?? tour.tourPrice) * people}
+				{t('Estimated total:')}{' '}
+				{formatCurrency((tour.tourDiscountPrice ?? tour.tourPrice) * people, i18n.language, 'USD')}
 				{t('. The backend confirms the final price.')}
 			</Typography>
 			<Button type="submit" variant="contained" disabled={action.busy || !maximum}>
@@ -105,7 +107,7 @@ export function BookingForm({ tour, onChanged }: { tour: Tour; onChanged: () => 
 	);
 }
 function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Promise<unknown> }) {
-	const { t } = useTranslation('common');
+	const { t, i18n } = useTranslation('common');
 
 	const member = useReactiveVar(memberVar)!;
 	const agentView = member.memberType === 'AGENT';
@@ -198,11 +200,11 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 							<dl className="triplink-booking-card__details">
 								<div>
 									<dt>{t('Departure')}</dt>
-									<dd>{displayDate(booking.selectedDate)}</dd>
+									<dd>{displayDate(booking.selectedDate, i18n.language)}</dd>
 								</div>
 								<div>
 									<dt>{t('Return')}</dt>
-									<dd>{displayDate(booking.selectedEndDate)}</dd>
+									<dd>{displayDate(booking.selectedEndDate, i18n.language)}</dd>
 								</div>
 								<div>
 									<dt>{t('Travelers')}</dt>
@@ -210,11 +212,21 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 								</div>
 								<div>
 									<dt>{t('Unit price:')}</dt>
-									<dd>{booking.unitPrice.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}</dd>
+									<dd>
+										{booking.unitPrice.toLocaleString(
+											i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'uz' ? 'uz-UZ' : i18n.language,
+											{ style: 'currency', currency: 'USD' },
+										)}
+									</dd>
 								</div>
 								<div className="triplink-booking-card__total">
 									<dt>{t('Total')}</dt>
-									<dd>{booking.totalPrice.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}</dd>
+									<dd>
+										{booking.totalPrice.toLocaleString(
+											i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'uz' ? 'uz-UZ' : i18n.language,
+											{ style: 'currency', currency: 'USD' },
+										)}
+									</dd>
 								</div>
 							</dl>
 							<dl className="triplink-booking-card__references">
@@ -231,16 +243,18 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 					) : (
 						<>
 							<Typography variant="h6">
-								{booking.bookingCode} · {booking.tourData?.tourTitle ?? 'Tour unavailable'}
+								{booking.bookingCode} · {booking.tourData?.tourTitle ?? t('Tour unavailable')}
 							</Typography>
 							<Typography>
 								{t(booking.bookingStatus)} / {t(booking.paymentStatus)} · {booking.numberOfPeople} {t('people')}
 							</Typography>
 							<Typography>
-								{displayDate(booking.selectedDate)} → {displayDate(booking.selectedEndDate)}
+								{displayDate(booking.selectedDate, i18n.language)} →{' '}
+								{displayDate(booking.selectedEndDate, i18n.language)}
 							</Typography>
 							<Typography>
-								{t('Unit price:')} {booking.unitPrice} {t('· Total:')} {booking.totalPrice}
+								{t('Unit price:')} {formatCurrency(booking.unitPrice, i18n.language, 'USD')} {t('· Total:')}{' '}
+								{formatCurrency(booking.totalPrice, i18n.language, 'USD')}
 							</Typography>
 							<Typography>
 								{t('Payment:')} {booking.paymentReference ?? '—'} {t('· Refund:')} {booking.refundReference ?? '—'}
@@ -423,7 +437,7 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 	);
 }
 export function BookingsPanel({ admin = false }: { admin?: boolean }) {
-	const { t } = useTranslation('common');
+	const { t, i18n } = useTranslation('common');
 
 	const member = useReactiveVar(memberVar);
 	const [page, setPage] = useState(1);

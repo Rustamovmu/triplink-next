@@ -29,7 +29,7 @@ export default function withAdminLayout(Component: ComponentType) {
 		return (
 			<Access roles={['ADMIN']}>
 				<Head>
-					<title>TripLink · {t('Admin')}</title>
+					<title>{`TripLink · ${t('Admin')}`}</title>
 				</Head>
 				<Box component="div" className="triplink-admin" sx={{ display: 'flex', minHeight: '100vh' }}>
 					<AppBar className="admin-topbar" position="fixed" elevation={0} sx={{ zIndex: 1201 }}>

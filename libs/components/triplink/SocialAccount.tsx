@@ -35,7 +35,7 @@ export function SocialComplete() {
 			<h1>{t('Completing sign-in')}</h1>
 			{error ? (
 				<Alert severity="error">
-					{t(error)} <Link href="/account/join">{t('Login')}</Link>
+					{t(error, { defaultValue: t('Something went wrong!') })} <Link href="/account/join">{t('Login')}</Link>
 				</Alert>
 			) : (
 				<div role="status">
@@ -75,7 +75,7 @@ export function SocialOnboarding() {
 			{action.feedback}
 			{error ? (
 				<Alert severity="error">
-					{t(error)} <Link href="/account/join">{t('Login')}</Link>
+					{t(error, { defaultValue: t('Something went wrong!') })} <Link href="/account/join">{t('Login')}</Link>
 				</Alert>
 			) : name === null ? (
 				<div role="status">

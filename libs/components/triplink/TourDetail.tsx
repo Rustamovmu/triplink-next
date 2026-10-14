@@ -95,7 +95,7 @@ export default function TourDetail() {
 			</Frame>
 		);
 	const tour = query.data?.result;
-	const locale = router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : 'en-US';
+	const locale = (router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : router.locale === 'uz' ? 'uz-UZ' : 'en-US');
 	const price = new Intl.NumberFormat(locale, {
 		style: 'currency',
 		currency: 'USD',

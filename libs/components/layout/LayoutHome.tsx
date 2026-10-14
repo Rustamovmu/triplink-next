@@ -1,3 +1,4 @@
+import { useTranslation } from 'next-i18next';
 import React from 'react';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import Head from 'next/head';
@@ -16,12 +17,14 @@ import 'swiper/css/navigation';
 const withLayoutMain = (Component: any) => {
 	return function LayoutMain(props: any) {
 		const device = useDeviceDetect();
+		const { t } = useTranslation('common');
 
 		if (device == 'mobile') {
 			return (
 				<>
 					<Head>
-						<title>TripLink</title>
+						<title>{`TripLink · ${t('Travel with TripLink')}`}</title>
+						<meta name="description" content={t('Discover tours, connect with travel agents, and share your journeys with TripLink.')} />
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="mobile-wrap">
@@ -47,7 +50,8 @@ const withLayoutMain = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>TripLink</title>
+						<title>{`TripLink · ${t('Travel with TripLink')}`}</title>
+						<meta name="description" content={t('Discover tours, connect with travel agents, and share your journeys with TripLink.')} />
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="pc-wrap">

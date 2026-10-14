@@ -92,4 +92,5 @@ module.exports.push(
 		{ page: 1, limit: 12, search: { noticeCategory: 'NOTICE', noticeStatus: 'HOLD' } },
 	],
 	['help-center/help-center.update', 'HelpEntryUpdate', { entryId: id, noticeStatus: 'ACTIVE' }],
+	['ai/ai-chat.input', 'AiChatInput', { message: 'Sayohat topishga yordam bering.', locale: 'uz', intent: 'FIND_TOURS' }],
 );

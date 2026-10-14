@@ -367,7 +367,7 @@ function TourImage({ tour }: { tour: Tour }) {
 function Price({ tour }: { tour: Tour }) {
 	const { t } = useTranslation('common');
 	const { locale } = useRouter();
-	const format = new Intl.NumberFormat(locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US', {
+	const format = new Intl.NumberFormat((locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US'), {
 		style: 'currency',
 		currency: 'USD',
 		maximumFractionDigits: 2,
@@ -421,7 +421,7 @@ function SaveTour({ tour }: { tour: Tour }) {
 			</button>
 			{error && (
 				<p role="alert" className="triplink-home-tour__error">
-					{t(error)}
+					{t(error, { defaultValue: t('Something went wrong!') })}
 				</p>
 			)}
 		</>
@@ -432,7 +432,7 @@ function RatedTourCard({ tour }: { tour: Tour }) {
 	const { t } = useTranslation('common');
 	const { locale } = useRouter();
 	const [failedImage, setFailedImage] = useState(false);
-	const language = locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US';
+	const language = (locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US');
 	const number = new Intl.NumberFormat(language, { maximumFractionDigits: 1 });
 	const compact = new Intl.NumberFormat(language, { notation: 'compact', maximumFractionDigits: 1 });
 	const exact = new Intl.NumberFormat(language);
@@ -543,11 +543,11 @@ function RatedTourCard({ tour }: { tour: Tour }) {
 function HomeTourCard({ tour, variant, rank }: { tour: Tour; variant: Exclude<TourVariant, 'rated'>; rank: number }) {
 	const { t } = useTranslation('common');
 	const { locale } = useRouter();
-	const number = new Intl.NumberFormat(locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US', {
+	const number = new Intl.NumberFormat((locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US'), {
 		maximumFractionDigits: 1,
 	});
 	const href = `/tour/detail?id=${tour._id}`;
-	const language = locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US';
+	const language = (locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US');
 	const exact = new Intl.NumberFormat(language);
 	const compact = new Intl.NumberFormat(language, { notation: 'compact', maximumFractionDigits: 1 });
 	const agentName = tour.agentData?.memberFullname || tour.agentData?.memberNick;

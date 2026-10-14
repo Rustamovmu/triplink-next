@@ -24,7 +24,7 @@ import { FaqTopic, HelpEntry, HelpKind, HelpStatus } from '../../../types/tripli
 import { displayDate, Pager, QueryState, useAction } from '../../triplink/Common';
 import { topicLabels, topics } from '../../cs/Faq';
 export default function HelpCenterManager({ kind }: { kind: HelpKind }) {
-	const { t } = useTranslation('common');
+	const { t, i18n } = useTranslation('common');
 	const action = useAction();
 	const [page, setPage] = useState(1);
 	const [text, setText] = useState('');
@@ -145,7 +145,7 @@ export default function HelpCenterManager({ kind }: { kind: HelpKind }) {
 								{entry.faqTopic && <Chip label={t(topicLabels[entry.faqTopic])} />}
 							</Stack>
 							<Typography variant="caption">
-								{t('Created')}: {displayDate(entry.createdAt)} · {t('Updated')}: {displayDate(entry.updatedAt)}
+								{t('Created')}: {displayDate(entry.createdAt, i18n.language)} · {t('Updated')}: {displayDate(entry.updatedAt, i18n.language)}
 							</Typography>
 							<Stack direction="row" spacing={1} flexWrap="wrap">
 								<Button disabled={action.busy} onClick={() => open(entry)}>

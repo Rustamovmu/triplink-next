@@ -1403,6 +1403,18 @@
 	}
 }
 
+// Uzbek labels need room while retaining the existing navigation layout.
+html[lang='uz'] .triplink-top__language select { min-width: 110px; width: auto; }
+html[lang='uz'] .triplink-search__date .MuiInputLabel-root {
+	position: static; transform: none; max-width: 100%; white-space: normal;
+	overflow: visible; font-size: 10px; line-height: 1.5;
+}
+html[lang='uz'] .triplink-search__date .MuiInput-root { margin-top: 8px; }
+@media (min-width: 1200px) {
+	html[lang='uz'] .triplink-top__desktop-nav a { white-space: normal; text-align: center; }
+	html[lang='uz'] .triplink-top__desktop-account > a.triplink-top__account-button { width: auto; white-space: normal; max-width: 230px; text-align: center; }
+}
+
 // Shared public tour cards: photograph-led layouts with genuine tour data.
 .triplink-tour-grid {
 	display: grid;

@@ -179,7 +179,7 @@ export function AgentDirectory() {
 														await follow({ variables: { memberId: member._id } });
 														await refreshCurrentMember();
 														await query.refetch();
-													}, t(member.isFollowing ? 'Agent unfollowed' : 'Agent followed'))
+													}, member.isFollowing ? 'Agent unfollowed' : 'Agent followed')
 												}
 											>
 												{t(member.isFollowing ? 'Unfollow' : 'Follow')}
@@ -420,7 +420,7 @@ function PublicMemberProfile() {
 	}
 
 	return (
-		<Frame title={member?.memberFullname || member?.memberNick || 'Member'}>
+		<Frame title={member?.memberFullname || member?.memberNick || t('Community member')}>
 			{followAction.feedback}
 			{likeAction.feedback}
 			<QueryState

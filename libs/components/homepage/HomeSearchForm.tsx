@@ -8,7 +8,7 @@ import {
 	ruRU as pickerRu,
 } from '@mui/x-date-pickers-pro';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { enUS, ko, ru } from 'date-fns/locale';
+import { enUS, ko, ru, uz } from 'date-fns/locale';
 import {
 	ArrowForwardRounded,
 	AddRounded,
@@ -104,10 +104,28 @@ export default function HomeSearchForm() {
 				</label>
 				<LocalizationProvider
 					dateAdapter={AdapterDateFns}
-					adapterLocale={router.locale === 'kr' ? ko : router.locale === 'ru' ? ru : enUS}
+					adapterLocale={router.locale === 'kr' ? ko : router.locale === 'ru' ? ru : router.locale === 'uz' ? uz : enUS}
 					localeText={{
 						...(router.locale === 'kr' ? pickerKo : router.locale === 'ru' ? pickerRu : pickerEn).components
 							.MuiLocalizationProvider.defaultProps.localeText,
+						...(router.locale === 'uz'
+							? {
+									previousMonth: t('Previous month'),
+									nextMonth: t('Next month'),
+									openPreviousView: t('Previous view'),
+									openNextView: t('Next view'),
+									calendarViewSwitchingButtonAriaLabel: (view: string) =>
+										t(view === 'year' ? 'Switch to calendar view' : 'Switch to year view'),
+									inputModeToggleButtonAriaLabel: (keyboard: boolean) =>
+										t(keyboard ? 'Switch to calendar view' : 'Switch to text input'),
+									start: t('From'),
+									end: t('Until'),
+									todayButtonLabel: t('Today'),
+									datePickerDefaultToolbarTitle: t('Select date'),
+									dateTableLabel: t('Select date'),
+									openDatePickerDialogue: () => t('Select date'),
+							  }
+							: {}),
 						cancelButtonLabel: String(t('Cancel')),
 						okButtonLabel: String(t('Done')),
 						clearButtonLabel: String(t('Clear dates')),
@@ -186,7 +204,7 @@ export default function HomeSearchForm() {
 				</button>
 				{error && (
 					<Alert severity="error" className="triplink-search__error" id={`${id}-error`}>
-						{t(error)}
+						{t(error, { defaultValue: t('Something went wrong!') })}
 					</Alert>
 				)}
 			</form>

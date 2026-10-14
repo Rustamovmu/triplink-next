@@ -22,7 +22,7 @@ test('help topics and notices preserve public filters, pagination reset, safe te
   TextField: ({ label, value, onChange }) => React.createElement('button', { 'data-search': true, onClick: () => onChange({ target: { value: value ? '' : '  trip  ' } }) }, label),
   Dialog: ({ children, open }) => open ? React.createElement('div', { role: 'dialog' }, children) : null,
   DialogActions: box, DialogContent: box, DialogTitle: box, Button: ({ children, onClick }) => React.createElement('button', { onClick }, children) };
- const mocks = { react: React, 'next-i18next': { useTranslation: () => ({ t: k => k }) }, '@mui/material': mui,
+ const mocks = { react: React, 'next-i18next': { useTranslation: () => ({ t: k => k, i18n: { language: 'uz' } }) }, '@mui/material': mui,
   '@apollo/client': { useQuery: (doc, options) => { if (doc === 'entries') input = options.variables.input; else detailInput = options;
    return { loading: false, data: { result: doc === 'entries' ? { list, metaCounter: [{ total: 30 }] } : entry }, refetch: async () => {} }; } },
   '../../../apollo/user/triplink': { HELP_ENTRIES: 'entries', HELP_ENTRY: 'entry' }, '../../types/triplink': {},

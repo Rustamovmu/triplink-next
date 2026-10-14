@@ -75,7 +75,9 @@ function environment() {
 		},
 		'../types/triplink/ai': { AI_MESSAGE_LIMIT: 1000 },
 	});
-	const t = (key, variables = {}) => key.replace(/{{(\w+)}}/g, (_, name) => variables[name] ?? '');
+	const uz = JSON.parse(fs.readFileSync('public/locales/uz/common.json'));
+	const t = (key, variables = {}) =>
+		(ctx.router.locale === 'uz' ? uz[key] || key : key).replace(/{{(\w+)}}/g, (_, name) => variables[name] ?? '');
 	const Assistant = load('libs/components/AiAssistant.tsx', {
 		'@apollo/client': { useReactiveVar: (variable) => (variable === 'token' ? ctx.token : ctx.member) },
 		'../../apollo/store': { memberVar: 'member', accessTokenVar: 'token' },
@@ -98,7 +100,7 @@ function environment() {
 			},
 		},
 		'next/router': { useRouter: () => ctx.router },
-		'next-i18next': { useTranslation: () => ({ t, i18n: { language: 'en' } }) },
+		'next-i18next': { useTranslation: () => ({ t, i18n: { language: ctx.router.locale || 'en' } }) },
 		'next/link': {
 			__esModule: true,
 			default: ({ href, children, onClick }) =>
@@ -319,6 +321,30 @@ test('access renewal in the same session retains Gemini history and accepts an i
 		await ctx.resolve();
 		assert.match(document.body.textContent, /Keep this conversation/);
 		assert.equal(document.querySelectorAll('article').length, 2);
+	} finally {
+		await ctx.cleanup();
+	}
+});
+
+test('Uzbek AI UI sends selected locale, preserves original conversation text across language changes and retries the original context', async () => {
+	const ctx = environment();
+	try {
+		ctx.router = { pathname: '/', query: {}, locale: 'uz' };
+		await ctx.render();
+		await ctx.click('AI yordamchi');
+		assert.match(document.body.textContent, /Qayerga sayohat qilishni xohlaysiz/);
+		await ctx.change('Please answer in English about Seoul');
+		await ctx.click('AI yordamchiga yuborish');
+		assert.equal(ctx.requests[0].options.variables.input.locale, 'uz');
+		assert.equal(ctx.requests[0].options.variables.input.message, 'Please answer in English about Seoul');
+		await ctx.reject('AI_UNAVAILABLE');
+		ctx.router.locale = 'ru';
+		await ctx.render();
+		assert.match(document.body.textContent, /Please answer in English about Seoul/);
+		await ctx.click('Retry');
+		assert.equal(ctx.requests[1].options.variables.input.locale, 'uz');
+		await ctx.resolve(1, 'Original English answer');
+		assert.match(document.body.textContent, /Original English answer/);
 	} finally {
 		await ctx.cleanup();
 	}

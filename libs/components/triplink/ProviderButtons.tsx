@@ -37,7 +37,7 @@ export function ProviderButtons({ returnTo, disabled }: { returnTo: unknown; dis
 		<Stack className="triplink-providers" spacing={1.5}>
 			{error && (
 				<Alert severity="warning" action={<Button onClick={() => setRetry(retry + 1)}>{t('Retry')}</Button>}>
-					{t(error)}
+					{t(error, { defaultValue: t('Something went wrong!') })}
 				</Alert>
 			)}
 			{!!providers.length && <p className="triplink-providers__divider">{t('Or continue with')}</p>}

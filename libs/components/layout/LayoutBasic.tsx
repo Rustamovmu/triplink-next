@@ -91,7 +91,7 @@ const withLayoutBasic = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>{router.pathname === '/help-center' ? `${t('Help Center')} | TripLink` : 'TripLink'}</title>
+						<title>{memoizedValues.title ? `${t(memoizedValues.title)} | TripLink` : 'TripLink'}</title>
 						<meta
 							name="description"
 							content={
@@ -123,7 +123,7 @@ const withLayoutBasic = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>{router.pathname === '/help-center' ? `${t('Help Center')} | TripLink` : 'TripLink'}</title>
+						<title>{memoizedValues.title ? `${t(memoizedValues.title)} | TripLink` : 'TripLink'}</title>
 						<meta
 							name="description"
 							content={

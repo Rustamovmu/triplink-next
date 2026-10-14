@@ -216,7 +216,7 @@ export default function TourSearchPage() {
 			return `${search.durationRange.start}–${search.durationRange.end} ${t('days')}`;
 		if (id === 'price' && search.priceRange) return `$${search.priceRange.start}–$${search.priceRange.end}`;
 		if (id === 'dates' && search.availableDateRange) {
-			const locale = router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : 'en-US';
+			const locale = (router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : router.locale === 'uz' ? 'uz-UZ' : 'en-US');
 			return [search.availableDateRange.start, search.availableDateRange.end]
 				.map((date) => new Date(date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }))
 				.join(' – ');

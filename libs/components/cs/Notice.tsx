@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next';
 import { HELP_ENTRIES, HELP_ENTRY } from '../../../apollo/user/triplink';
 import { Pager, QueryState, usePublicReady, displayDate } from '../triplink/Common';
 export default function Notice() {
-	const { t } = useTranslation('common');
+	const { t, i18n } = useTranslation('common');
 	const ready = usePublicReady();
 	const [page, setPage] = useState(1);
 	const [text, setText] = useState('');
@@ -63,7 +63,7 @@ export default function Notice() {
 					{query.data?.result.list.map((entry) => (
 						<button type="button" key={entry._id} onClick={() => setSelected(entry._id)} aria-haspopup="dialog">
 							<CampaignOutlinedIcon aria-hidden="true" />
-							<time dateTime={entry.createdAt}>{displayDate(entry.createdAt)}</time>
+							<time dateTime={entry.createdAt}>{displayDate(entry.createdAt, i18n.language)}</time>
 							<h3>{entry.noticeTitle}</h3>
 							<p>{entry.noticeContent}</p>
 							<span>{t('Read notice')}</span>

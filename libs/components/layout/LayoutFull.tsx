@@ -1,3 +1,4 @@
+import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
@@ -18,6 +19,7 @@ const withLayoutFull = (Component: any) => {
 	return function FullLayout(props: any) {
 		const router = useRouter();
 		const device = useDeviceDetect();
+		const { t } = useTranslation('common');
 
 		/** LIFECYCLES **/
 		useEffect(() => {
@@ -30,7 +32,8 @@ const withLayoutFull = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>TripLink</title>
+						<title>{`TripLink · ${t('Travel with TripLink')}`}</title>
+						<meta name="description" content={t('Discover tours, connect with travel agents, and share your journeys with TripLink.')} />
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="mobile-wrap">
@@ -53,7 +56,8 @@ const withLayoutFull = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>TripLink</title>
+						<title>{`TripLink · ${t('Travel with TripLink')}`}</title>
+						<meta name="description" content={t('Discover tours, connect with travel agents, and share your journeys with TripLink.')} />
 						<meta name={'title'} content={`TripLink`} />
 					</Head>
 					<Stack id="pc-wrap">

@@ -135,7 +135,9 @@ export function AdminMembers() {
 	};
 	const date = (value: string) => {
 		const parsed = new Date(value);
-		return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleDateString(i18n.language);
+		return Number.isNaN(parsed.getTime())
+			? '—'
+			: parsed.toLocaleDateString(i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'uz' ? 'uz-UZ' : i18n.language);
 	};
 	return (
 		<section className="admin-members">
@@ -310,7 +312,7 @@ export function AdminMembers() {
 													<Button
 														size="small"
 														onClick={() =>
-															void tools.run(() => navigator.clipboard.writeText(member._id), t('Member ID copied'))
+															void tools.run(() => navigator.clipboard.writeText(member._id), 'Member ID copied')
 														}
 													>
 														{t('Copy ID')}

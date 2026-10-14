@@ -1,0 +1,622 @@
+{
+  "pages": [
+    {
+      "locale": "uz",
+      "route": "/",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/tour",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/tour/detail",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/agent",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/agent/detail",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/member",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/community",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/community/detail",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/help-center",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/about",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/account/join",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/account/recovery",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/account/onboarding",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/account/complete",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/mypage",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/_admin/users",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/_admin/tours",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/_admin/bookings",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/_admin/reviews",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/_admin/community",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/_admin/cs/faq",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "uz",
+      "route": "/_admin/cs/notice",
+      "status": 200,
+      "htmlLanguage": "uz",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "en",
+      "route": "/",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/tour",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/tour/detail",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/agent",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/agent/detail",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/member",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/community",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/community/detail",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/help-center",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/about",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/account/join",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/account/recovery",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/account/onboarding",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/account/complete",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/mypage",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/_admin/users",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/_admin/tours",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/_admin/bookings",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/_admin/reviews",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/_admin/community",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/_admin/cs/faq",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "en",
+      "route": "/_admin/cs/notice",
+      "status": 200,
+      "htmlLanguage": "en",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/tour",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/tour/detail",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/agent",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/agent/detail",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/member",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/community",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/community/detail",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/help-center",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/about",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/account/join",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/account/recovery",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/account/onboarding",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/account/complete",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/mypage",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/_admin/users",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/_admin/tours",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/_admin/bookings",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/_admin/reviews",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/_admin/community",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/_admin/cs/faq",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "kr",
+      "route": "/_admin/cs/notice",
+      "status": 200,
+      "htmlLanguage": "ko",
+      "dictionaryKeys": 1027
+    },
+    {
+      "locale": "ru",
+      "route": "/",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/tour",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/tour/detail",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/agent",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/agent/detail",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/member",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/community",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/community/detail",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/help-center",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/about",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/account/join",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/account/recovery",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/account/onboarding",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/account/complete",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/mypage",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/_admin/users",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/_admin/tours",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/_admin/bookings",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/_admin/reviews",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/_admin/community",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/_admin/cs/faq",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    },
+    {
+      "locale": "ru",
+      "route": "/_admin/cs/notice",
+      "status": 200,
+      "htmlLanguage": "ru",
+      "dictionaryKeys": 1043
+    }
+  ],
+  "preferenceRedirects": 3,
+  "errors": []
+}

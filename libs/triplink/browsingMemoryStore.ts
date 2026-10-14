@@ -23,7 +23,7 @@ export type BrowsingEntry = {
 const routes = new Set(['/', '/tour', '/tour/detail', '/agent', '/agent/detail', '/community', '/community/detail']);
 export function browsingRoute(url: string, locale = 'en'): { route: string; locale: string; supported: boolean } {
 	const parsed = new URL(url, 'http://triplink.local');
-	const prefix = parsed.pathname.match(/^\/(en|kr|ru)(?=\/|$)/);
+	const prefix = parsed.pathname.match(/^\/(en|kr|ru|uz)(?=\/|$)/);
 	const pathname = (prefix ? parsed.pathname.slice(prefix[0].length) : parsed.pathname).replace(/\/$/, '') || '/';
 	parsed.searchParams.sort();
 	return { route: pathname + parsed.search, locale: prefix?.[1] ?? locale, supported: routes.has(pathname) };
@@ -64,6 +64,18 @@ export class NavigationMemory {
 	begin(url: string, locale: string, restore?: BrowsingEntry, pop = false) {
 		const previous = this.active;
 		const next = pop && restore ? restore : this.create(url, locale);
+		// Switching language on this page keeps its controls and scroll anchors.
+		if (!restore && previous.route === next.route && previous.locale !== next.locale) {
+			Object.assign(next, {
+				x: previous.x,
+				y: previous.y,
+				width: previous.width,
+				height: previous.height,
+				ui: { ...previous.ui },
+				item: previous.item,
+				section: previous.section,
+			});
+		}
 		if (restore && !pop) Object.assign(next, restore, { id: next.id, ui: { ...restore.ui } });
 		if (!pop) {
 			next.previous = previous.id;
@@ -126,7 +138,7 @@ function validEntry(entry: BrowsingEntry): boolean {
 		entry.route.startsWith('//')
 	)
 		return false;
-	if (!browsingRoute(entry.route).supported || !['en', 'kr', 'ru'].includes(entry.locale)) return false;
+	if (!browsingRoute(entry.route).supported || !['en', 'kr', 'ru', 'uz'].includes(entry.locale)) return false;
 	if (
 		![entry.time, entry.x, entry.y, entry.width, entry.height].every((value) => Number.isFinite(value) && value >= 0) ||
 		entry.time > Date.now() + 1000

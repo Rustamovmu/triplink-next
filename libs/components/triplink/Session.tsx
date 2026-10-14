@@ -27,7 +27,7 @@ export function SessionBootstrap() {
 	}, []);
 	return status === 'error' ? (
 		<Alert severity="error" action={<Button onClick={() => void restoreSession(true)}>{t('Retry')}</Button>}>
-			{t(error)}
+			{t(error, { defaultValue: t('Something went wrong!') })}
 		</Alert>
 	) : null;
 }
@@ -47,7 +47,7 @@ export function Access({ roles, children }: { roles?: Role[]; children: ReactNod
 	if (session === 'error')
 		return (
 			<Alert severity="error" action={<Button onClick={() => void restoreSession(true)}>{t('Retry')}</Button>}>
-				{t(error)}
+				{t(error, { defaultValue: t('Something went wrong!') })}
 			</Alert>
 		);
 	if (!member)

@@ -88,7 +88,7 @@ export function SecuritySettings() {
 		}
 	};
 	const date = (value: string) =>
-		new Intl.DateTimeFormat(i18n.language === 'kr' ? 'ko' : i18n.language, {
+		new Intl.DateTimeFormat((i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US'), {
 			dateStyle: 'medium',
 			timeStyle: 'short',
 		}).format(new Date(value));
@@ -99,7 +99,7 @@ export function SecuritySettings() {
 					severity="error"
 					action={!status ? <Button onClick={() => void load()}>{t('Retry')}</Button> : undefined}
 				>
-					{t(error)}
+					{t(error, { defaultValue: t('Something went wrong!') })}
 				</Alert>
 			)}
 			{success && <Alert severity="success">{t(success)}</Alert>}

@@ -29,7 +29,7 @@ function ReviewRow({ review, admin, refetch }: { review: Review; admin: boolean;
 				<Stack spacing={2}>
 					{action.feedback}
 					<Typography>
-						{review.tourData?.tourTitle ?? 'Tour unavailable'} · {t(review.reviewStatus)} · ★ {review.reviewRating}
+						{review.tourData?.tourTitle ?? t('Tour unavailable')} · {t(review.reviewStatus)} · ★ {review.reviewRating}
 					</Typography>
 					<Typography sx={{ whiteSpace: 'pre-wrap' }}>{review.reviewComment}</Typography>
 					{!admin && member?.memberType === 'USER' && review.reviewStatus === 'ACTIVE' && (

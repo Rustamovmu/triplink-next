@@ -59,7 +59,8 @@ export default function AiAssistant() {
 	const panel = useRef<HTMLDivElement>(null);
 	const feed = useRef<HTMLDivElement>(null);
 	const composing = useRef(false);
-	const locale = i18n.language === 'kr' ? 'ko' : i18n.language || 'en';
+	const locale =
+		i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US';
 	const price = (value: number) =>
 		new Intl.NumberFormat(locale, {
 			style: 'currency',
@@ -103,7 +104,12 @@ export default function AiAssistant() {
 		if (feed.current && open) feed.current.scrollTop = feed.current.scrollHeight;
 	}, [ai.turns, ai.loading, ai.error, open]);
 	const context = (intent?: AiIntent): Omit<AiChatInput, 'message' | 'history'> => {
-		const result: Omit<AiChatInput, 'message' | 'history'> = { detailed, ...(intent ? { intent } : {}) };
+		const selected = router.locale || i18n.language;
+		const result: Omit<AiChatInput, 'message' | 'history'> = {
+			detailed,
+			...(intent ? { intent } : {}),
+			...(['en', 'kr', 'ru', 'uz'].includes(selected) ? { locale: selected as AiChatInput['locale'] } : {}),
+		};
 		if (
 			!intent &&
 			router.pathname === '/tour/detail' &&

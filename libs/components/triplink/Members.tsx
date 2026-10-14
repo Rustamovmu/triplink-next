@@ -230,7 +230,7 @@ function FollowsList({ memberId, following }: { memberId: string; following: boo
 												if (!result.data?.result) throw new Error('Follow request failed');
 												await refreshCurrentMember();
 												await client.refetchQueries({ include: [FOLLOWERS, FOLLOWINGS, MEMBER] });
-											}, t(row.isFollowing ? 'Member unfollowed' : 'Member followed'))
+											}, row.isFollowing ? 'Member unfollowed' : 'Member followed')
 										}
 									>
 										{t(row.isFollowing ? 'Unfollow' : 'Follow')}

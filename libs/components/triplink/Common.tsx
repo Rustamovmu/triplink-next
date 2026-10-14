@@ -41,7 +41,7 @@ export function QueryState({
 	if (error)
 		return (
 			<Alert severity="error" action={retry && <Button onClick={() => retry()}>{t('Retry')}</Button>}>
-				{t(errorMessage(error))}
+				{t(errorMessage(error), { defaultValue: t('Something went wrong!') })}
 			</Alert>
 		);
 	if (empty) return <Alert severity="info">{t('No results')}</Alert>;
@@ -63,6 +63,11 @@ export function Pager({
 	return total > limit ? (
 		<Pagination
 			aria-label={t('Pages')}
+			getItemAriaLabel={(type, page) =>
+				type === 'page'
+					? t('Go to page {{page}}', { page })
+					: t({ first: 'First page', last: 'Last page', next: 'Next page', previous: 'Previous page' }[type])
+			}
 			count={Math.ceil(total / limit)}
 			page={page}
 			onChange={(_, value) => onChange(value)}
@@ -74,7 +79,7 @@ export function useAction() {
 	const [busy, setBusy] = useState(false);
 	const [notice, setNotice] = useState<{ severity: 'error' | 'success'; text: string } | null>(null);
 	const { t } = useTranslation('common');
-	const run = async (action: () => Promise<unknown>, success: string | null = t('Saved')) => {
+	const run = async (action: () => Promise<unknown>, success: string | null = 'Saved') => {
 		if (lock.current) return;
 		lock.current = true;
 		setBusy(true);
@@ -83,7 +88,7 @@ export function useAction() {
 			await action();
 			if (success !== null) setNotice({ severity: 'success', text: success });
 		} catch (error: unknown) {
-			setNotice({ severity: 'error', text: t(errorMessage(error)) });
+			setNotice({ severity: 'error', text: errorMessage(error) });
 		} finally {
 			lock.current = false;
 			setBusy(false);
@@ -94,7 +99,7 @@ export function useAction() {
 		run,
 		feedback: notice && (
 			<Alert severity={notice.severity} onClose={() => setNotice(null)}>
-				{notice.text}
+				{t(notice.text, { defaultValue: t('Something went wrong!') })}
 			</Alert>
 		),
 	};
@@ -107,4 +112,10 @@ export const imageUrl = (path?: string | null) =>
 		? path
 		: `${process.env.REACT_APP_API_URL || 'http://localhost:3007'}/${path.replace(/^\//, '')}`;
 export const validId = (id: unknown): id is string => typeof id === 'string' && /^[a-f\d]{24}$/i.test(id);
-export const displayDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleString() : '—');
+export const displayDate = (iso?: string | null, locale = 'en') =>
+	!iso || Number.isNaN(Date.parse(iso))
+		? '—'
+		: new Intl.DateTimeFormat(locale === 'kr' ? 'ko-KR' : locale === 'uz' ? 'uz-UZ' : locale, {
+				dateStyle: 'medium',
+				timeStyle: 'short',
+		  }).format(new Date(iso));

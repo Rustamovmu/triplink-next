@@ -119,7 +119,7 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 	const saved = favorites.saved.has(tour._id);
 	const favoriteCount = favorites.counts[tour._id] ?? tour.tourFavoriteCount;
 	const { locale = 'en' } = useRouter();
-	const displayLocale = locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : 'en-US';
+	const displayLocale = (locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US');
 	const price = new Intl.NumberFormat(displayLocale, {
 		style: 'currency',
 		currency: 'USD',
@@ -226,7 +226,7 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 				</div>
 				{(favorites.error || favorites.errors[tour._id]) && (
 					<p role="alert" className="triplink-tour-card__error">
-						{t(favorites.error || favorites.errors[tour._id])}
+						{t(favorites.error || favorites.errors[tour._id], { defaultValue: t('Something went wrong!') })}
 					</p>
 				)}
 				<div className="triplink-tour-card__bottom">
@@ -317,7 +317,7 @@ export function PublicReviews({ tourId, agentId }: { tourId?: string; agentId?: 
 					<Card variant="outlined" key={review._id}>
 						<CardContent>
 							<Typography>
-								★ {review.reviewRating} · {review.userData?.memberNick ?? 'Unavailable member'}
+								★ {review.reviewRating} · {review.userData?.memberNick ?? t('Unavailable member')}
 							</Typography>
 							<Typography sx={{ whiteSpace: 'pre-wrap' }}>{review.reviewComment}</Typography>
 						</CardContent>
