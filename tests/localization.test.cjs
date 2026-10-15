@@ -16,8 +16,10 @@ function load(file, requireModule = require) {
 test('all namespaces cover every existing locale key, preserve original translations and contain no missing literal UI keys', () => {
 	const report = audit();
 	assert.deepEqual(report.errors, []);
-	assert.deepEqual(report.preserved, { en: true, kr: true, ru: true });
-	assert.equal(report.counts['uz/common.json'], report.counts['ru/common.json']);
+	assert.deepEqual(report.preserved, { en: true, kr: true });
+	assert.ok(report.counts['uz/common.json'] >= report.counts['en/common.json']);
+	assert.deepEqual(report.locales, ['en', 'kr', 'uz']);
+	assert.deepEqual(fs.readdirSync('public/locales').sort(), ['en', 'kr', 'uz']);
 });
 test('audit rejects empty and missing translations, changed interpolation, nested shape drift, duplicates and Cyrillic Uzbek', () => {
 	const source = { nested: { heading: 'Hello {{name}}' } };
@@ -28,7 +30,7 @@ test('audit rejects empty and missing translations, changed interpolation, neste
 	assert.equal(compare(source, { nested: { heading: 'Салом {{name}}' } }, 'uz', true).length, 1);
 	assert.equal(duplicateKeys('{"outer":{"key":"a","key":"b"}}', 'fixture').length, 1);
 });
-test('real i18next uses Uzbek counts/interpolation and English fallback through all four language transitions', async () => {
+test('real i18next uses Uzbek counts/interpolation and English fallback through all three language transitions', async () => {
 	const i18n = i18next.createInstance();
 	const config = require('../next-i18next.config');
 	const resources = Object.fromEntries(
@@ -51,7 +53,6 @@ test('real i18next uses Uzbek counts/interpolation and English fallback through 
 		['en', 'Tours'],
 		['uz', 'Sayohatlar'],
 		['kr', resources.kr.common.Tours],
-		['ru', resources.ru.common.Tours],
 		['en', 'Tours'],
 	]) {
 		await i18n.changeLanguage(locale);
@@ -65,7 +66,7 @@ test('SSR translation loader reads a full Uzbek dictionary before rendering', as
 	assert.equal(props._nextI18Next.initialI18nStore.uz.common.Tours, 'Sayohatlar');
 	assert.equal(props._nextI18Next.initialI18nStore.en.common.Tours, 'Tours');
 });
-test('homepage translations stay below the page-data budget with identical translations in all four locales', async () => {
+test('homepage translations stay below the page-data budget with identical translations in all three locales', async () => {
 	const { serverSideTranslations: originalLoader } = require('next-i18next/serverSideTranslations');
 	const { serverSideTranslations } = load('libs/triplink/serverSideTranslations.ts');
 	const config = require('../next-i18next.config');
@@ -103,9 +104,9 @@ test('homepage loader retains missing, empty and null English fallbacks without 
 	const config = require('../next-i18next.config');
 	const original = {
 		_nextI18Next: {
-			initialLocale: 'ru', ns: ['common'], userConfig: config,
+			initialLocale: 'uz', ns: ['common'], userConfig: config,
 			initialI18nStore: {
-				ru: { common: { Tours: 'Туры', Empty: '', Null: null } },
+				uz: { common: { Tours: 'Sayohatlar', Empty: '', Null: null } },
 				en: { common: {
 					Tours: 'Tours', Empty: 'Empty fallback', Null: 'Null fallback',
 					'Missing {{name}}': 'Welcome {{name}}',
@@ -120,15 +121,15 @@ test('homepage loader retains missing, empty and null English fallbacks without 
 		assert.equal(name, 'next-i18next/serverSideTranslations');
 		return { serverSideTranslations: async () => original };
 	});
-	const compact = await serverSideTranslations('ru', ['common']);
+	const compact = await serverSideTranslations('uz', ['common']);
 	assert.equal(JSON.stringify(original), snapshot);
 	assert.equal(compact._nextI18Next.initialI18nStore.en.common.Tours, undefined);
 	const i18n = i18next.createInstance();
 	await i18n.init({
-		...config, lng: 'ru', defaultNS: 'common', returnNull: false, returnEmptyString: false,
+		...config, lng: 'uz', defaultNS: 'common', returnNull: false, returnEmptyString: false,
 		resources: compact._nextI18Next.initialI18nStore,
 	});
-	assert.equal(i18n.t('Tours'), 'Туры');
+	assert.equal(i18n.t('Tours'), 'Sayohatlar');
 	assert.equal(i18n.t('Empty'), 'Empty fallback');
 	assert.equal(i18n.t('Null'), 'Null fallback');
 	assert.equal(i18n.t('Missing {{name}}', { name: 'Aziza' }), 'Welcome Aziza');
@@ -137,10 +138,42 @@ test('homepage loader retains missing, empty and null English fallbacks without 
 	}
 	assert.strictEqual(await serverSideTranslations('en', ['common']), original);
 });
+test('About and Help Center loaders use only supported locales and stay below 128 kB', async () => {
+	const { i18n } = require('../next-i18next.config');
+	for (const file of ['pages/about/index.tsx', 'pages/help-center/index.tsx']) {
+		const ast = ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+		// Execute the page's actual data loader without loading its client components.
+		const source = ast.statements.filter((statement) =>
+			(ts.isImportDeclaration(statement) && statement.moduleSpecifier.text.endsWith('/serverSideTranslations')) ||
+			(ts.isVariableStatement(statement) && statement.declarationList.declarations.some((d) => d.name.getText(ast) === 'getStaticProps')),
+		).map((statement) => statement.getText(ast)).join('\n');
+		const exports = {};
+		new Function('require', 'exports', ts.transpileModule(source, { compilerOptions: { module: 1 } }).outputText)(require, exports);
+		for (const locale of i18n.locales) {
+			const { props } = await exports.getStaticProps({ locale });
+			assert.equal(props._nextI18Next.initialLocale, locale);
+			assert.deepEqual(Object.keys(props._nextI18Next.initialI18nStore).sort(), [...new Set([locale, 'en'])].sort());
+			assert.ok(Object.keys(props._nextI18Next.initialI18nStore[locale].common).length >= 1027);
+			assert.ok(Buffer.byteLength(JSON.stringify(props)) + 1024 < 128 * 1024, `${file}: ${locale} exceeds the page-data budget`);
+		}
+	}
+});
+test('browsing memory discards obsolete Russian entries and keeps supported-language entries', () => {
+	const { NavigationMemory, browsingRoute, MEMORY_KEY } = load('libs/triplink/browsingMemoryStore.ts');
+	const memory = new NavigationMemory('/tour', 'uz');
+	const supported = memory.active;
+	const obsolete = memory.create('/tour', 'ru');
+	const stored = JSON.stringify({ version: 1, active: obsolete.id, entries: [supported, obsolete] });
+	memory.load({ getItem: (key) => key === MEMORY_KEY ? stored : null });
+	assert.equal(memory.get(obsolete.id), undefined);
+	assert.equal(memory.get(supported.id).locale, 'uz');
+	assert.equal(browsingRoute('/ru/tour').supported, false);
+});
 test('Uzbek dates preserve the instant and USD formatting preserves the value and currency', () => {
 	const { regionalLocale, formatDate, formatCurrency } = load('libs/triplink/locale.ts');
 	assert.equal(regionalLocale('uz'), 'uz-UZ');
 	assert.equal(regionalLocale('kr'), 'ko-KR');
+	assert.equal(regionalLocale('ru'), 'en-US');
 	const iso = '2026-10-14T09:00:00.000Z';
 	assert.equal(
 		formatDate(iso, 'uz'),

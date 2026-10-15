@@ -27,7 +27,7 @@ test('confirmed-booking conflicts explain the restriction while unrelated confli
 	assert.equal(errorMessage(conflict('Cannot resubmit a tour with confirmed bookings.')), restriction);
 	assert.equal(errorMessage(conflict('UPDATE_FAILED')), 'This record changed. Refresh and try again.');
 	assert.equal(errorMessage({ networkError: new Error('offline') }), 'Unable to reach the server. Please retry.');
-	for (const locale of ['en', 'kr', 'ru']) {
+	for (const locale of ['en', 'kr', 'uz']) {
 		const dictionary = JSON.parse(fs.readFileSync(`public/locales/${locale}/common.json`, 'utf8'));
 		for (const key of [
 			restriction,

@@ -60,7 +60,7 @@ export default function AiAssistant() {
 	const feed = useRef<HTMLDivElement>(null);
 	const composing = useRef(false);
 	const locale =
-		i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US';
+		i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US';
 	const price = (value: number) =>
 		new Intl.NumberFormat(locale, {
 			style: 'currency',
@@ -108,7 +108,7 @@ export default function AiAssistant() {
 		const result: Omit<AiChatInput, 'message' | 'history'> = {
 			detailed,
 			...(intent ? { intent } : {}),
-			...(['en', 'kr', 'ru', 'uz'].includes(selected) ? { locale: selected as AiChatInput['locale'] } : {}),
+			...(['en', 'kr', 'uz'].includes(selected) ? { locale: selected as AiChatInput['locale'] } : {}),
 		};
 		if (
 			!intent &&

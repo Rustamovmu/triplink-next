@@ -261,7 +261,7 @@ test('featured tour query, one/two/six carousel results, links, translations, pr
 		},
 	};
 	const translations = Object.fromEntries(
-		['en', 'kr', 'ru'].map((language) => [
+		['en', 'kr', 'uz'].map((language) => [
 			language,
 			JSON.parse(fs.readFileSync(`public/locales/${language}/common.json`, 'utf8')),
 		]),
@@ -376,10 +376,10 @@ test('featured tour query, one/two/six carousel results, links, translations, pr
 		favorites = { ...favorites, anonymous: false, eligible: false };
 		await render();
 		assert.equal(document.querySelector('.triplink-home-save'), null);
-		for (const language of ['kr', 'ru']) {
+		for (const language of ['kr', 'uz']) {
 			locale = language;
 			await render();
-			assert.equal(document.querySelector('section').lang, language === 'kr' ? 'ko' : 'ru');
+			assert.equal(document.querySelector('section').lang, language === 'kr' ? 'ko' : 'uz');
 			assert.equal(
 				document.querySelector('.triplink-home-section__statement').textContent,
 				translations[language]['Make room for a memorable journey.'],

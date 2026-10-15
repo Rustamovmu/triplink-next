@@ -120,7 +120,7 @@ export default function Chat() {
 	const metrics = useRef({ top: 0, height: 0 });
 	const selection = useRef({ start: 0, end: 0 });
 	const composing = useRef(false);
-	const locale = (i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US');
+	const locale = (i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US');
 	const time = (date: string) =>
 		new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(new Date(date));
 	const fullDate = (date: string) =>

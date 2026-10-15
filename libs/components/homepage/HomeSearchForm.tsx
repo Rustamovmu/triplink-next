@@ -5,10 +5,9 @@ import {
 	LocalizationProvider,
 	enUS as pickerEn,
 	koKR as pickerKo,
-	ruRU as pickerRu,
 } from '@mui/x-date-pickers-pro';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { enUS, ko, ru, uz } from 'date-fns/locale';
+import { enUS, ko, uz } from 'date-fns/locale';
 import {
 	ArrowForwardRounded,
 	AddRounded,
@@ -104,9 +103,9 @@ export default function HomeSearchForm() {
 				</label>
 				<LocalizationProvider
 					dateAdapter={AdapterDateFns}
-					adapterLocale={router.locale === 'kr' ? ko : router.locale === 'ru' ? ru : router.locale === 'uz' ? uz : enUS}
+					adapterLocale={router.locale === 'kr' ? ko : router.locale === 'uz' ? uz : enUS}
 					localeText={{
-						...(router.locale === 'kr' ? pickerKo : router.locale === 'ru' ? pickerRu : pickerEn).components
+						...(router.locale === 'kr' ? pickerKo : pickerEn).components
 							.MuiLocalizationProvider.defaultProps.localeText,
 						...(router.locale === 'uz'
 							? {

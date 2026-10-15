@@ -18,7 +18,7 @@ export interface AiTourSource {
 }
 export interface AiChatInput {
 	message: string;
-	locale?: 'en' | 'kr' | 'ru' | 'uz';
+	locale?: 'en' | 'kr' | 'uz';
 	history?: AiMessage[];
 	intent?: AiIntent;
 	tourId?: string;

@@ -60,7 +60,7 @@ function HomeArticleCard({ article }: { article: Article }) {
 	const name = author?.memberFullname || author?.memberNick || t('Community member') || 'Community member';
 	const href = `/community/detail?id=${article._id}`;
 	const date = new Date(article.createdAt);
-	const language = (locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US');
+	const language = (locale === 'kr' ? 'ko-KR' : locale === 'uz' ? 'uz-UZ' : 'en-US');
 	const number = new Intl.NumberFormat(language);
 	const text = articleText(article.articleContent);
 	const cjkCharacters = (text.match(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g) || []).length;

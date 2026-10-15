@@ -88,7 +88,7 @@ function audit() {
 		for (const locale of locales)
 			if (all[locale]) errors.push(...compare(all.en, all[locale], `${locale}/${namespace}`, locale === 'uz'));
 		// Include extra plural forms present in the other existing languages.
-		for (const locale of ['kr', 'ru'])
+		for (const locale of locales.filter((locale) => locale !== 'en' && locale !== 'uz'))
 			if (all[locale]) errors.push(...compare(all[locale], all.uz, `uz matching ${locale}/${namespace}`, true));
 		for (const [key, value] of Object.entries(all.uz)) {
 			if (

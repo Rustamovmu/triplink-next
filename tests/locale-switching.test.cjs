@@ -73,11 +73,10 @@ test('navbar switches all languages on a filtered detail route, persists one pre
 			[
 				['en', 'English'],
 				['kr', '한국어'],
-				['ru', 'Русский'],
 				['uz', 'O‘zbekcha'],
 			],
 		);
-		for (const locale of ['uz', 'kr', 'ru', 'en']) {
+		for (const locale of ['uz', 'kr', 'en']) {
 			const select = document.querySelector('select');
 			await act(async () => select.focus());
 			await act(async () => Simulate.pointerDown(select, { pointerType: 'mouse' }));
@@ -105,6 +104,7 @@ test('navbar switches all languages on a filtered detail route, persists one pre
 		await act(async () => Simulate.click(document.querySelector('.triplink-top__menu-button')));
 		const drawerSelect = document.querySelector('.triplink-nav-drawer__language select');
 		assert.ok(drawerSelect);
+		assert.deepEqual([...drawerSelect.options].map((option) => option.value), ['en', 'kr', 'uz']);
 		await act(async () => drawerSelect.focus());
 		await act(async () => Simulate.pointerDown(drawerSelect, { pointerType: 'touch' }));
 		assert.equal(drawerSelect.dataset.focusModality, 'pointer');
@@ -136,9 +136,29 @@ test('locale middleware restores callbacks before SSR, preserving queries and re
 		'http://localhost:3000/uz/account/complete?security=1',
 	);
 	assert.equal(middleware(request('/', 'NEXT_LOCALE=uz')).headers.get('location'), 'http://localhost:3000/uz');
-	assert.equal(middleware(request('/ru/account/complete?security=1', 'NEXT_LOCALE=uz')).headers.get('location'), null);
+	assert.equal(middleware(request('/kr/account/complete?security=1', 'NEXT_LOCALE=uz')).headers.get('location'), null);
 	assert.equal(middleware(request('/account/complete', 'NEXT_LOCALE=invalid')).headers.get('location'), null);
 	assert.equal(middleware(request('/', 'NEXT_LOCALE=en')).headers.get('location'), null);
+});
+test('retired Russian URLs redirect to English with their queries and replace obsolete language cookies', () => {
+	const { NextRequest } = require('next/server');
+	const { middleware, config: middlewareConfig } = load('middleware.ts');
+	const { i18n } = require('../next-i18next.config');
+	assert.ok(middlewareConfig.matcher.includes('/ru/:path*'));
+	const request = (path, cookie = 'NEXT_LOCALE=uz') =>
+		new NextRequest('http://localhost:3000' + path, { headers: { cookie }, nextConfig: { i18n } });
+	for (const path of ['/', '/about/', '/help-center/', '/account/complete', '/tour/detail']) {
+		const response = middleware(request('/ru' + path + '?id=abc&tag=city&tag=food&security=1'));
+		assert.equal(response.status, 307);
+		assert.equal(response.headers.get('location'), 'http://localhost:3000' + path + '?id=abc&tag=city&tag=food&security=1');
+		assert.equal(response.cookies.get('NEXT_LOCALE').value, 'en');
+	}
+	assert.equal(middleware(request('/ru')).headers.get('location'), 'http://localhost:3000/');
+	for (const path of ['/', '/account/complete?security=1', '/uz/account/complete?security=1']) {
+		const response = middleware(request(path, 'NEXT_LOCALE=ru'));
+		assert.equal(response.headers.get('location'), null);
+		assert.equal(response.cookies.get('NEXT_LOCALE').value, 'en');
+	}
 });
 
 test('action notices follow the active language and unknown backend details remain private', async () => {

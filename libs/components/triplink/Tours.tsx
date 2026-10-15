@@ -119,7 +119,7 @@ export function TourCard({ tour, catalog = false }: { tour: Tour; catalog?: bool
 	const saved = favorites.saved.has(tour._id);
 	const favoriteCount = favorites.counts[tour._id] ?? tour.tourFavoriteCount;
 	const { locale = 'en' } = useRouter();
-	const displayLocale = (locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US');
+	const displayLocale = (locale === 'kr' ? 'ko-KR' : locale === 'uz' ? 'uz-UZ' : 'en-US');
 	const price = new Intl.NumberFormat(displayLocale, {
 		style: 'currency',
 		currency: 'USD',

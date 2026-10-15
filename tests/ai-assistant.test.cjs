@@ -338,7 +338,7 @@ test('Uzbek AI UI sends selected locale, preserves original conversation text ac
 		assert.equal(ctx.requests[0].options.variables.input.locale, 'uz');
 		assert.equal(ctx.requests[0].options.variables.input.message, 'Please answer in English about Seoul');
 		await ctx.reject('AI_UNAVAILABLE');
-		ctx.router.locale = 'ru';
+		ctx.router.locale = 'en';
 		await ctx.render();
 		assert.match(document.body.textContent, /Please answer in English about Seoul/);
 		await ctx.click('Retry');

@@ -74,7 +74,7 @@ async function harness() {
 	state.favorites.toggle = (id, count) => state.toggles.push([id, count]);
 	state.favorites.retry = () => state.retries++;
 	const translations = Object.fromEntries(
-		['en', 'kr', 'ru'].map((locale) => [
+		['en', 'kr', 'uz'].map((locale) => [
 			locale,
 			JSON.parse(fs.readFileSync(`public/locales/${locale}/common.json`, 'utf8')),
 		]),
@@ -305,7 +305,7 @@ test('rated pricing, image failure/replacement and translated metadata handle ed
 		ctx.state.tours = [tour({ tourImages: ['uploads/tour/replaced.jpg'] })];
 		await ctx.render();
 		assert.match(document.querySelector('article img').getAttribute('src'), /replaced/);
-		for (const locale of ['kr', 'ru']) {
+		for (const locale of ['kr', 'uz']) {
 			ctx.state.locale = locale;
 			ctx.state.tours = [
 				tour({
@@ -474,7 +474,7 @@ test('articles retain actual counts, detail routes, safe image fallbacks and col
 		await act(async () => document.querySelector('details button').click());
 		assert.equal(ctx.state.retries, 1);
 		ctx.state.commentError = undefined;
-		for (const locale of ['kr', 'ru']) {
+		for (const locale of ['kr', 'uz']) {
 			ctx.state.locale = locale;
 			await ctx.render('articles');
 			assert.equal(document.querySelector('summary').textContent, ctx.t('Home article comment count', { count: 7 }));

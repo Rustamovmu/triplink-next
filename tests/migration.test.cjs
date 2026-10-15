@@ -141,7 +141,7 @@ test('multipart uploads map exactly the selected file count without a boundary o
 	}
 });
 test('every migrated locale includes core marketplace and lifecycle translations', () => {
-	for (const locale of ['en', 'kr', 'ru']) {
+	for (const locale of ['en', 'kr', 'uz']) {
 		const dictionary = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/locales', locale, 'common.json')));
 		for (const key of [
 			'Tours',

@@ -175,7 +175,7 @@ export function CommunityArticleCard({ article, onChanged }: { article: Article;
 			<div className="triplink-story-card__body">
 				{!Number.isNaN(date.getTime()) && (
 					<time dateTime={article.createdAt}>
-						{new Intl.DateTimeFormat((locale === 'kr' ? 'ko-KR' : locale === 'ru' ? 'ru-RU' : locale === 'uz' ? 'uz-UZ' : 'en-US'), {
+						{new Intl.DateTimeFormat((locale === 'kr' ? 'ko-KR' : locale === 'uz' ? 'uz-UZ' : 'en-US'), {
 							month: 'short',
 							day: 'numeric',
 							year: 'numeric',
@@ -725,7 +725,7 @@ export function CommunityDetail() {
 	const date = article ? new Date(article.createdAt) : null;
 	const formattedDate =
 		date && !Number.isNaN(date.getTime())
-			? new Intl.DateTimeFormat((router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : router.locale === 'uz' ? 'uz-UZ' : 'en-US'), {
+			? new Intl.DateTimeFormat((router.locale === 'kr' ? 'ko-KR' : router.locale === 'uz' ? 'uz-UZ' : 'en-US'), {
 					month: 'long',
 					day: 'numeric',
 					year: 'numeric',

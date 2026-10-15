@@ -137,7 +137,7 @@ test('Top agents preserves server order, links, statistics, localized copy, and 
 		},
 	};
 	const translations = Object.fromEntries(
-		['en', 'kr', 'ru'].map((language) => [
+		['en', 'kr', 'uz'].map((language) => [
 			language,
 			JSON.parse(fs.readFileSync(`public/locales/${language}/common.json`, 'utf8')),
 		]),
@@ -233,10 +233,10 @@ test('Top agents preserves server order, links, statistics, localized copy, and 
 			[...document.querySelectorAll('.triplink-home-agent__portrait')].map((node) => node.textContent),
 			['M', 'А', '여', 'A'],
 		);
-		for (const language of ['kr', 'ru']) {
+		for (const language of ['kr', 'uz']) {
 			locale = language;
 			await render();
-			assert.equal(document.querySelector('section').lang, language === 'kr' ? 'ko' : 'ru');
+			assert.equal(document.querySelector('section').lang, language === 'kr' ? 'ko' : 'uz');
 			assert.equal(
 				document.querySelector('.triplink-home-section__statement').textContent,
 				translations[language]['Meet the people behind your next adventure.'],

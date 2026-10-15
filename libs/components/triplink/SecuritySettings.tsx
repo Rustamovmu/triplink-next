@@ -88,7 +88,7 @@ export function SecuritySettings() {
 		}
 	};
 	const date = (value: string) =>
-		new Intl.DateTimeFormat((i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US'), {
+		new Intl.DateTimeFormat((i18n.language === 'kr' ? 'ko-KR' : i18n.language === 'uz' ? 'uz-UZ' : 'en-US'), {
 			dateStyle: 'medium',
 			timeStyle: 'short',
 		}).format(new Date(value));

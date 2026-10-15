@@ -128,7 +128,6 @@ export default function Top() {
 			>
 				<option value="en">English</option>
 				<option value="kr">한국어</option>
-				<option value="ru">Русский</option>
 				<option value="uz">O‘zbekcha</option>
 			</select>
 		</label>
@@ -138,7 +137,7 @@ export default function Top() {
 		.slice(0, 2)
 		.join('')
 		.toLocaleUpperCase(
-			router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : router.locale === 'uz' ? 'uz-UZ' : 'en-US',
+			router.locale === 'kr' ? 'ko-KR' : router.locale === 'uz' ? 'uz-UZ' : 'en-US',
 		);
 	const avatar = () => (
 		<Avatar

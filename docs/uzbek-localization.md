@@ -1,5 +1,7 @@
 # Uzbek localization — 2026-10-14
 
+> Current status (2026-10-15): the frontend supports English, Korean and Uzbek. Russian has been removed; see [the removal record](language-removal.md). This dated implementation report and its linked JSON evidence describe the earlier four-language setup.
+
 ## Architecture and locale registration
 
 Extended the existing next-i18next / react-i18next / i18next setup, its `common` namespace, `appWithTranslation`, per-page `serverSideTranslations`, and Next.js Pages Router locale routing. No additional localization library or dependency was installed. Locales are `en`, `kr`, `ru`, `uz`; the inherited Korean URL identifier is deliberately retained. Document/Intl language identifiers map to `en` / `en-US`, `ko` / `ko-KR`, `ru` / `ru-RU`, and `uz` / `uz-UZ`. English remains the default and fallback. Phrase keys retain their spelling and are treated literally, including punctuation.
