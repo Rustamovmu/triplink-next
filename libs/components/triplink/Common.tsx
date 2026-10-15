@@ -1,11 +1,11 @@
 import { errorMessage } from '../../triplink/errors';
 import React, { ReactNode, useRef, useState } from 'react';
-import { Alert, Box, Button, CircularProgress, Container, Pagination, Stack, Typography } from '@mui/material';
+import { Alert, Button, CircularProgress, Container, Pagination, Stack, Typography } from '@mui/material';
 import { useReactiveVar } from '@apollo/client';
 import { sessionVar } from '../../../apollo/store';
 import { useTranslation } from 'next-i18next';
 export function Frame({ title, children }: { title: string; children: ReactNode }) {
-	const { t } = useTranslation('common');
+	useTranslation('common');
 
 	return (
 		<Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 }, minHeight: '50vh' }}>

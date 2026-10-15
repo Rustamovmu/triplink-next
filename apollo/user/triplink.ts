@@ -22,8 +22,6 @@ import {
 	FollowMember,
 	Inquiry,
 	PageResult,
-	Role,
-	MemberStatus,
 } from '../../libs/types/triplink';
 export type Result<T> = { result: T };
 export const CURRENT_MEMBER: TypedDocumentNode<Result<Member>, Record<string, never>> = gql`

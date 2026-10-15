@@ -27,7 +27,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 		document.documentElement.lang = regionalLocale(locale).split('-')[0];
 	}, [locale]);
 	// @ts-ignore
-	const [theme, setTheme] = useState(createTheme(light));
+	const [theme] = useState(createTheme(light));
 	const client = useApollo(pageProps.initialApolloState);
 
 	return (

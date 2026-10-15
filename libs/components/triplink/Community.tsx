@@ -26,7 +26,7 @@ import {
 } from '../../../apollo/admin/triplink';
 import { memberVar } from '../../../apollo/store';
 import { Article, ArticleCategory, Comment, totalOf } from '../../types/triplink';
-import { Frame, imageUrl, Pager, QueryState, useAction, usePublicReady, validId } from './Common';
+import { imageUrl, Pager, QueryState, useAction, usePublicReady, validId } from './Common';
 import { uploadImages } from '../../uploads';
 import { ArticleContent } from './ArticleContent';
 import { articleContentError, articleText } from './articleFormat';

@@ -437,7 +437,7 @@ function BookingRow({ booking, refetch }: { booking: Booking; refetch: () => Pro
 	);
 }
 export function BookingsPanel({ admin = false }: { admin?: boolean }) {
-	const { t, i18n } = useTranslation('common');
+	const { t } = useTranslation('common');
 
 	const member = useReactiveVar(memberVar);
 	const [page, setPage] = useState(1);

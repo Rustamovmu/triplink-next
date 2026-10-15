@@ -140,7 +140,7 @@ export function ProfileForm({ member }: { member: Member }) {
 	);
 }
 export function SavedTours({ visited = false }: { visited?: boolean }) {
-	const { t } = useTranslation('common');
+	useTranslation('common');
 
 	const [page, setPage] = useState(1);
 	const query = useQuery(visited ? VISITED : FAVORITES, {

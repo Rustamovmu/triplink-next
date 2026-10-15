@@ -274,7 +274,7 @@ export function TourList({
 	onPage?: (page: number) => void;
 	catalog?: boolean;
 }) {
-	const { t } = useTranslation('common');
+	useTranslation('common');
 
 	const ready = usePublicReady();
 	const query = useQuery(TOURS, { variables: { input }, skip: !ready, notifyOnNetworkStatusChange: true });

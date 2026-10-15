@@ -117,7 +117,7 @@ function ReviewRow({ review, admin, refetch }: { review: Review; admin: boolean;
 	);
 }
 export function ReviewsPanel({ admin = false }: { admin?: boolean }) {
-	const { t } = useTranslation('common');
+	useTranslation('common');
 
 	const member = useReactiveVar(memberVar);
 	const [page, setPage] = useState(1);
