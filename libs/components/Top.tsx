@@ -22,6 +22,7 @@ export default function Top() {
 		drawerId = `triplink-navigation-${id}`;
 	const [open, setOpen] = useState(false);
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+	const [languageFocusModality, setLanguageFocusModality] = useState<'keyboard' | 'pointer'>('keyboard');
 	const surface = useNavbarSurface(router.asPath);
 	const close = () => {
 		setOpen(false);
@@ -106,6 +107,10 @@ export default function Top() {
 			<select
 				name="language"
 				value={router.locale ?? 'en'}
+				data-focus-modality={languageFocusModality}
+				onPointerDown={() => setLanguageFocusModality('pointer')}
+				onKeyDown={() => setLanguageFocusModality('keyboard')}
+				onBlur={() => setLanguageFocusModality('keyboard')}
 				onChange={(event) => {
 					close();
 					const locale = event.target.value;

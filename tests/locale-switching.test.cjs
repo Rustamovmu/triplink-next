@@ -54,7 +54,7 @@ test('navbar switches all languages on a filtered detail route, persists one pre
 		'@mui/material': {
 			Avatar: ({ children }) => React.createElement('span', null, children),
 			Divider: blank,
-			Drawer: blank,
+			Drawer: ({ open, children }) => (open ? React.createElement('aside', null, children) : null),
 			Menu: blank,
 			MenuItem: blank,
 		},
@@ -78,7 +78,11 @@ test('navbar switches all languages on a filtered detail route, persists one pre
 			],
 		);
 		for (const locale of ['uz', 'kr', 'ru', 'en']) {
-			await act(async () => Simulate.change(document.querySelector('select'), { target: { value: locale } }));
+			const select = document.querySelector('select');
+			await act(async () => select.focus());
+			await act(async () => Simulate.pointerDown(select, { pointerType: 'mouse' }));
+			assert.equal(select.dataset.focusModality, 'pointer');
+			await act(async () => Simulate.change(select, { target: { value: locale } }));
 			await act(async () => root.render(React.createElement(Top)));
 			const [url, as, options] = requests.at(-1);
 			assert.deepEqual(url, { pathname: router.pathname, query: router.query });
@@ -86,7 +90,27 @@ test('navbar switches all languages on a filtered detail route, persists one pre
 			assert.deepEqual(options, { locale, scroll: false });
 			assert.match(document.cookie, new RegExp('NEXT_LOCALE=' + locale));
 			assert.equal(document.querySelector('select').value, locale);
+			assert.equal(select.dataset.focusModality, 'pointer');
+			assert.equal(document.activeElement, select, 'selection must not forcibly blur the native control');
+			await act(async () => Simulate.keyDown(select, { key: 'ArrowDown' }));
+			assert.equal(select.dataset.focusModality, 'keyboard');
 		}
+		const select = document.querySelector('select');
+		await act(async () => Simulate.pointerDown(select, { pointerType: 'touch' }));
+		assert.equal(select.dataset.focusModality, 'pointer');
+		await act(async () => select.blur());
+		assert.equal(select.dataset.focusModality, 'keyboard');
+		await act(async () => select.focus());
+		assert.equal(select.dataset.focusModality, 'keyboard');
+		await act(async () => Simulate.click(document.querySelector('.triplink-top__menu-button')));
+		const drawerSelect = document.querySelector('.triplink-nav-drawer__language select');
+		assert.ok(drawerSelect);
+		await act(async () => drawerSelect.focus());
+		await act(async () => Simulate.pointerDown(drawerSelect, { pointerType: 'touch' }));
+		assert.equal(drawerSelect.dataset.focusModality, 'pointer');
+		await act(async () => Simulate.keyDown(drawerSelect, { key: 'ArrowDown' }));
+		assert.equal(drawerSelect.dataset.focusModality, 'keyboard');
+		await act(async () => Simulate.click(document.querySelector('.triplink-nav-drawer__heading button')));
 		outcome = false;
 		await act(async () => Simulate.change(document.querySelector('select'), { target: { value: 'uz' } }));
 		assert.match(document.cookie, /NEXT_LOCALE=en/);
