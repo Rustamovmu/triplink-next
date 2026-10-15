@@ -2511,46 +2511,273 @@ html[lang='uz'] .triplink-search__date .MuiInput-root { margin-top: 8px; }
 	}
 }
 
-// Accordion photo introduction inspired by React Bits; scoped to the homepage.
+// React Bits CircularCarousel photo inspiration, isolated from the tour Swiper.
+.triplink-home-sections {
+  .circular-carousel {
+    --cc-fade: #000000;
+    --cc-radius: 12px;
+    --cc-inner: 0.4;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    outline: none;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .circular-carousel[data-axis='x'] {
+    touch-action: pan-x;
+  }
+
+  .circular-carousel[data-draggable] {
+    cursor: grab;
+  }
+
+  .circular-carousel[data-dragging] {
+    cursor: grabbing;
+  }
+
+  .circular-carousel:focus-visible {
+    box-shadow: inset 0 0 0 2px rgba(128, 128, 140, 0.55);
+  }
+
+  .circular-carousel__view {
+    position: absolute;
+    inset: 0;
+  }
+
+  .circular-carousel[data-shape='wheel'] .circular-carousel__view {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000000 18%, #000000 82%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000000 18%, #000000 82%, transparent);
+  }
+
+  .circular-carousel[data-shape='panorama'] .circular-carousel__view {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000000 12%, #000000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000000 12%, #000000 88%, transparent);
+  }
+
+  .circular-carousel__stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+
+  .circular-carousel[data-ready] .circular-carousel__stage {
+    opacity: 1;
+  }
+
+  .circular-carousel__camera,
+  .circular-carousel__ring,
+  .circular-carousel__card {
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+  }
+
+  .circular-carousel__camera {
+    position: relative;
+  }
+
+  .circular-carousel__ring,
+  .circular-carousel__card {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .circular-carousel__tile {
+    position: absolute;
+    outline: 1px solid transparent;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .circular-carousel__frame {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .circular-carousel__photo {
+    position: absolute;
+    display: block;
+    max-width: none;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .circular-carousel__photo--leaving {
+    animation: circular-carousel-leave 700ms cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  .circular-carousel__shade,
+  .circular-carousel__inner {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .circular-carousel__shade {
+    background: var(--cc-fade);
+    opacity: var(--cc-depth, 0);
+  }
+
+  .circular-carousel__inner {
+    background: #000000;
+    opacity: var(--cc-inner);
+  }
+
+  .circular-carousel__caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px;
+    color: inherit;
+    text-align: center;
+    pointer-events: none;
+    animation: circular-carousel-reveal 900ms ease both;
+  }
+
+  .circular-carousel__title {
+    display: flex;
+    max-width: 100%;
+    flex-direction: column;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.35;
+    animation: circular-carousel-title 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .circular-carousel__subtitle {
+    font-weight: 400;
+    opacity: 0.6;
+  }
+
+  .circular-carousel__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    opacity: 0.5;
+  }
+
+  .circular-carousel__slash {
+    opacity: 0.6;
+  }
+
+  .circular-carousel__digits {
+    display: inline-flex;
+  }
+
+  .circular-carousel__digit {
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+  }
+
+  .circular-carousel__reel {
+    display: flex;
+    flex-direction: column;
+    transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .circular-carousel__reel > span {
+    height: 1em;
+  }
+
+  .circular-carousel__live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @keyframes circular-carousel-title {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes circular-carousel-leave {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes circular-carousel-reveal {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .circular-carousel__stage,
+    .circular-carousel__reel {
+      transition: none;
+    }
+
+    .circular-carousel__caption,
+    .circular-carousel__title {
+      animation: none;
+    }
+  }
+}
+
 .triplink-home-sections .triplink-circular-carousel {
-	--carousel-radius: 410px;
-	min-width: 0;
-	&__stage {
-		position: relative; height: 360px; overflow: hidden; perspective: 1100px;
-		background: radial-gradient(ellipse at 50% 90%, #dce9e8 0, transparent 65%);
-		border-radius: 16px; cursor: grab; touch-action: pan-y; user-select: none;
-		&:active { cursor: grabbing; }
-		&:focus-visible { outline: 3px solid #0f766e; outline-offset: -3px; }
-	}
-	&__ring {
-		position: absolute; top: 50%; left: 50%; width: 0; height: 0;
-		transform-style: preserve-3d;
-		transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	&__card {
-		position: absolute; width: 180px; height: 250px; border-radius: 12px;
-		backface-visibility: hidden; overflow: hidden; background: #d9eae7;
-		box-shadow: 0 18px 30px -18px rgba(0, 52, 59, 0.42);
-		img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-	}
-	&__footer {
-		display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; color: #00343b;
-		> div:first-child { min-width: 0; }
-		strong { display: block; font-family: 'TripLink Outfit', Arial, sans-serif; font-size: 20px; line-height: 1.3; overflow-wrap: anywhere; }
-		span { display: block; margin-top: 4px; font-size: 12px; letter-spacing: 0.1em; }
-	}
-	&__controls {
-		display: flex; gap: 6px; flex-shrink: 0;
-		button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #93b4ae; border-radius: 50%; color: #00343b; background: transparent; cursor: pointer; }
-		button:hover { background: #d9eae7; }
-		button:focus-visible { outline: 3px solid #0f766e; outline-offset: 2px; }
-	}
-	@media (max-width: 1023px) {
-		--carousel-radius: 330px;
-		&__card { width: 145px; height: 220px; }
-		&__stage { height: 300px; }
-	}
-	@media (prefers-reduced-motion: reduce) { &__ring { transition: none; } }
+  min-width: 0;
+  &__stage {
+    height: 380px; border-radius: 16px;
+    background: radial-gradient(ellipse at 50% 90%, #dce9e8 0, transparent 65%);
+    .circular-carousel:focus-visible { box-shadow: inset 0 0 0 3px #0f766e; border-radius: 16px; }
+  }
+  &__footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; color: #00343b;
+    > div:first-child { min-width: 0; }
+    strong { display: block; font-family: 'TripLink Outfit', Arial, sans-serif; font-size: 20px; line-height: 1.3; overflow-wrap: anywhere; }
+    span { display: block; margin-top: 4px; font-size: 12px; letter-spacing: 0.1em; }
+  }
+  &__controls {
+    display: flex; gap: 6px; flex-shrink: 0;
+    button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #93b4ae; border-radius: 50%; color: #00343b; background: transparent; cursor: pointer; transition: transform 160ms ease-out, background-color 160ms ease; }
+    button:active { transform: scale(.97); }
+    button:focus-visible { outline: 3px solid #0f766e; outline-offset: 2px; }
+    @media (hover: hover) and (pointer: fine) { button:hover { background: #d9eae7; } }
+  }
+  @media (max-width: 1023px) { &__stage { height: 320px; } }
+  @media (max-width: 599px) { &__stage { height: 280px; } }
+  @media (prefers-reduced-motion: reduce) { &__controls button { transition: none; } }
 }
 
 // The previous centered Swiper now carries actual Featured Tours.

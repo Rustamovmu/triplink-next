@@ -40,6 +40,26 @@ async function harness() {
 		removeEventListener: (_, fn) => mediaListeners.delete(fn),
 	};
 	window.matchMedia = () => media;
+	const frames = new Map();
+	let frameId = 0, clock = performance.now();
+	window.requestAnimationFrame = callback => { frames.set(++frameId, callback); return frameId; };
+	window.cancelAnimationFrame = id => frames.delete(id);
+	const intersections = [];
+	window.ResizeObserver = class { observe() {} disconnect() {} };
+	window.IntersectionObserver = class {
+		constructor(callback) { this.callback = callback; intersections.push(this); }
+		observe() {} disconnect() { this.disconnected = true; }
+	};
+	window.HTMLElement.prototype.getBoundingClientRect = () => ({ width: 600, height: 380, left: 0, top: 0 });
+	window.HTMLElement.prototype.setPointerCapture = () => {};
+	window.Image = class { set src(value) { queueMicrotask(() => this.onload?.()); } };
+	const tick = async (count = 1) => act(async () => {
+		for (let index = 0; index < count; index++) {
+			clock += 1000 / 60;
+			const pending = [...frames.values()]; frames.clear();
+			pending.forEach(callback => callback(clock));
+		}
+	});
 	let intervalId = 0;
 	window.setInterval = (callback, delay) => {
 		const id = ++intervalId;
@@ -121,7 +141,8 @@ async function harness() {
 			{ __esModule: true, default: (props) => React.createElement('svg', { ...props, 'data-icon': name }) },
 		]),
 	);
-	const carousel = load('libs/components/homepage/IntroCircularCarousel.tsx', shared);
+	const engine = load('libs/components/homepage/CircularCarousel.jsx', shared);
+	const carousel = load('libs/components/homepage/IntroCircularCarousel.tsx', { ...shared, './CircularCarousel': engine });
 	const articleFormat = load('libs/components/triplink/articleFormat.ts', {});
 	const links = {
 		__esModule: true,
@@ -185,6 +206,9 @@ async function harness() {
 		media,
 		mediaListeners,
 		intervals,
+		frames,
+		intersections,
+		tick,
 		render: (variant = 'rated') =>
 			act(async () =>
 				root.render(
@@ -198,6 +222,8 @@ async function harness() {
 		cleanup: async () => {
 			await act(async () => root.unmount());
 			assert.equal(intervals.size, 0);
+			assert.equal(frames.size, 0);
+			assert.ok(intersections.every(observer => observer.disconnected));
 			assert.equal(mediaListeners.size, 0);
 			dom.window.close();
 			for (const [key, descriptor] of Object.entries(saved)) {
@@ -549,46 +575,66 @@ test('rated favorites preserve roles, pending locks, retries and errors; query s
 	}
 });
 
-test('existing circular carousel retains photos, five-second autoplay, controls, drag and keyboard behavior', async () => {
+test('React Bits carousel preserves local photos and translated controls with continuous drift, momentum and cleanup', async () => {
 	const ctx = await harness();
 	try {
 		await ctx.render();
-		assert.equal(document.querySelectorAll('.triplink-circular-carousel__card img').length, 13);
-		assert.equal(ctx.intervals.size, 0);
-		await act(async () => {
-			ctx.media.matches = false;
-			ctx.mediaListeners.forEach((fn) => fn());
-		});
-		assert.equal(ctx.intervals.size, 1);
-		assert.equal([...ctx.intervals.values()][0].delay, 5000);
-		await act(async () => [...ctx.intervals.values()][0].callback());
-		assert.match(document.querySelector('.triplink-circular-carousel__stage').getAttribute('aria-label'), /Seoul, 2/);
-		await act(async () => document.querySelector('[aria-label="Previous photo in Best rated"]').click());
-		assert.match(document.querySelector('.triplink-circular-carousel__stage').getAttribute('aria-label'), /Kyoto, 1/);
-		assert.equal(ctx.intervals.size, 0);
-		await act(async () => document.querySelector('[aria-label="Play slideshow"]').click());
-		assert.equal(ctx.intervals.size, 1);
-		await act(async () => Simulate.pointerEnter(document.querySelector('.triplink-circular-carousel')));
-		assert.equal(ctx.intervals.size, 0);
-		await act(async () => Simulate.pointerLeave(document.querySelector('.triplink-circular-carousel')));
-		assert.equal(ctx.intervals.size, 1);
-		const stage = document.querySelector('.triplink-circular-carousel__stage');
+		await ctx.tick(120);
+		assert.equal(document.querySelectorAll('.circular-carousel__card').length, 13);
+		assert.ok([...document.querySelectorAll('.circular-carousel__photo')].every(img => img.getAttribute('src').startsWith('/img/homepage/rated-circular/')));
+		const stage = document.querySelector('.circular-carousel');
+		const ring = document.querySelector('.circular-carousel__ring');
+		assert.match(stage.getAttribute('aria-label'), /Kyoto, 1/);
+		assert.equal(ctx.frames.size, 0, 'reduced motion settles without an idle animation loop');
+		await act(async () => document.querySelector('[aria-label="Next photo in Best rated"]').click());
+		await ctx.tick(2);
+		assert.match(stage.getAttribute('aria-label'), /Seoul, 2/);
 		await act(async () => Simulate.keyDown(stage, { key: 'End' }));
+		await ctx.tick(1);
 		assert.match(stage.getAttribute('aria-label'), /Bali, 13/);
 		await act(async () => Simulate.keyDown(stage, { key: 'ArrowRight' }));
+		await ctx.tick(1);
 		assert.match(stage.getAttribute('aria-label'), /Kyoto, 1/);
-		stage.setPointerCapture = () => {};
-		await act(async () =>
-			Simulate.pointerDown(stage, { isPrimary: true, button: 0, pointerId: 1, clientX: 100, clientY: 50 }),
-		);
-		await act(async () => Simulate.pointerUp(stage, { pointerId: 1, clientX: 40, clientY: 50 }));
-		assert.match(stage.getAttribute('aria-label'), /Seoul, 2/);
-		await act(async () => {
-			ctx.media.matches = true;
-			ctx.mediaListeners.forEach((fn) => fn());
-		});
-		assert.equal(document.querySelector('[aria-label="Play slideshow"]'), null);
-	} finally {
-		await ctx.cleanup();
-	}
+		await act(async () => { ctx.media.matches = false; ctx.mediaListeners.forEach(fn => fn()); });
+		await act(async () => document.querySelector('[aria-label="Play slideshow"]').click());
+		await ctx.tick(250);
+		const before = ring.style.transform;
+		await ctx.tick(20);
+		assert.notEqual(ring.style.transform, before, 'drifts between cards without an interval');
+		assert.equal(ctx.intervals.size, 0);
+		await act(async () => Simulate.pointerEnter(stage, { pointerType: 'mouse' }));
+		await ctx.tick(250);
+		const hovered = ring.style.transform;
+		await ctx.tick(30);
+		assert.equal(ring.style.transform, hovered, 'hover settles on a card');
+		await act(async () => Simulate.pointerLeave(stage, { pointerType: 'mouse' }));
+		await ctx.tick(30);
+		assert.notEqual(ring.style.transform, hovered);
+		await act(async () => document.querySelector('[aria-label="Next photo in Best rated"]').click());
+		await ctx.tick(180);
+		const settled = stage.getAttribute('aria-label');
+		await act(async () => document.querySelector('[aria-label="Next photo in Best rated"]').click());
+		await ctx.tick(180);
+		assert.notEqual(stage.getAttribute('aria-label'), settled, 'normal-motion controls spring to the next card');
+		await act(async () => document.querySelector('[aria-label="Play slideshow"]').click());
+		await ctx.tick(180);
+		await act(async () => Simulate.pointerDown(stage, { isPrimary: true, button: 0, pointerId: 1, clientX: 200, clientY: 50 }));
+		await act(async () => Simulate.pointerMove(stage, { pointerId: 1, clientX: 180, clientY: 50 }));
+		await act(async () => Simulate.pointerMove(stage, { pointerId: 1, clientX: 40, clientY: 50 }));
+		await ctx.tick(1);
+		assert.ok(stage.hasAttribute('data-dragging'));
+		const dragged = ring.style.transform;
+		await act(async () => Simulate.pointerUp(stage, { pointerId: 1, pointerType: 'touch' }));
+		await ctx.tick(10);
+		assert.ok(!stage.hasAttribute('data-dragging'));
+		assert.notEqual(ring.style.transform, dragged, 'release continues with momentum');
+		await act(async () => ctx.intersections[0].callback([{ isIntersecting: false }]));
+		assert.equal(ctx.frames.size, 0, 'offscreen carousel suspends animation');
+		await act(async () => ctx.intersections[0].callback([{ isIntersecting: true }]));
+		assert.equal(ctx.frames.size, 1);
+		await act(async () => { ctx.media.matches = true; ctx.mediaListeners.forEach(fn => fn()); });
+		await ctx.tick(120);
+		assert.equal(document.querySelector('[aria-label="Pause slideshow"]'), null);
+		assert.equal(ctx.frames.size, 0);
+	} finally { await ctx.cleanup(); }
 });
