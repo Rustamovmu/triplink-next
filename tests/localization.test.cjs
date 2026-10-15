@@ -4,12 +4,13 @@ const fs = require('node:fs');
 const ts = require('typescript');
 const i18next = require('i18next');
 const { audit, compare, duplicateKeys } = require('../scripts/audit-translations.cjs');
-function load(file) {
+function load(file, requireModule = require) {
 	const exports = {};
 	new Function(
 		'exports',
+		'require',
 		ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: 1 } }).outputText,
-	)(exports);
+	)(exports, requireModule);
 	return exports;
 }
 test('all namespaces cover every existing locale key, preserve original translations and contain no missing literal UI keys', () => {
@@ -63,6 +64,78 @@ test('SSR translation loader reads a full Uzbek dictionary before rendering', as
 	assert.equal(props._nextI18Next.initialLocale, 'uz');
 	assert.equal(props._nextI18Next.initialI18nStore.uz.common.Tours, 'Sayohatlar');
 	assert.equal(props._nextI18Next.initialI18nStore.en.common.Tours, 'Tours');
+});
+test('homepage translations stay below the page-data budget with identical translations in all four locales', async () => {
+	const { serverSideTranslations: originalLoader } = require('next-i18next/serverSideTranslations');
+	const { serverSideTranslations } = load('libs/triplink/serverSideTranslations.ts');
+	const config = require('../next-i18next.config');
+	assert.ok(fs.readFileSync('pages/index.tsx', 'utf8').includes("from '../libs/triplink/serverSideTranslations'"));
+	for (const locale of config.i18n.locales) {
+		const original = await originalLoader(locale, ['common']);
+		const compact = await serverSideTranslations(locale, ['common']);
+		const resources = compact._nextI18Next.initialI18nStore;
+		assert.deepEqual(resources[locale], original._nextI18Next.initialI18nStore[locale]);
+		assert.deepEqual(compact._nextI18Next.userConfig, original._nextI18Next.userConfig);
+		const pageData = {
+			props: { pageProps: compact, __N_SSG: true }, page: '/', query: {}, buildId: 'test-build',
+			isFallback: false, gsp: true, locale, locales: config.i18n.locales, defaultLocale: 'en',
+		};
+		assert.ok(Buffer.byteLength(JSON.stringify(pageData)) < 100 * 1024, `${locale} exceeds the homepage budget`);
+		if (locale !== 'en') {
+			assert.ok(Buffer.byteLength(JSON.stringify(original)) - Buffer.byteLength(JSON.stringify(compact)) > 50000);
+		}
+		const baseline = i18next.createInstance();
+		const optimized = i18next.createInstance();
+		await baseline.init({ ...config, lng: locale, defaultNS: 'common', resources: original._nextI18Next.initialI18nStore });
+		await optimized.init({ ...config, lng: locale, defaultNS: 'common', resources });
+		const keys = new Set([...Object.keys(resources[locale].common), ...Object.keys(original._nextI18Next.initialI18nStore.en.common)]);
+		for (const key of keys) {
+			for (const count of [0, 1, 2, 5, 21, 100]) {
+				const options = { count, displayCount: String(count), name: 'Aziza', total: 12, current: 2 };
+				assert.equal(optimized.t(key, options), baseline.t(key, options), `${locale}: ${key}, count=${count}`);
+			}
+		}
+		const nextRequest = await originalLoader(locale, ['common']);
+		assert.deepEqual(nextRequest, original, 'compaction must not modify the shared server resources');
+	}
+});
+test('homepage loader retains missing, empty and null English fallbacks without mutating shared dictionaries', async () => {
+	const config = require('../next-i18next.config');
+	const original = {
+		_nextI18Next: {
+			initialLocale: 'ru', ns: ['common'], userConfig: config,
+			initialI18nStore: {
+				ru: { common: { Tours: 'Туры', Empty: '', Null: null } },
+				en: { common: {
+					Tours: 'Tours', Empty: 'Empty fallback', Null: 'Null fallback',
+					'Missing {{name}}': 'Welcome {{name}}',
+					'Fallback count_one': '{{count}} item', 'Fallback count_other': '{{count}} items',
+				} },
+			},
+		},
+	};
+	const snapshot = JSON.stringify(original);
+	Object.freeze(original._nextI18Next.initialI18nStore.en.common);
+	const { serverSideTranslations } = load('libs/triplink/serverSideTranslations.ts', (name) => {
+		assert.equal(name, 'next-i18next/serverSideTranslations');
+		return { serverSideTranslations: async () => original };
+	});
+	const compact = await serverSideTranslations('ru', ['common']);
+	assert.equal(JSON.stringify(original), snapshot);
+	assert.equal(compact._nextI18Next.initialI18nStore.en.common.Tours, undefined);
+	const i18n = i18next.createInstance();
+	await i18n.init({
+		...config, lng: 'ru', defaultNS: 'common', returnNull: false, returnEmptyString: false,
+		resources: compact._nextI18Next.initialI18nStore,
+	});
+	assert.equal(i18n.t('Tours'), 'Туры');
+	assert.equal(i18n.t('Empty'), 'Empty fallback');
+	assert.equal(i18n.t('Null'), 'Null fallback');
+	assert.equal(i18n.t('Missing {{name}}', { name: 'Aziza' }), 'Welcome Aziza');
+	for (const count of [0, 1, 2, 5, 21, 100]) {
+		assert.equal(i18n.t('Fallback count', { count }), `${count} ${count === 1 ? 'item' : 'items'}`);
+	}
+	assert.strictEqual(await serverSideTranslations('en', ['common']), original);
 });
 test('Uzbek dates preserve the instant and USD formatting preserves the value and currency', () => {
 	const { regionalLocale, formatDate, formatCurrency } = load('libs/triplink/locale.ts');
