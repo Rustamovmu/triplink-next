@@ -94,3 +94,13 @@ module.exports.push(
 	['help-center/help-center.update', 'HelpEntryUpdate', { entryId: id, noticeStatus: 'ACTIVE' }],
 	['ai/ai-chat.input', 'AiChatInput', { message: 'Sayohat topishga yordam bering.', locale: 'uz', intent: 'FIND_TOURS' }],
 );
+
+// Either range endpoint is optional; omitted endpoints must stay omitted on the wire.
+for (const side of ['start', 'end']) {
+	for (const [field, value] of [['priceRange', 0], ['durationRange', 20],
+		['availableDateRange', '2035-01-02T00:00:00.000Z']]) {
+		module.exports.push(['tour/tour.input', 'ToursInquiry', {
+			page: 1, limit: 12, search: { [field]: { [side]: value } },
+		}]);
+	}
+}

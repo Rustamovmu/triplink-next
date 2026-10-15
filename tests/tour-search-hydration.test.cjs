@@ -196,9 +196,13 @@ test('compact filters preserve drafts, apply together, reveal invalid ranges, di
 		const before = pushes.length;
 		await set('maxPrice', '');
 		await submit();
-		assert.equal(pushes.length, before);
+		assert.equal(pushes.length, before + 1);
+		assert.deepEqual(JSON.parse(pushes.at(-1).query.input).search.priceRange, { start: 100 });
+		await set('maxPrice', '50');
+		await submit();
+		assert.equal(pushes.length, before + 1);
 		assert.equal(document.querySelector('[data-group="price"]').open, true);
-		assert.match(document.body.textContent, /Complete both ends/);
+		assert.match(document.body.textContent, /Enter valid values/);
 		await act(async () =>
 			document.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })),
 		);
@@ -221,6 +225,33 @@ test('compact filters preserve drafts, apply together, reveal invalid ranges, di
 		await act(async () => root.render(React.createElement(TourSearch)));
 		assert.equal(document.querySelector('[name="text"]').value, 'Seoul');
 		assert.equal(document.querySelector('[name="minDays"]').value, '');
+		for (const [key, field, side, value, group] of [
+			['minPrice', 'priceRange', 'start', '0', 'price'],
+			['maxPrice', 'priceRange', 'end', '250', 'price'],
+			['minDays', 'durationRange', 'start', '3', 'duration'],
+			['maxDays', 'durationRange', 'end', '20', 'duration'],
+			['start', 'availableDateRange', 'start', '2027-12-01', 'dates'],
+			['end', 'availableDateRange', 'end', '2027-12-03', 'dates'],
+		]) {
+			for (const name of ['minPrice', 'maxPrice', 'minDays', 'maxDays', 'start', 'end']) await set(name, '');
+			await set(key, value);
+			const count = pushes.length;
+			await submit();
+			assert.equal(pushes.length, count + 1, `${key} alone must submit`);
+			const query = pushes.at(-1).query;
+			const search = JSON.parse(query.input).search;
+			assert.deepEqual(Object.keys(search[field]), [side]);
+			if (group === 'dates') {
+				const date = new Date(search[field][side]);
+				assert.equal(date.getHours(), side === 'start' ? 0 : 23);
+			} else assert.equal(search[field][side], Number(value));
+			router = { ...router, query, asPath: '/tour?input=' + encodeURIComponent(query.input) };
+			await act(async () => root.render(React.createElement(TourSearch)));
+			assert.equal(document.querySelector(`[name="${key}"]`).value, value);
+			const summary = document.querySelector(`[data-group="${group}"] summary`).textContent;
+			assert.doesNotMatch(summary, /undefined|Invalid Date/);
+			assert.match(summary, group === 'dates' ? /From|Until/ : /≥|≤/);
+		}
 	} finally {
 		if (root) await act(async () => root.unmount());
 		dom.window.close();

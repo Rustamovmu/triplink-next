@@ -1025,5 +1025,7 @@
 	"Agent follower count_other": "{{count}} 팔로워",
 	"Home article comment count_one": "{{count}} 댓글",
 	"Home article comment count_other": "{{count}} 댓글",
-	"Community like count_one": "{{count}} 좋아요"
+	"Community like count_one": "{{count}} 좋아요",
+	"Check {{filter}}. Enter valid values and keep the minimum before the maximum.": "{{filter}}을(를) 확인하세요. 올바른 값을 입력하고 최솟값이 최댓값보다 크지 않도록 하세요.",
+	"Choose a start date, an end date, or both. Entire days are included.": "시작일, 종료일 또는 둘 다 선택하세요. 선택한 날짜 전체가 포함됩니다."
 }

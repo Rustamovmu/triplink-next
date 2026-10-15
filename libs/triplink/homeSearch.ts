@@ -21,13 +21,12 @@ export function buildHomeSearch(values: {
 	const seats = Number(values.seats);
 	if (!Number.isInteger(seats) || seats < 1 || seats > 100) throw new Error('Choose between 1 and 100 travelers.');
 	query.seats = String(seats);
-	if (Boolean(values.start) !== Boolean(values.end)) throw new Error('Choose both departure dates.');
-	if (values.start && values.end) {
-		const start = calendarDate(values.start),
-			end = calendarDate(values.end);
-		if (end < start) throw new Error('The end date must not be before the start date.');
+	const start = values.start ? calendarDate(values.start) : undefined;
+	const end = values.end ? calendarDate(values.end) : undefined;
+	if (start && end && end < start) throw new Error('The end date must not be before the start date.');
+	if (start) query.start = start.toISOString();
+	if (end) {
 		end.setHours(23, 59, 59, 999);
-		query.start = start.toISOString();
 		query.end = end.toISOString();
 	}
 	return tourSearchQuery(parseTourSearchQuery(query));

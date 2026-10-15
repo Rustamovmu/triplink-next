@@ -21,8 +21,8 @@ test('search preserves supported URL keys and allows dates to be omitted', () =>
 });
 test('invalid dates and traveler counts do not produce search URLs', () => {
 	for (const change of [
-		{ start: '2026-10-10' },
-		{ end: '2026-10-10' },
+		{ start: '2026-02-30' },
+		{ end: '2026-02-30' },
 		{ start: '2026-10-12', end: '2026-10-10' },
 		{ start: '2026-02-30', end: '2026-03-01' },
 		{ seats: '0' },
@@ -65,5 +65,15 @@ test('legacy local datetime URLs and ISO URLs remain editable', () => {
 	} finally {
 		if (previous === undefined) delete process.env.TZ;
 		else process.env.TZ = previous;
+	}
+});
+
+test('home search accepts either departure date alone and includes the entire local day', () => {
+	for (const side of ['start', 'end']) {
+		const date = '2027-03-14';
+		const search = JSON.parse(buildHomeSearch({ ...values, [side]: date }).input).search;
+		assert.deepEqual(Object.keys(search.availableDateRange), [side]);
+		assert.equal(localDateTimeValue(search.availableDateRange[side]),
+			`${date}T${side === 'start' ? '00:00:00.000' : '23:59:59.999'}`);
 	}
 });

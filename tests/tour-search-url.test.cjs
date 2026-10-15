@@ -71,7 +71,10 @@ test('reject malformed JSON, arrays, wrong types, enum values and invalid bounds
 		{ minimumAvailableSeats: Infinity },
 		{ minimumRating: 5.1 },
 		{ priceRange: { start: 100, end: 0 } },
-		{ priceRange: { start: 0 } },
+		{ priceRange: {} },
+		{ priceRange: { end: -1 } },
+		{ durationRange: { start: 1.5 } },
+		{ durationRange: { end: 0 } },
 		{ durationRange: { start: 1, end: 366 } },
 		{ availableDateRange: { start: 'invalid', end: 'invalid' } },
 		{ availableDateRange: { start: '2030-01-01T00:00', end: '2030-02-01T00:00' } },
@@ -112,7 +115,7 @@ test('readable links and old local datetime links remain supported', () => {
 	for (const query of [
 		{ page: 'NaN' },
 		{ category: 'INVALID' },
-		{ minPrice: '0' },
+		{ minPrice: '-1' },
 		{ start: 'invalid', end: 'invalid' },
 		{ start: '2030-02-30T00:00Z', end: '2030-03-01T00:00Z' },
 		{ seats: 'Infinity' },
@@ -190,5 +193,30 @@ test('calendar date endpoints include entire local days across DST and reject in
 	} finally {
 		if (original === undefined) delete process.env.TZ;
 		else process.env.TZ = original;
+	}
+});
+
+test('one-sided ranges round trip without inventing the other endpoint and can be cleared independently', () => {
+	for (const [key, field, side, value] of [
+		['minPrice', 'priceRange', 'start', 0], ['maxPrice', 'priceRange', 'end', 250],
+		['minDays', 'durationRange', 'start', 3], ['maxDays', 'durationRange', 'end', 20],
+		['start', 'availableDateRange', 'start', '2030-01-01T00:00:00.000Z'],
+		['end', 'availableDateRange', 'end', '2030-02-01T23:59:59.999Z'],
+	]) {
+		const input = parse({ [key]: String(value) });
+		assert.deepEqual(input.search[field], { [side]: value });
+		assert.deepEqual(parse(encode(input)), input);
+		const values = form(input);
+		const applied = apply(defaults, { ...form(defaults), [key]: String(value) }, new Set([key]));
+		assert.deepEqual(applied.search[field], { [side]: value });
+		assert.equal(apply(input, { ...values, [key]: '' }, new Set([key])).search[field], undefined);
+	}
+	for (const [key, field, otherSide] of [
+		['minPrice', 'priceRange', 'end'], ['maxPrice', 'priceRange', 'start'],
+		['minDays', 'durationRange', 'end'], ['maxDays', 'durationRange', 'start'],
+		['start', 'availableDateRange', 'end'], ['end', 'availableDateRange', 'start'],
+	]) {
+		const result = apply(full, { ...form(full), [key]: '' }, new Set([key]));
+		assert.deepEqual(result.search[field], { [otherSide]: full.search[field][otherSide] });
 	}
 });

@@ -25,12 +25,17 @@ function strings(value: unknown, count: number, length: number, allowed?: readon
 		return result;
 	});
 }
-function range(value: unknown, min: number, max = Infinity, integer = false) {
+function bounds<T extends number | string>(value: unknown, parse: (value: unknown) => T) {
 	const input = object(value);
-	const start = number(input.start, min, max, integer),
-		end = number(input.end, min, max, integer);
-	if (start > end) return fail();
-	return { start, end };
+	const result: { start?: T; end?: T } = {};
+	if (input.start !== undefined) result.start = parse(input.start);
+	if (input.end !== undefined) result.end = parse(input.end);
+	if (result.start === undefined && result.end === undefined) return fail();
+	if (result.start !== undefined && result.end !== undefined && result.start > result.end) return fail();
+	return result;
+}
+function range(value: unknown, min: number, max = Infinity, integer = false) {
+	return bounds(value, (endpoint) => number(endpoint, min, max, integer));
 }
 function instant(value: unknown, requireZone: boolean): string {
 	const text = string(value, 100);
@@ -73,13 +78,8 @@ export function normalizeTourInquiry(value: unknown): Inquiry<TourSearch> {
 		search.difficulties = strings(raw.difficulties, 10, 100, tourDifficulties) as TourSearch['difficulties'];
 	if (raw.priceRange !== undefined) search.priceRange = range(raw.priceRange, 0);
 	if (raw.durationRange !== undefined) search.durationRange = range(raw.durationRange, 1, 365, true);
-	if (raw.availableDateRange !== undefined) {
-		const dates = object(raw.availableDateRange);
-		const start = instant(dates.start, true),
-			end = instant(dates.end, true);
-		if (start > end) return fail();
-		search.availableDateRange = { start, end };
-	}
+	if (raw.availableDateRange !== undefined)
+		search.availableDateRange = bounds(raw.availableDateRange, (endpoint) => instant(endpoint, true));
 	if (raw.minimumAvailableSeats !== undefined)
 		search.minimumAvailableSeats = number(raw.minimumAvailableSeats, 1, 2147483647, true);
 	if (raw.minimumRating !== undefined) search.minimumRating = number(raw.minimumRating, 0, 5);
@@ -130,12 +130,17 @@ export function parseTourSearchQuery(query: Query): Inquiry<TourSearch> {
 		['minDays', 'maxDays', 'durationRange'],
 	]) {
 		if (one(a) || one(b)) {
-			if (!one(a) || !one(b)) return fail();
-			search[field] = { start: Number(one(a)), end: Number(one(b)) };
+			search[field] = {
+				...(one(a) ? { start: Number(one(a)) } : {}),
+				...(one(b) ? { end: Number(one(b)) } : {}),
+			};
 		}
 	}
 	if (one('start') || one('end'))
-		search.availableDateRange = { start: instant(one('start'), false), end: instant(one('end'), false) };
+		search.availableDateRange = {
+			...(one('start') ? { start: instant(one('start'), false) } : {}),
+			...(one('end') ? { end: instant(one('end'), false) } : {}),
+		};
 	if (one('seats')) search.minimumAvailableSeats = Number(one('seats'));
 	if (one('rating')) search.minimumRating = Number(one('rating'));
 	return normalizeTourInquiry({

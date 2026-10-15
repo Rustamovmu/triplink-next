@@ -1041,5 +1041,7 @@
 	"Community like count_few": "{{count}} yoqtirish",
 	"Community like count_many": "{{count}} yoqtirish",
 	"{{count}} people online_few": "{{count}} kishi onlayn",
-	"{{count}} people online_many": "{{count}} kishi onlayn"
+	"{{count}} people online_many": "{{count}} kishi onlayn",
+	"Check {{filter}}. Enter valid values and keep the minimum before the maximum.": "«{{filter}}» filtrini tekshiring. To‘g‘ri qiymatlarni kiriting; eng kam qiymat eng katta qiymatdan oshmasin.",
+	"Choose a start date, an end date, or both. Entire days are included.": "Boshlanish sanasi, tugash sanasi yoki ikkalasini tanlang. Kunlar to‘liq hisobga olinadi."
 }

@@ -95,7 +95,7 @@ export default function TourSearchPage() {
 					setFormError(
 						t(
 							['dates', 'duration', 'price'].includes(group.id)
-								? 'Check {{filter}}. Complete both ends of each range and keep the minimum before the maximum.'
+								? 'Check {{filter}}. Enter valid values and keep the minimum before the maximum.'
 								: 'Check {{filter}} and enter valid values.',
 							{ filter: t(group.label) },
 						) || invalidTourSearch,
@@ -212,14 +212,22 @@ export default function TourSearchPage() {
 		const search = inquiry.search;
 		if (id === 'destination') return search.destinations?.join(', ');
 		if (id === 'activity') return search.difficulties?.map((value) => t(value)).join(', ');
-		if (id === 'duration' && search.durationRange)
-			return `${search.durationRange.start}–${search.durationRange.end} ${t('days')}`;
-		if (id === 'price' && search.priceRange) return `$${search.priceRange.start}–$${search.priceRange.end}`;
+		if (id === 'duration' && search.durationRange) {
+			const { start, end } = search.durationRange;
+			if (start !== undefined && end !== undefined) return `${start}–${end} ${t('days')}`;
+			return `${start !== undefined ? '≥' : '≤'} ${t('{{count}} days', { count: start ?? end })}`;
+		}
+		if (id === 'price' && search.priceRange) {
+			const { start, end } = search.priceRange;
+			if (start !== undefined && end !== undefined) return `$${start}–$${end}`;
+			return `${start !== undefined ? '≥' : '≤'} $${start ?? end}`;
+		}
 		if (id === 'dates' && search.availableDateRange) {
 			const locale = (router.locale === 'kr' ? 'ko-KR' : router.locale === 'uz' ? 'uz-UZ' : 'en-US');
-			return [search.availableDateRange.start, search.availableDateRange.end]
-				.map((date) => new Date(date).toLocaleDateString(locale, { month: 'short', day: 'numeric' }))
-				.join(' – ');
+			const { start, end } = search.availableDateRange;
+			const format = (date: string) => new Date(date).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
+			if (start && end) return `${format(start)} – ${format(end)}`;
+			return start ? `${t('From')} ${format(start)}` : end ? `${t('Until')} ${format(end)}` : '';
 		}
 		if (id === 'sort') return sortingLabel(inquiry.sort || 'createdAt', inquiry.direction || 'DESC');
 		if (id === 'more') {
@@ -288,7 +296,7 @@ export default function TourSearchPage() {
 								</summary>
 								<div className="triplink-tour-filters__panel">
 									{group.keys.map(field)}
-									{group.id === 'dates' && <p>{t('Choose a start and end date. Entire days are included.')}</p>}
+									{group.id === 'dates' && <p>{t('Choose a start date, an end date, or both. Entire days are included.')}</p>}
 									<Button type="submit" variant="contained">
 										{t('Apply filters')}
 									</Button>

@@ -1025,5 +1025,7 @@
 	"Previous page": "Previous page",
 	"Check your information and try again.": "Check your information and try again.",
 	"Discover tours, connect with travel agents, and share your journeys with TripLink.": "Discover tours, connect with travel agents, and share your journeys with TripLink.",
-	"Empty AI response": "Empty AI response"
+	"Empty AI response": "Empty AI response",
+	"Check {{filter}}. Enter valid values and keep the minimum before the maximum.": "Check {{filter}}. Enter valid values and keep the minimum before the maximum.",
+	"Choose a start date, an end date, or both. Entire days are included.": "Choose a start date, an end date, or both. Entire days are included."
 }

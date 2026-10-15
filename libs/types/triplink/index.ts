@@ -126,9 +126,9 @@ export interface TourSearch {
 	cities?: string[];
 	categories?: TourCategory[];
 	difficulties?: TourDifficulty[];
-	priceRange?: { start: number; end: number };
-	durationRange?: { start: number; end: number };
-	availableDateRange?: { start: string; end: string };
+	priceRange?: { start?: number; end?: number };
+	durationRange?: { start?: number; end?: number };
+	availableDateRange?: { start?: string; end?: string };
 	minimumAvailableSeats?: number;
 	minimumRating?: number;
 	featured?: boolean;
