@@ -575,18 +575,20 @@ test('rated favorites preserve roles, pending locks, retries and errors; query s
 	}
 });
 
-test('React Bits carousel preserves local photos and translated controls with continuous drift, momentum and cleanup', async () => {
+test('React Bits carousel preserves local photos without overlay controls and retains continuous drift, momentum and cleanup', async () => {
 	const ctx = await harness();
 	try {
 		await ctx.render();
 		await ctx.tick(120);
 		assert.equal(document.querySelectorAll('.circular-carousel__card').length, 13);
 		assert.ok([...document.querySelectorAll('.circular-carousel__photo')].every(img => img.getAttribute('src').startsWith('/img/homepage/rated-circular/')));
+		assert.equal(document.querySelector('.triplink-circular-carousel__controls'), null);
+		assert.equal(document.querySelector('.triplink-circular-carousel__footer').querySelector('button'), null);
 		const stage = document.querySelector('.circular-carousel');
 		const ring = document.querySelector('.circular-carousel__ring');
 		assert.match(stage.getAttribute('aria-label'), /Kyoto, 1/);
 		assert.equal(ctx.frames.size, 0, 'reduced motion settles without an idle animation loop');
-		await act(async () => document.querySelector('[aria-label="Next photo in Best rated"]').click());
+		await act(async () => Simulate.keyDown(stage, { key: 'ArrowRight' }));
 		await ctx.tick(2);
 		assert.match(stage.getAttribute('aria-label'), /Seoul, 2/);
 		await act(async () => Simulate.keyDown(stage, { key: 'End' }));
@@ -596,7 +598,6 @@ test('React Bits carousel preserves local photos and translated controls with co
 		await ctx.tick(1);
 		assert.match(stage.getAttribute('aria-label'), /Kyoto, 1/);
 		await act(async () => { ctx.media.matches = false; ctx.mediaListeners.forEach(fn => fn()); });
-		await act(async () => document.querySelector('[aria-label="Play slideshow"]').click());
 		await ctx.tick(250);
 		const before = ring.style.transform;
 		await ctx.tick(20);
@@ -610,13 +611,12 @@ test('React Bits carousel preserves local photos and translated controls with co
 		await act(async () => Simulate.pointerLeave(stage, { pointerType: 'mouse' }));
 		await ctx.tick(30);
 		assert.notEqual(ring.style.transform, hovered);
-		await act(async () => document.querySelector('[aria-label="Next photo in Best rated"]').click());
+		await act(async () => Simulate.keyDown(stage, { key: 'ArrowRight' }));
 		await ctx.tick(180);
 		const settled = stage.getAttribute('aria-label');
-		await act(async () => document.querySelector('[aria-label="Next photo in Best rated"]').click());
+		await act(async () => Simulate.keyDown(stage, { key: 'ArrowRight' }));
 		await ctx.tick(180);
-		assert.notEqual(stage.getAttribute('aria-label'), settled, 'normal-motion controls spring to the next card');
-		await act(async () => document.querySelector('[aria-label="Play slideshow"]').click());
+		assert.notEqual(stage.getAttribute('aria-label'), settled, 'keyboard navigation still reaches the next card');
 		await ctx.tick(180);
 		await act(async () => Simulate.pointerDown(stage, { isPrimary: true, button: 0, pointerId: 1, clientX: 200, clientY: 50 }));
 		await act(async () => Simulate.pointerMove(stage, { pointerId: 1, clientX: 180, clientY: 50 }));

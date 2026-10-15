@@ -6,19 +6,15 @@ import HomeSearchForm from './HomeSearchForm';
 import { tourSearchQuery } from '../../triplink/tourSearchUrl';
 import { motion } from 'framer-motion';
 import {
-	ArrowBackRounded,
 	ArrowForwardRounded,
 	NorthEastRounded,
-	PauseRounded,
-	PlayArrowRounded,
 } from '@mui/icons-material';
 import { homeDestinations } from './homeContent';
 import { useRememberedState } from '../../triplink/BrowsingMemoryProvider';
 
 export default function HeaderFilter() {
 	const { t } = useTranslation('common');
-	const [index, setIndex] = useRememberedState('home:hero-slide', 0),
-		[playing, setPlaying] = useRememberedState('home:hero-playing', true);
+	const [index, setIndex] = useRememberedState('home:hero-slide', 0);
 	const [reduced, setReduced] = useState(true),
 		[hovered, setHovered] = useState(false);
 	const [focused, setFocused] = useState(false),
@@ -50,16 +46,16 @@ export default function HeaderFilter() {
 		};
 	}, []);
 	useEffect(() => {
-		if (!playing || reduced || hovered || focused || hidden) return;
+		if (reduced || hovered || focused || hidden) return;
 		const timer = window.setInterval(() => change(1), 6000);
 		return () => window.clearInterval(timer);
-	}, [playing, reduced, hovered, focused, hidden, index, change]);
+	}, [reduced, hovered, focused, hidden, index, change]);
 	return (
 		<div className="triplink-home-intro">
 			<section
 				data-browse-section="home:hero"
 				data-triplink-nav-hero
-				className={`triplink-hero${!playing || reduced || hovered || focused || hidden ? ' is-paused' : ''}`}
+				className={`triplink-hero${reduced || hovered || focused || hidden ? ' is-paused' : ''}`}
 				aria-label={t('Destination inspiration')}
 				aria-roledescription={t('Carousel')}
 				onPointerEnter={(event) => {
@@ -164,26 +160,6 @@ export default function HeaderFilter() {
 								onClick={() => setIndex(slideIndex)}
 							/>
 						))}
-					</div>
-					<div className="triplink-hero__navigation">
-						<span className="triplink-hero__counter">
-							{String(index + 1).padStart(2, '0')} <span>/</span> {String(homeDestinations.length).padStart(2, '0')}
-						</span>
-						<button
-							type="button"
-							disabled={reduced}
-							aria-label={t(playing && !reduced ? 'Pause slideshow' : 'Play slideshow')}
-							aria-pressed={!playing || reduced}
-							onClick={() => setPlaying((value) => !value)}
-						>
-							{playing && !reduced ? <PauseRounded aria-hidden="true" /> : <PlayArrowRounded aria-hidden="true" />}
-						</button>
-						<button type="button" aria-label={t('Previous slide')} onClick={() => change(-1)}>
-							<ArrowBackRounded aria-hidden="true" />
-						</button>
-						<button type="button" aria-label={t('Next slide')} onClick={() => change(1)}>
-							<ArrowForwardRounded aria-hidden="true" />
-						</button>
 					</div>
 				</div>
 			</section>
