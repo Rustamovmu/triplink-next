@@ -191,6 +191,7 @@ test('Top agents preserves server order, links, statistics, localized copy, and 
 		'./AgentsAtlas': ctx.atlas,
 		'./HomeArticles': {},
 		'./IntroMedia': {},
+		'./FeaturedTourSwiper': { FeaturedTourSwiper: ({ items }) => React.createElement('div', { 'data-count': items.length, 'data-tour-swiper': true }, items.map(item => React.createElement(React.Fragment, { key: item.id }, item.content))) },
 		'./IntroGallery': {},
 		'./IntroCircularCarousel': {},
 		...Object.fromEntries(

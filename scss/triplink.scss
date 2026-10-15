@@ -2327,7 +2327,6 @@ html[lang='uz'] .triplink-search__date .MuiInput-root { margin-top: 8px; }
 		.triplink-stitch-glows > :nth-child(1) { top: -128px; right: 48px; width: 384px; height: 384px; background: rgba(169, 240, 230, .3); filter: blur(64px); mix-blend-mode: multiply; }
 		.triplink-stitch-glows > :nth-child(2) { top: 50%; left: -144px; width: 500px; height: 500px; background: rgba(255, 222, 171, .4); filter: blur(100px); mix-blend-mode: multiply; }
 		.triplink-stitch-glows > :nth-child(3) { display: none; }
-		.triplink-home-grid--featured { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; }
 		.triplink-home-tour--featured {
 			grid-column: span 6; border: 0; border-radius: 16px; background: #fff; box-shadow: 0 1px 3px rgba(27, 28, 24, .1);
 			.triplink-home-tour__visual { aspect-ratio: auto; min-height: 260px; }
@@ -2337,37 +2336,11 @@ html[lang='uz'] .triplink-search__date .MuiInput-root { margin-top: 8px; }
 			.triplink-home-tour__destination { color: #40484a; }
 			.triplink-home-tour__cta { background: #00242a; color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 13px; &:hover { background: #073b43; } }
 		}
-		.triplink-home-grid--featured:not([data-count='1']):not([data-count='2']) > .triplink-home-tour:nth-child(-n+3) {
-			grid-column: span 3; position: relative; min-height: 460px; color: #fff;
-			.triplink-home-tour__visual { position: absolute; inset: 0; height: 100%; }
-			.triplink-home-tour__photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 36, 42, .9), transparent 85%, rgba(0, 0, 0, .2)); }
-			.triplink-home-tour__body { position: relative; z-index: 1; margin-top: auto; padding: 16px; gap: 8px; pointer-events: none; a { pointer-events: auto; } }
-			h3 { color: #fff; font-size: 20px; line-height: 28px; }
-			.triplink-home-tour__destination, .triplink-home-tour__description, .triplink-home-tour__metadata, .triplink-home-tour__rating, .triplink-home-tour__rating span, .triplink-home-price > span, .triplink-home-price s { color: #f5f3ed; }
-			.triplink-home-tour__description { -webkit-line-clamp: 2; }
-			.triplink-home-tour__metadata > span { background: rgba(0, 36, 42, .6); color: #fff; }
-			.triplink-home-tour__bottom { border: 0; padding-top: 4px; }
-			.triplink-home-price strong { color: #ffdeab; font-size: 20px; }
-			.triplink-home-tour__cta { background: rgba(0, 36, 42, .75); padding: 8px 10px; }
-		}
-		.triplink-home-grid--featured:not([data-count='1']):not([data-count='2']) > .triplink-home-tour:nth-child(2) { grid-column: span 6; h3 { font-size: 26px; line-height: 34px; } }
-		.triplink-home-grid--featured > .triplink-home-tour:nth-child(4),
-		.triplink-home-grid--featured[data-count='1'] > .triplink-home-tour {
-			grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); border-radius: 24px;
-			.triplink-home-tour__visual { min-height: 420px; }
-			.triplink-home-tour__body { padding: 40px; justify-content: center; }
-			h3 { font-size: 26px; line-height: 34px; }
-		}
-		@media (max-width: 1023px) { .triplink-home-grid--featured > .triplink-home-tour:nth-child(4), .triplink-home-grid--featured[data-count='1'] > .triplink-home-tour { grid-template-columns: minmax(0, 1fr); .triplink-home-tour__visual { min-height: 320px; } .triplink-home-tour__body { padding: 28px; } } }
 		@media (max-width: 639px) { .triplink-stitch-solar { display: none; } }
 		@media (max-width: 767px) {
 			.triplink-home-section__copy { grid-template-columns: minmax(0, 1fr); }
 			.triplink-home-section__link { grid-column: 1; grid-row: auto; margin-top: 16px; }
-			.triplink-home-grid--featured, .triplink-home-grid--featured[data-count] { grid-template-columns: minmax(0, 1fr); }
-			.triplink-home-grid--featured > .triplink-home-tour,
-			.triplink-home-grid--featured:not([data-count='1']):not([data-count='2']) > .triplink-home-tour:nth-child(-n+3) { grid-column: 1; min-height: 380px; }
-			.triplink-home-grid--featured > .triplink-home-tour:nth-child(4), .triplink-home-grid--featured[data-count='1'] > .triplink-home-tour { min-height: 0; }
-			.triplink-home-tour--featured .triplink-home-tour__body { padding: 24px; }
+
 		}
 	}
 	.triplink-home-section--stitch.triplink-home-section--rated {
@@ -2575,6 +2548,28 @@ html[lang='uz'] .triplink-search__date .MuiInput-root { margin-top: 8px; }
 		&__stage { height: 300px; }
 	}
 	@media (prefers-reduced-motion: reduce) { &__ring { transition: none; } }
+}
+
+// The previous centered Swiper now carries actual Featured Tours.
+.triplink-home-sections .triplink-home-section--featured .triplink-featured-swiper {
+	min-width: 0;
+	.swiper { padding: 14px 0; cursor: grab; }
+	.swiper:active { cursor: grabbing; }
+	.swiper-wrapper { align-items: stretch; }
+	.swiper-slide { width: 58%; height: auto; }
+	.triplink-home-tour { height: 100%; transform: scale(.92); transition: transform 650ms ease; }
+	.swiper-slide-active .triplink-home-tour,
+	.swiper-slide-duplicate-active .triplink-home-tour { transform: none; }
+	.triplink-home-tour__visual { min-height: 0; height: 340px; flex-shrink: 0; }
+	&:focus-visible { outline: 3px solid #1e6962; outline-offset: 4px; border-radius: 16px; }
+	&__controls { display: flex; justify-content: center; gap: 12px; margin-top: 12px;
+		button { width: 44px; height: 44px; border: 1px solid #c7d7d3; border-radius: 50%; color: #073b43; background: #fff; font-size: 20px; cursor: pointer; }
+		button:focus-visible { outline: 3px solid #1e6962; outline-offset: 3px; }
+	}
+	&__announcement { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+	@media (max-width: 1023px) { .swiper-slide { width: 72%; } .triplink-home-tour__visual { height: 290px; } }
+	@media (max-width: 599px) { .swiper-slide { width: 86%; } .triplink-home-tour__visual { height: 230px; } .triplink-home-tour__body { padding: 20px; } }
+	@media (prefers-reduced-motion: reduce) { .triplink-home-tour { transition: none; } }
 }
 
 // React Bits FlexCarousel photo inspiration; tour-card layout is unchanged.

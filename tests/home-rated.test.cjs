@@ -171,6 +171,7 @@ async function harness() {
 		'../triplink/Common': common,
 		'../triplink/TourFavorites': { useTourFavorites: () => state.favorites },
 		'./IntroCircularCarousel': carousel,
+		'./FeaturedTourSwiper': { FeaturedTourSwiper: ({ items }) => React.createElement('div', { 'data-count': items.length, 'data-tour-swiper': true }, items.map(item => React.createElement(React.Fragment, { key: item.id }, item.content))) },
 		'./IntroGallery': {},
 		'./IntroMedia': { IntroVideo: () => React.createElement('div', { 'data-video': true }) },
 		'./AgentsAtlas': {},

@@ -7,6 +7,7 @@ import { useQuery } from '@apollo/client';
 import { Avatar } from '@mui/material';
 import { IntroVideo } from './IntroMedia';
 import { IntroGallery } from './IntroGallery';
+import { FeaturedTourSwiper } from './FeaturedTourSwiper';
 import { IntroCircularCarousel } from './IntroCircularCarousel';
 import { HomeArticles } from './HomeArticles';
 import { AgentsAtlas } from './AgentsAtlas';
@@ -659,18 +660,28 @@ export function TourSection({ variant }: { variant: TourVariant }) {
 				empty={!query.data?.result.list.length}
 				retry={() => query.refetch()}
 			>
-				<div
-					className={`triplink-home-grid triplink-home-grid--${variant}`}
-					data-count={query.data?.result.list.length}
-				>
-					{query.data?.result.list.map((tour, index) =>
-						variant === 'rated' ? (
-							<RatedTourCard key={JSON.stringify([tour._id, tour.tourImages])} tour={tour} />
-						) : (
-							<HomeTourCard key={tour._id} tour={tour} variant={variant} rank={index + 1} />
-						),
-					)}
-				</div>
+				{variant === 'featured' ? (
+					<FeaturedTourSwiper
+						items={(query.data?.result.list || []).map((tour, index) => ({
+							id: tour._id,
+							title: tour.tourTitle,
+							content: <HomeTourCard tour={tour} variant="featured" rank={index + 1} />,
+						}))}
+					/>
+				) : (
+					<div
+						className={`triplink-home-grid triplink-home-grid--${variant}`}
+						data-count={query.data?.result.list.length}
+					>
+						{query.data?.result.list.map((tour, index) =>
+							variant === 'rated' ? (
+								<RatedTourCard key={JSON.stringify([tour._id, tour.tourImages])} tour={tour} />
+							) : (
+								<HomeTourCard key={tour._id} tour={tour} variant={variant} rank={index + 1} />
+							),
+						)}
+					</div>
+				)}
 			</QueryState>
 		</Section>
 	);

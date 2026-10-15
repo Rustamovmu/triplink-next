@@ -214,7 +214,7 @@ test('FlexCarousel engine restores selection, honors reduced motion, pauses offs
 	assert.ok(gpu.images.every(i => i.onload === null && i.onerror === null));
 });
 
-test('featured tour query, one/two/six result layouts, links, translations, prices and image failures remain intact', async () => {
+test('featured tour query, one/two/six carousel results, links, translations, prices and image failures remain intact', async () => {
 	const ctx = environment();
 	let locale = 'en',
 		ready = true,
@@ -304,6 +304,7 @@ test('featured tour query, one/two/six result layouts, links, translations, pric
 		'../../../apollo/user/triplink': { TOURS: 'tours', AGENTS: 'agents' },
 		'../triplink/Common': common,
 		'../triplink/TourFavorites': { useTourFavorites: () => favorites },
+		'./FeaturedTourSwiper': { FeaturedTourSwiper: ({ items }) => React.createElement('div', { 'data-count': items.length, 'data-tour-swiper': true }, items.map(item => React.createElement(React.Fragment, { key: item.id }, item.content))) },
 		'./IntroGallery': { IntroGallery: () => React.createElement('div', { 'data-inspiration': true }) },
 		'./IntroCircularCarousel': {},
 		'./IntroMedia': {},
@@ -321,6 +322,8 @@ test('featured tour query, one/two/six result layouts, links, translations, pric
 		await render();
 		assert.deepEqual(options.variables.input, { page: 1, limit: 6, search: { featured: true } });
 		assert.equal(options.notifyOnNetworkStatusChange, true);
+		assert.ok(document.querySelector('[data-tour-swiper]'));
+		assert.ok(document.querySelector('[data-inspiration]'));
 		assert.deepEqual(
 			[...document.querySelectorAll('article h3 a')].map((node) => node.textContent),
 			tours.map((tour) => tour.tourTitle),
