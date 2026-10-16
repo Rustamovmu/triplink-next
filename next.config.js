@@ -4,6 +4,8 @@ const tourImageOrigin = new URL(process.env.REACT_APP_API_URL || 'http://localho
 const nextConfig = {
 	reactStrictMode: true,
 	images: {
+		unoptimized:
+			process.env.NODE_ENV === 'production' && ['localhost', '127.0.0.1', '[::1]'].includes(tourImageOrigin.hostname),
 		remotePatterns: [
 			{
 				protocol: tourImageOrigin.protocol.replace(':', ''),

@@ -1,0 +1,34 @@
+services:
+  triplink-next:
+    container_name: triplink-next
+    restart: always
+    image: node:22-bookworm-slim
+    init: true
+    ports:
+      - '4000:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - REACT_APP_API_URL=${REACT_APP_API_URL:?Set REACT_APP_API_URL in .env}
+      - REACT_APP_API_GRAPHQL_URL=${REACT_APP_API_GRAPHQL_URL:?Set REACT_APP_API_GRAPHQL_URL in .env}
+      - REACT_APP_API_WS=${REACT_APP_API_WS:?Set REACT_APP_API_WS in .env}
+
+    volumes:
+      - ./:/usr/src/triplink-next
+      - frontend-node-modules:/usr/src/triplink-next/node_modules
+      - frontend-next:/usr/src/triplink-next/.next
+    working_dir: /usr/src/triplink-next
+
+    networks:
+      - client-network
+
+    # FOR PRODUCTION
+    command: bash -c 'yarn install --frozen-lockfile --production=false && yarn build && exec yarn start -H 0.0.0.0'
+
+networks:
+  client-network:
+    driver: bridge
+
+volumes:
+  frontend-node-modules:
+  frontend-next:
