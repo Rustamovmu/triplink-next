@@ -1,7 +1,8 @@
 #!/bin/bash
-set -euo pipefail
 
-cd /Users/a1234/Developer/tripLInk-next
+# PRODUCTION
+git reset --hard
 git checkout master
-git pull --ff-only origin master
-docker compose up -d --force-recreate
+git pull origin master
+
+docker compose up -d
