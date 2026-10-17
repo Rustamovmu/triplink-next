@@ -6,12 +6,11 @@ services:
     init: true
     ports:
       - '4000:3000'
+    env_file:
+      - .env.local
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - REACT_APP_API_URL=${REACT_APP_API_URL:?Set REACT_APP_API_URL in .env}
-      - REACT_APP_API_GRAPHQL_URL=${REACT_APP_API_GRAPHQL_URL:?Set REACT_APP_API_GRAPHQL_URL in .env}
-      - REACT_APP_API_WS=${REACT_APP_API_WS:?Set REACT_APP_API_WS in .env}
 
     volumes:
       - ./:/usr/src/triplink-next
